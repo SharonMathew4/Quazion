@@ -49,7 +49,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
           return (
             <Link
               key={category.id}
-              href={`/explore/${category.slug}`}
+              href={`/publications?category=${category.slug}`}
               className="cosmic-card p-6 rounded-2xl block group relative overflow-hidden bg-slate-900/60 border border-slate-800 hover:border-sky-500/40 transition-all"
             >
               <div className="flex items-start justify-between gap-3 mb-4">

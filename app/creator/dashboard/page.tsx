@@ -18,31 +18,8 @@ import { MOCK_PUBLICATIONS } from "@/lib/mock-data";
 export default function CreatorDashboard() {
   const [activeTab, setActiveTab] = useState<"all" | "published" | "drafts">("all");
 
-  // Sample creator draft alongside mock publications
-  const myPublications = [
-    ...MOCK_PUBLICATIONS,
-    {
-      id: "draft-1",
-      title: "Observations of Tidal Disruption Flares in Dwarf Spheroidal Galaxies",
-      slug: "tidal-disruption-flares-dwarf-galaxies",
-      abstract: "Preliminary spectroscopic reduction of ultraviolet emission excesses...",
-      publicationType: "Observation Report",
-      category: {
-        id: "cat-1",
-        name: "Astrophysics",
-        slug: "astrophysics",
-        description: "",
-      },
-      tags: ["TDE", "Dwarf Galaxies", "Spectroscopy"],
-      keywords: ["ultraviolet excess"],
-      author: MOCK_PUBLICATIONS[0].author,
-      status: "DRAFT" as const,
-      views: 0,
-      likes: 0,
-      downloads: 0,
-      createdAt: "2026-09-15",
-    },
-  ];
+  // Creator publications (empty by default until manuscripts are created)
+  const myPublications: import("@/types").Publication[] = [];
 
   const filtered = myPublications.filter((p) => {
     if (activeTab === "published") return p.status === "PUBLISHED";
@@ -167,60 +144,78 @@ export default function CreatorDashboard() {
         </div>
 
         {/* Publications List */}
-        <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-900/40">
-          {filtered.map((pub) => (
-            <div
-              key={pub.id}
-              className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-900/70 transition-colors"
-            >
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <Badge variant={pub.status === "PUBLISHED" ? "success" : "warning"}>
-                    {pub.status}
-                  </Badge>
-                  <span className="text-xs text-slate-500 font-mono">
-                    {pub.category.name} • {pub.publicationType}
-                  </span>
+        {filtered.length > 0 ? (
+          <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-900/40">
+            {filtered.map((pub) => (
+              <div
+                key={pub.id}
+                className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-900/70 transition-colors"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <Badge variant={pub.status === "PUBLISHED" ? "success" : "warning"}>
+                      {pub.status}
+                    </Badge>
+                    <span className="text-xs text-slate-500 font-mono">
+                      {pub.category.name} • {pub.publicationType}
+                    </span>
+                  </div>
+
+                  <h3 className="text-base font-semibold text-slate-100">
+                    {pub.title}
+                  </h3>
+
+                  <div className="flex items-center gap-4 text-xs text-slate-500 font-mono">
+                    <span>Created: {pub.createdAt}</span>
+                    {pub.status === "PUBLISHED" && (
+                      <>
+                        <span>•</span>
+                        <span>{pub.views} views</span>
+                        <span>•</span>
+                        <span>{pub.likes} likes</span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
-                <h3 className="text-base font-semibold text-slate-100">
-                  {pub.title}
-                </h3>
-
-                <div className="flex items-center gap-4 text-xs text-slate-500 font-mono">
-                  <span>Created: {pub.createdAt}</span>
-                  {pub.status === "PUBLISHED" && (
-                    <>
-                      <span>•</span>
-                      <span>{pub.views} views</span>
-                      <span>•</span>
-                      <span>{pub.likes} likes</span>
-                    </>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {pub.status === "PUBLISHED" ? (
+                    <Link href={`/publications/${pub.slug}`}>
+                      <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                        <span>View</span>
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href={`/creator/publications/${pub.id}/edit`}>
+                      <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
+                        <Edit3 className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Edit Draft</span>
+                      </Button>
+                    </Link>
                   )}
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 shrink-0">
-                {pub.status === "PUBLISHED" ? (
-                  <Link href={`/publications/${pub.slug}`}>
-                    <Button variant="outline" size="sm" className="flex items-center gap-1.5">
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                      <span>View</span>
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link href={`/creator/publications/${pub.id}/edit`}>
-                    <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
-                      <Edit3 className="w-3.5 h-3.5 text-sky-400" />
-                      <span>Edit Draft</span>
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="cosmic-card rounded-2xl p-12 text-center border border-dashed border-slate-800">
+            <FileText className="w-8 h-8 text-slate-500 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-slate-200 mb-1">
+              No manuscripts found
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              You haven&apos;t created any publications or drafts yet.
+            </p>
+            <Link href="/creator/publications/new">
+              <Button variant="primary" size="sm" className="inline-flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                <span>Create your first publication</span>
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

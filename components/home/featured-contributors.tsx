@@ -34,11 +34,21 @@ export function FeaturedContributors({ contributors }: FeaturedContributorsProps
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {contributors.map((contributor) => (
-          <ContributorCard key={contributor.id} contributor={contributor} />
-        ))}
-      </div>
+      {contributors.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {contributors.map((contributor) => (
+            <ContributorCard key={contributor.id} contributor={contributor} />
+          ))}
+        </div>
+      ) : (
+        <div className="cosmic-card rounded-2xl p-10 text-center border border-dashed border-slate-800">
+          <Users className="w-8 h-8 text-sky-400/40 mx-auto mb-2" />
+          <h3 className="text-sm font-semibold text-slate-200">No community contributors yet</h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Registered researchers, reviewers, and scientific authors will be showcased here.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

@@ -34,11 +34,21 @@ export function FeaturedPublications({ publications }: FeaturedPublicationsProps
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {publications.map((pub) => (
-          <PublicationCard key={pub.id} publication={pub} />
-        ))}
-      </div>
+      {publications.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {publications.map((pub) => (
+            <PublicationCard key={pub.id} publication={pub} />
+          ))}
+        </div>
+      ) : (
+        <div className="cosmic-card rounded-2xl p-10 text-center border border-dashed border-slate-800">
+          <Star className="w-8 h-8 text-amber-400/40 mx-auto mb-2" />
+          <h3 className="text-sm font-semibold text-slate-200">No featured papers yet</h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Curated papers will be highlighted here as the scientific archive grows.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

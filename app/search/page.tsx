@@ -81,10 +81,12 @@ function SearchContent() {
         <div className="cosmic-card rounded-xl p-12 text-center max-w-lg mx-auto">
           <BookOpen className="w-8 h-8 text-slate-500 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-200 mb-1">
-            No publications matched your search
+            {query ? "No publications matched your search" : "No publications in the archive"}
           </h3>
           <p className="text-xs text-slate-400">
-            Try searching for terms like &ldquo;black holes&rdquo;, &ldquo;spacetime&rdquo;, &ldquo;Sharon Mathew&rdquo;, or &ldquo;cosmology&rdquo;.
+            {query
+              ? "Try searching for alternative topics or keywords."
+              : "The archive currently has no published papers. Be the first to publish research."}
           </p>
         </div>
       )}

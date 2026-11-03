@@ -76,11 +76,20 @@ export default function ExplorePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_PUBLICATIONS.map((pub) => (
-            <PublicationCard key={pub.id} publication={pub} />
-          ))}
-        </div>
+        {MOCK_PUBLICATIONS.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {MOCK_PUBLICATIONS.map((pub) => (
+              <PublicationCard key={pub.id} publication={pub} />
+            ))}
+          </div>
+        ) : (
+          <div className="cosmic-card rounded-2xl p-8 text-center border border-dashed border-slate-800">
+            <BookOpen className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+            <p className="text-xs text-slate-400">
+              No publications have been uploaded across disciplines yet.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

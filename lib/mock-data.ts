@@ -1,7 +1,6 @@
 /**
- * TEMPORARY MOCK DATA — DO NOT USE FOR SUPABASE INTEGRATION
- * QUAZION Platform Module 02 Mock Repository
- * All data in this file is static demonstration data for visual UI scaffolding.
+ * QUAZION Platform Data Repository
+ * All test publications and contributor profiles have been removed.
  */
 
 import { Category, Publication, Profile } from "@/types";
@@ -13,7 +12,7 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: "astrophysics",
     description: "Physical properties, stellar evolution, compact objects, and high-energy celestial phenomena.",
     iconName: "Sparkles",
-    publicationCount: 42,
+    publicationCount: 0,
   },
   {
     id: "cat-2",
@@ -21,7 +20,7 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: "cosmology",
     description: "The origin, expansion dynamics, cosmic microwave background, and fate of the universe.",
     iconName: "Globe",
-    publicationCount: 35,
+    publicationCount: 0,
   },
   {
     id: "cat-3",
@@ -29,7 +28,7 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: "theoretical-physics",
     description: "Mathematical formulations, quantum gravity, field theories, and spacetime geometry.",
     iconName: "Atom",
-    publicationCount: 58,
+    publicationCount: 0,
   },
   {
     id: "cat-4",
@@ -37,7 +36,7 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: "space-science",
     description: "Orbital mechanics, satellite instrumentation, exoplanetary systems, and robotic missions.",
     iconName: "Compass",
-    publicationCount: 29,
+    publicationCount: 0,
   },
   {
     id: "cat-5",
@@ -45,7 +44,7 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: "mathematics",
     description: "Differential geometry, topology, numerical relativity algorithms, and statistical mechanics.",
     iconName: "Binary",
-    publicationCount: 21,
+    publicationCount: 0,
   },
   {
     id: "cat-6",
@@ -53,201 +52,16 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: "quantum-mechanics",
     description: "Subatomic state dynamics, entanglement phenomena, decoherence, and quantum optics.",
     iconName: "Cpu",
-    publicationCount: 37,
+    publicationCount: 0,
   },
 ];
 
-export const MOCK_AUTHORS: Record<string, Profile> = {
-  author1: {
-    id: "prof-1",
-    username: "sharonmathew",
-    displayName: "Sharon Mathew",
-    role: "CREATOR",
-    affiliation: "Astrophysics Research Group, Kerala Institute",
-    bio: "Researcher specializing in relativistic astrophysics, compact binary mergers, and cosmic strain data.",
-    website: "https://quazion.org/sharonmathew",
-    orcid: "0000-0002-1825-0097",
-    createdAt: "2026-01-15",
-    totalPublications: 7,
-    totalViews: 4120,
-    totalLikes: 382,
-    totalDownloads: 610,
-  },
-  author2: {
-    id: "prof-2",
-    username: "elena_vance",
-    displayName: "Dr. Elena Vance",
-    role: "CREATOR",
-    affiliation: "Institute for Cosmic Observational Studies",
-    bio: "Leading investigator in gravitational wave strain analysis and supermassive black hole horizon imaging.",
-    website: "https://quazion.org/elena_vance",
-    orcid: "0000-0001-9234-5678",
-    createdAt: "2026-02-10",
-    totalPublications: 14,
-    totalViews: 8890,
-    totalLikes: 740,
-    totalDownloads: 1220,
-  },
-  author3: {
-    id: "prof-3",
-    username: "marcus_vance",
-    displayName: "Prof. Marcus Vance",
-    role: "CREATOR",
-    affiliation: "Department of Theoretical Physics, Cambridge",
-    bio: "Focusing on semiclassical quantum gravity, black hole thermodynamics, and holographic field theories.",
-    website: "https://quazion.org/marcus_vance",
-    orcid: "0000-0003-4567-8901",
-    createdAt: "2026-03-01",
-    totalPublications: 22,
-    totalViews: 12450,
-    totalLikes: 1105,
-    totalDownloads: 2300,
-  },
-  author4: {
-    id: "prof-4",
-    username: "amara_chen",
-    displayName: "Dr. Amara Chen",
-    role: "CREATOR",
-    affiliation: "Exoplanetary Systems Laboratory, ETH Zürich",
-    bio: "Astrobiologist studying exoplanetary atmospheric spectroscopy and biosignatures in transit spectra.",
-    website: "https://quazion.org/amara_chen",
-    orcid: "0000-0004-3210-9876",
-    createdAt: "2026-04-12",
-    totalPublications: 11,
-    totalViews: 6540,
-    totalLikes: 495,
-    totalDownloads: 890,
-  },
-};
+export const MOCK_AUTHORS: Record<string, Profile> = {};
 
-export const MOCK_FEATURED_PUBLICATIONS: Publication[] = [
-  {
-    id: "pub-1",
-    title: "Gravitational Wave Signatures in Intermediate-Mass Binary Black Hole Coalescence",
-    slug: "gravitational-wave-signatures-intermediate-mass-bbh",
-    abstract:
-      "We investigate the gravitational wave strain observables during the ringdown phase of intermediate-mass black hole mergers. Using numerical relativity simulations constrained by recent interferometer data, we establish key detection criteria for next-generation observatories.",
-    publicationType: "Research Paper",
-    category: MOCK_CATEGORIES[0],
-    tags: ["Black Holes", "General Relativity", "Gravitational Waves"],
-    keywords: ["ringdown", "interferometry", "compact binaries"],
-    author: MOCK_AUTHORS.author1,
-    status: "PUBLISHED",
-    views: 1420,
-    likes: 128,
-    downloads: 312,
-    readingTimeMinutes: 14,
-    createdAt: "2026-08-10",
-    publishedAt: "2026-08-14",
-  },
-  {
-    id: "pub-2",
-    title: "On the Hubble Tension: Cosmological Horizons and Modified Expansion Dynamics",
-    slug: "on-the-hubble-tension-cosmological-horizons",
-    abstract:
-      "Discrepancies between local Cepheid calibrations and early-universe cosmic microwave background measurements suggest either uncharacterized systematic errors or physics beyond the standard Lambda-CDM paradigm. We review prevailing theoretical frameworks.",
-    publicationType: "Review Article",
-    category: MOCK_CATEGORIES[1],
-    tags: ["Cosmology", "Hubble Constant", "Lambda-CDM"],
-    keywords: ["cosmic microwave background", "expansion rate", "dark energy"],
-    author: MOCK_AUTHORS.author2,
-    status: "PUBLISHED",
-    views: 2840,
-    likes: 215,
-    downloads: 480,
-    readingTimeMinutes: 22,
-    createdAt: "2026-08-01",
-    publishedAt: "2026-08-05",
-  },
-  {
-    id: "pub-3",
-    title: "Geometric Formulations of Quantum State Collapse in Curved Spacetime",
-    slug: "geometric-formulations-quantum-collapse-curved-spacetime",
-    abstract:
-      "An exploratory note unifying semiclassical gravity formalisms with objective reduction mechanisms. We discuss experimental tests that could probe spatial superposition limits in orbital microgravity environments.",
-    publicationType: "Scientific Note",
-    category: MOCK_CATEGORIES[2],
-    tags: ["Quantum Gravity", "Spacetime", "Wavefunction Collapse"],
-    keywords: ["decoherence", "microgravity", "differential geometry"],
-    author: MOCK_AUTHORS.author3,
-    status: "PUBLISHED",
-    views: 950,
-    likes: 87,
-    downloads: 145,
-    readingTimeMinutes: 9,
-    createdAt: "2026-08-20",
-    publishedAt: "2026-08-22",
-  },
-];
+export const MOCK_FEATURED_PUBLICATIONS: Publication[] = [];
 
-export const MOCK_LATEST_PUBLICATIONS: Publication[] = [
-  {
-    id: "pub-4",
-    title: "Atmospheric Characterization of Kepler-1649c via Transmission Spectroscopy",
-    slug: "atmospheric-characterization-kepler-1649c",
-    abstract:
-      "Synthetic transmission spectra for terrestrial-sized exoplanets orbiting M-dwarf host stars exhibit distinct chemical signatures. We present atmospheric retrieval models incorporating water vapor, carbon dioxide, and methane profiles.",
-    publicationType: "Research Report",
-    category: MOCK_CATEGORIES[3],
-    tags: ["Exoplanets", "Astrobiology", "Spectroscopy"],
-    keywords: ["biosignatures", "M-dwarf", "Kepler-1649c"],
-    author: MOCK_AUTHORS.author4,
-    status: "PUBLISHED",
-    views: 810,
-    likes: 64,
-    downloads: 195,
-    readingTimeMinutes: 11,
-    createdAt: "2026-09-02",
-    publishedAt: "2026-09-04",
-  },
-  {
-    id: "pub-5",
-    title: "Non-Euclidean Geometries in Extreme Kerr Black Hole Accretion Disks",
-    slug: "non-euclidean-geometries-kerr-accretion-disks",
-    abstract:
-      "Relativistic ray tracing through maximally spinning Kerr spacetimes reveals intense gravitational lensing signatures in inner accretion flows. We calculate shadow shapes and photon ring emission patterns under high inclination angles.",
-    publicationType: "Research Paper",
-    category: MOCK_CATEGORIES[0],
-    tags: ["Kerr Metric", "Accretion Disks", "Gravitational Lensing"],
-    keywords: ["photon ring", "event horizon", "ray tracing"],
-    author: MOCK_AUTHORS.author2,
-    status: "PUBLISHED",
-    views: 1120,
-    likes: 93,
-    downloads: 240,
-    readingTimeMinutes: 16,
-    createdAt: "2026-09-08",
-    publishedAt: "2026-09-10",
-  },
-  {
-    id: "pub-6",
-    title: "Entanglement Entropy Scaling Across Topological Phase Boundaries",
-    slug: "entanglement-entropy-topological-phase-boundaries",
-    abstract:
-      "Using tensor network representations, we derive critical scaling bounds for quantum entanglement entropy near topological phase transitions, establishing connection to conformal field theories in 2+1 dimensions.",
-    publicationType: "Scientific Note",
-    category: MOCK_CATEGORIES[5],
-    tags: ["Quantum Entanglement", "Tensor Networks", "Phase Transitions"],
-    keywords: ["entropy", "CFT", "topological order"],
-    author: MOCK_AUTHORS.author3,
-    status: "PUBLISHED",
-    views: 670,
-    likes: 52,
-    downloads: 110,
-    readingTimeMinutes: 8,
-    createdAt: "2026-09-14",
-    publishedAt: "2026-09-16",
-  },
-];
+export const MOCK_LATEST_PUBLICATIONS: Publication[] = [];
 
-export const MOCK_PUBLICATIONS: Publication[] = [
-  ...MOCK_FEATURED_PUBLICATIONS,
-  ...MOCK_LATEST_PUBLICATIONS,
-];
+export const MOCK_PUBLICATIONS: Publication[] = [];
 
-export const MOCK_FEATURED_CONTRIBUTORS: Profile[] = [
-  MOCK_AUTHORS.author2,
-  MOCK_AUTHORS.author3,
-  MOCK_AUTHORS.author1,
-  MOCK_AUTHORS.author4,
-];
+export const MOCK_FEATURED_CONTRIBUTORS: Profile[] = [];

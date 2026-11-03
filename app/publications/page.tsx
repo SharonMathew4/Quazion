@@ -118,13 +118,13 @@ export default function PublicationsPage() {
           ))}
         </div>
       ) : (
-        <div className="cosmic-card rounded-xl p-12 text-center max-w-lg mx-auto">
+        <div className="cosmic-card rounded-2xl p-12 text-center max-w-lg mx-auto border border-dashed border-slate-800">
           <BookOpen className="w-8 h-8 text-slate-500 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-200 mb-1">
             No publications found
           </h3>
           <p className="text-xs text-slate-400">
-            Try resetting your category or publication type filters to see available papers.
+            There are currently no publications in the archive. Check back soon or submit your own research.
           </p>
         </div>
       )}
