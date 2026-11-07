@@ -3,31 +3,43 @@
 -- "Exploring Knowledge Beyond Boundaries"
 -- ==============================================================================
 
--- 1. ENUMS
-CREATE TYPE user_role AS ENUM ('READER', 'CREATOR', 'REVIEWER', 'EDITOR', 'ADMIN');
+-- 1. ENUMS (Safe idempotent creation)
+DO $$ BEGIN
+  CREATE TYPE user_role AS ENUM ('READER', 'CREATOR', 'REVIEWER', 'EDITOR', 'ADMIN');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE publication_status AS ENUM (
-  'DRAFT',
-  'SUBMITTED',
-  'PUBLISHED',
-  'REVISION_REQUIRED',
-  'REJECTED',
-  'ARCHIVED'
-);
+DO $$ BEGIN
+  CREATE TYPE publication_status AS ENUM (
+    'DRAFT',
+    'SUBMITTED',
+    'PUBLISHED',
+    'REVISION_REQUIRED',
+    'REJECTED',
+    'ARCHIVED'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE publication_type AS ENUM (
-  'Research Paper',
-  'Review Article',
-  'Scientific Note',
-  'Research Report',
-  'Observation Report',
-  'Educational Article',
-  'Tutorial',
-  'Lecture Note',
-  'Editorial',
-  'Science Essay',
-  'Commentary'
-);
+DO $$ BEGIN
+  CREATE TYPE publication_type AS ENUM (
+    'Research Paper',
+    'Review Article',
+    'Scientific Note',
+    'Research Report',
+    'Observation Report',
+    'Educational Article',
+    'Tutorial',
+    'Lecture Note',
+    'Editorial',
+    'Science Essay',
+    'Commentary'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- 2. PROFILES TABLE (Linked to auth.users)
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -118,13 +130,24 @@ CREATE TABLE IF NOT EXISTS public.publication_downloads (
   downloaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 7. FULL-TEXT SEARCH INDEX
-ALTER TABLE public.publications ADD COLUMN IF NOT EXISTS search_vector tsvector
-  GENERATED ALWAYS AS (
-    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(abstract, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(array_to_string(keywords, ' '), '')), 'C')
-  ) STORED;
+-- 7. FULL-TEXT SEARCH (Trigger-based for compatibility & performance)
+ALTER TABLE public.publications ADD COLUMN IF NOT EXISTS search_vector tsvector;
+
+CREATE OR REPLACE FUNCTION public.publications_search_vector_trigger()
+RETURNS trigger AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('english', coalesce(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(NEW.abstract, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(array_to_string(NEW.keywords, ' '), '')), 'C');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_publications_search_vector ON public.publications;
+CREATE TRIGGER trg_publications_search_vector
+BEFORE INSERT OR UPDATE ON public.publications
+FOR EACH ROW EXECUTE FUNCTION public.publications_search_vector_trigger();
 
 CREATE INDEX IF NOT EXISTS publications_search_idx ON public.publications USING GIN (search_vector);
 CREATE INDEX IF NOT EXISTS publications_category_idx ON public.publications(category_id);
@@ -144,21 +167,56 @@ ALTER TABLE public.publication_views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.publication_downloads ENABLE ROW LEVEL SECURITY;
 
 -- PROFILES POLICIES:
--- Anyone can view public profiles
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone" 
   ON public.profiles FOR SELECT USING (true);
 
--- Users can update only their own profile
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+CREATE POLICY "Users can insert their own profile" 
+  ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" 
   ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
+-- AUTOMATIC PROFILE CREATION TRIGGER ON SIGNUP
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, username, display_name, avatar_url, role)
+  VALUES (
+    NEW.id,
+    COALESCE(
+      NEW.raw_user_meta_data->>'username',
+      SPLIT_PART(NEW.email, '@', 1) || '_' || SUBSTRING(NEW.id::text FROM 1 FOR 6)
+    ),
+    COALESCE(
+      NEW.raw_user_meta_data->>'display_name',
+      NEW.raw_user_meta_data->>'full_name',
+      SPLIT_PART(NEW.email, '@', 1)
+    ),
+    NEW.raw_user_meta_data->>'avatar_url',
+    'CREATOR'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    display_name = COALESCE(public.profiles.display_name, EXCLUDED.display_name),
+    username = COALESCE(public.profiles.username, EXCLUDED.username);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- CATEGORIES POLICIES:
--- Categories are public to read
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON public.categories;
 CREATE POLICY "Categories are viewable by everyone" 
   ON public.categories FOR SELECT USING (true);
 
 -- PUBLICATIONS POLICIES:
--- Readers can read published publications
+DROP POLICY IF EXISTS "Published publications are readable by everyone" ON public.publications;
 CREATE POLICY "Published publications are readable by everyone"
   ON public.publications FOR SELECT
   USING (
@@ -167,23 +225,24 @@ CREATE POLICY "Published publications are readable by everyone"
     OR (auth.jwt() ->> 'role' = 'ADMIN')
   );
 
--- Creators can insert their own draft publications
+DROP POLICY IF EXISTS "Creators can insert their own publications" ON public.publications;
 CREATE POLICY "Creators can insert their own publications"
   ON public.publications FOR INSERT
   WITH CHECK (auth.uid() = author_id);
 
--- Creators can update their own drafts or submitted publications
+DROP POLICY IF EXISTS "Creators can update their own non-published publications" ON public.publications;
 CREATE POLICY "Creators can update their own non-published publications"
   ON public.publications FOR UPDATE
   USING (auth.uid() = author_id)
   WITH CHECK (auth.uid() = author_id);
 
--- Creators can delete their own drafts
+DROP POLICY IF EXISTS "Creators can delete their own drafts" ON public.publications;
 CREATE POLICY "Creators can delete their own drafts"
   ON public.publications FOR DELETE
   USING (auth.uid() = author_id AND status = 'DRAFT');
 
 -- REFERENCES POLICIES:
+DROP POLICY IF EXISTS "References of visible publications are readable" ON public.publication_references;
 CREATE POLICY "References of visible publications are readable"
   ON public.publication_references FOR SELECT
   USING (EXISTS (
@@ -192,6 +251,7 @@ CREATE POLICY "References of visible publications are readable"
     AND (p.status = 'PUBLISHED' OR p.author_id = auth.uid())
   ));
 
+DROP POLICY IF EXISTS "Authors can manage their publication references" ON public.publication_references;
 CREATE POLICY "Authors can manage their publication references"
   ON public.publication_references FOR ALL
   USING (EXISTS (
@@ -199,3 +259,23 @@ CREATE POLICY "Authors can manage their publication references"
     WHERE p.id = publication_references.publication_id
     AND p.author_id = auth.uid()
   ));
+
+-- INTERACTION POLICIES (Likes, Views, Downloads):
+DROP POLICY IF EXISTS "Public can view and create likes" ON public.publication_likes;
+CREATE POLICY "Public can view and create likes"
+  ON public.publication_likes FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public can record views" ON public.publication_views;
+CREATE POLICY "Public can record views"
+  ON public.publication_views FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public can record downloads" ON public.publication_downloads;
+CREATE POLICY "Public can record downloads"
+  ON public.publication_downloads FOR ALL
+  USING (true)
+  WITH CHECK (true);
+

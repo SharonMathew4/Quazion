@@ -1,6 +1,7 @@
 /**
  * QUAZION Platform Data Repository
- * All test publications and contributor profiles have been removed.
+ * All sample mock publications and contributor profiles removed.
+ * Real data is served live from Supabase.
  */
 
 import { Category, Publication, Profile } from "@/types";

@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { MOCK_PUBLICATIONS } from "@/lib/mock-data";
 import { PublicationHeader } from "@/components/publications/publication-header";
 import { PublicationMeta } from "@/components/publications/publication-meta";
@@ -8,14 +9,113 @@ import { PublicationStats } from "@/components/publications/publication-stats";
 import { AuthorSummary } from "@/components/publications/author-summary";
 import { RelatedPublicationCard } from "@/components/publications/related-publication-card";
 import { BookOpen } from "lucide-react";
+import { Publication, Reference } from "@/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
+async function getPublicationBySlug(slug: string): Promise<Publication | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: p, error } = await supabase
+      .from("publications")
+      .select(`
+        id,
+        title,
+        slug,
+        abstract,
+        content,
+        publication_type,
+        status,
+        tags,
+        keywords,
+        views_count,
+        likes_count,
+        downloads_count,
+        reading_time_minutes,
+        created_at,
+        published_at,
+        category:categories(id, name, slug, description),
+        author:profiles(id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at),
+        references:publication_references(id, title, authors, year, source, doi, url)
+      `)
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (!error && p) {
+      interface RawRef {
+        id: string;
+        title: string;
+        authors: string;
+        year?: number | null;
+        source?: string | null;
+        doi?: string | null;
+        url?: string | null;
+      }
+      const cat = Array.isArray(p.category) ? p.category[0] : p.category;
+      const aut = Array.isArray(p.author) ? p.author[0] : p.author;
+      const refs = ((p.references || []) as unknown as RawRef[]).map((r) => ({
+        id: r.id,
+        title: r.title,
+        authors: r.authors,
+        year: r.year ?? undefined,
+        source: r.source ?? undefined,
+        doi: r.doi ?? undefined,
+        url: r.url ?? undefined,
+      })) as Reference[];
+
+      return {
+        id: p.id,
+        title: p.title,
+        slug: p.slug,
+        abstract: p.abstract,
+        content: p.content,
+        publicationType: p.publication_type,
+        category: cat || { id: "gen", name: "General Science", slug: "general", description: "" },
+        author: aut
+          ? {
+              id: aut.id,
+              username: aut.username,
+              displayName: aut.display_name,
+              avatarUrl: aut.avatar_url,
+              bio: aut.bio,
+              affiliation: aut.affiliation,
+              orcid: aut.orcid,
+              role: aut.role || "CREATOR",
+              createdAt: aut.created_at,
+            }
+          : {
+              id: "author",
+              username: "researcher",
+              displayName: "Researcher",
+              role: "CREATOR",
+              createdAt: p.created_at,
+            },
+        tags: p.tags || [],
+        keywords: p.keywords || [],
+        status: p.status,
+        views: p.views_count || 0,
+        likes: p.likes_count || 0,
+        downloads: p.downloads_count || 0,
+        readingTimeMinutes: p.reading_time_minutes || 5,
+        references: refs,
+        createdAt: p.created_at,
+        publishedAt: p.published_at,
+      };
+    }
+  } catch (err) {
+    console.warn("Error fetching publication by slug:", err);
+  }
+
+  // Fallback to static mock publications
+  const fallback = MOCK_PUBLICATIONS.find((p) => p.slug === slug);
+  return fallback || null;
+}
+
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const pub = MOCK_PUBLICATIONS.find((p) => p.slug === slug);
+  const pub = await getPublicationBySlug(slug);
   if (!pub) return { title: "Publication Not Found — QUAZION" };
   return {
     title: `${pub.title} — QUAZION Open Science`,
@@ -25,7 +125,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function PublicationDetailPage({ params }: Props) {
   const { slug } = await params;
-  const pub = MOCK_PUBLICATIONS.find((p) => p.slug === slug);
+  const pub = await getPublicationBySlug(slug);
 
   if (!pub) {
     notFound();
@@ -63,7 +163,7 @@ export default async function PublicationDetailPage({ params }: Props) {
               likes={pub.likes}
               downloads={pub.downloads}
               title={pub.title}
-              showDemoNotice={true}
+              showDemoNotice={false}
             />
           </section>
         </main>
@@ -74,18 +174,20 @@ export default async function PublicationDetailPage({ params }: Props) {
           <AuthorSummary author={pub.author} />
 
           {/* Related Manuscripts Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400">
-              <BookOpen className="w-4 h-4" />
-              <span>Related Manuscripts</span>
-            </div>
-
+          {related.length > 0 && (
             <div className="space-y-4">
-              {related.map((relPub) => (
-                <RelatedPublicationCard key={relPub.id} publication={relPub} />
-              ))}
+              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400">
+                <BookOpen className="w-4 h-4" />
+                <span>Related Manuscripts</span>
+              </div>
+
+              <div className="space-y-4">
+                {related.map((relPub) => (
+                  <RelatedPublicationCard key={relPub.id} publication={relPub} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </aside>
 
       </div>

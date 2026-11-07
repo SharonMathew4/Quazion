@@ -26,16 +26,52 @@ export type PublicationType =
   | "Science Essay"
   | "Commentary";
 
+export interface EducationEntry {
+  institution: string;
+  degree: string;
+  field: string;
+  startYear?: number;
+  endYear?: number;
+}
+
+export interface ExperienceEntry {
+  title: string;
+  organization: string;
+  description?: string;
+  startYear?: number;
+  endYear?: number;
+  current?: boolean;
+}
+
+export interface SocialLinks {
+  twitter?: string;
+  github?: string;
+  linkedin?: string;
+  googleScholar?: string;
+  researchGate?: string;
+}
+
 export interface Profile {
   id: string;
   username: string;
   displayName: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   bio?: string;
+  headline?: string;
+  about?: string;
   affiliation?: string;
+  location?: string;
   website?: string;
   orcid?: string;
   role: UserRole;
+  skills?: string[];
+  interests?: string[];
+  education?: EducationEntry[];
+  experience?: ExperienceEntry[];
+  socialLinks?: SocialLinks;
+  followersCount?: number;
+  followingCount?: number;
   createdAt: string;
   totalPublications?: number;
   totalViews?: number;

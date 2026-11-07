@@ -49,12 +49,19 @@ export function AuthNav() {
 
   if (!user) {
     return (
-      <Link href="/auth/login">
-        <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
-          <PenSquare className="w-3.5 h-3.5 text-sky-400" />
-          <span>Publish</span>
-        </Button>
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link href="/auth/login">
+          <Button variant="ghost" size="sm" className="text-xs text-slate-300 hover:text-white">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/auth/login?mode=signup">
+          <Button variant="primary" size="sm" className="flex items-center gap-1.5 text-xs font-semibold">
+            <PenSquare className="w-3.5 h-3.5 text-slate-950" />
+            <span>Sign Up</span>
+          </Button>
+        </Link>
+      </div>
     );
   }
 

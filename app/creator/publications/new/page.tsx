@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { MOCK_CATEGORIES } from "@/lib/mock-data";
-import { PublicationType } from "@/types";
+import { PublicationType, Category } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -13,8 +14,11 @@ import {
   Send, 
   Eye, 
   Plus, 
-  Trash2
+  Trash2,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const PUBLICATION_TYPES: PublicationType[] = [
   "Research Paper",
@@ -32,12 +36,18 @@ const PUBLICATION_TYPES: PublicationType[] = [
 
 export default function NewPublicationPage() {
   const router = useRouter();
+  const supabase = createClient();
+
+  // Auth & Category loading state
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
 
   // Form State
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [publicationType, setPublicationType] = useState<PublicationType>("Research Paper");
-  const [categoryId, setCategoryId] = useState(MOCK_CATEGORIES[0].id);
+  const [categoryId, setCategoryId] = useState("");
   const [abstract, setAbstract] = useState("");
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -46,9 +56,44 @@ export default function NewPublicationPage() {
     { title: "", authors: "", year: "", source: "" },
   ]);
 
-  // Preview Modal State
+  // Preview & Submit State
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitAction, setSubmitAction] = useState<"draft" | "publish" | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Verify auth session & load categories on mount
+  useEffect(() => {
+    async function init() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push("/auth/login?next=/creator/publications/new");
+          return;
+        }
+        setCurrentUser(user);
+
+        // Fetch categories from Supabase
+        const { data: catData } = await supabase
+          .from("categories")
+          .select("id, name, slug, description, icon_name")
+          .order("name");
+
+        if (catData && catData.length > 0) {
+          setCategories(catData as Category[]);
+          setCategoryId(catData[0].id);
+        } else if (MOCK_CATEGORIES.length > 0) {
+          setCategories(MOCK_CATEGORIES);
+          setCategoryId(MOCK_CATEGORIES[0].id);
+        }
+      } catch (err) {
+        console.warn("Failed to load initial publishing data:", err);
+      } finally {
+        setLoadingAuth(false);
+      }
+    }
+    init();
+  }, [router, supabase]);
 
   // Auto-generate URL slug when title changes
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,31 +120,176 @@ export default function NewPublicationPage() {
     setReferences(updated);
   };
 
-  const handleSaveDraft = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert("Publication draft saved successfully.");
-      router.push("/creator/dashboard");
-    }, 600);
-  };
+  const savePublication = async (isPublish: boolean) => {
+    setErrorMessage(null);
 
-  const handleSubmitForReview = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !abstract.trim() || !content.trim()) {
-      alert("Please fill in the required fields: Title, Abstract, and Main Content.");
+    if (!title.trim()) {
+      setErrorMessage("Please enter a manuscript title.");
       return;
     }
+    if (!abstract.trim()) {
+      setErrorMessage("Please provide an abstract summary.");
+      return;
+    }
+    if (isPublish && !content.trim()) {
+      setErrorMessage("Cannot publish an empty manuscript. Please add manuscript content.");
+      return;
+    }
+
+    if (!currentUser) {
+      router.push("/auth/login?next=/creator/publications/new");
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert("Publication submitted for moderation and publishing.");
+    setSubmitAction(isPublish ? "publish" : "draft");
+
+    try {
+      // 1. Ensure author profile exists in profiles table
+      const userMeta = currentUser.user_metadata || {};
+      const fallbackName = userMeta.display_name || userMeta.full_name || currentUser.email?.split("@")[0] || "Researcher";
+      const fallbackUsername = userMeta.username || currentUser.email?.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "") || `user_${currentUser.id.slice(0, 8)}`;
+
+      await supabase.from("profiles").upsert(
+        {
+          id: currentUser.id,
+          username: fallbackUsername,
+          display_name: fallbackName,
+          role: "CREATOR",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      );
+
+      // 2. Compute metadata
+      let finalSlug = slug.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      if (!finalSlug) {
+        finalSlug = `manuscript-${Date.now().toString(36)}`;
+      }
+
+      const tagsArray = tagsInput
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const keywordsArray = keywordsInput
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+
+      const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+      const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+      const selectedCatId = categoryId || (categories[0] ? categories[0].id : null);
+      if (!selectedCatId) {
+        setErrorMessage("Please select a scientific category.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const publicationStatus = isPublish ? "PUBLISHED" : "DRAFT";
+
+      // 3. Attempt insert into publications
+      let insertResult = await supabase
+        .from("publications")
+        .insert({
+          title: title.trim(),
+          slug: finalSlug,
+          abstract: abstract.trim(),
+          content: content.trim() || null,
+          publication_type: publicationType,
+          category_id: selectedCatId,
+          author_id: currentUser.id,
+          status: publicationStatus,
+          tags: tagsArray,
+          keywords: keywordsArray,
+          reading_time_minutes: readingTime,
+          published_at: isPublish ? new Date().toISOString() : null,
+        })
+        .select()
+        .single();
+
+      // If duplicate slug error, retry with unique suffix
+      if (insertResult.error && insertResult.error.code === "23505") {
+        finalSlug = `${finalSlug}-${Math.random().toString(36).substring(2, 6)}`;
+        insertResult = await supabase
+          .from("publications")
+          .insert({
+            title: title.trim(),
+            slug: finalSlug,
+            abstract: abstract.trim(),
+            content: content.trim() || null,
+            publication_type: publicationType,
+            category_id: selectedCatId,
+            author_id: currentUser.id,
+            status: publicationStatus,
+            tags: tagsArray,
+            keywords: keywordsArray,
+            reading_time_minutes: readingTime,
+            published_at: isPublish ? new Date().toISOString() : null,
+          })
+          .select()
+          .single();
+      }
+
+      if (insertResult.error) {
+        throw new Error(insertResult.error.message);
+      }
+
+      const newPubId = insertResult.data.id;
+
+      // 4. Insert bibliographic references if provided
+      const validRefs = references
+        .filter((r) => r.title.trim())
+        .map((r, index) => ({
+          publication_id: newPubId,
+          order_index: index,
+          title: r.title.trim(),
+          authors: r.authors.trim() || "Anonymous",
+          year: r.year ? parseInt(r.year, 10) || null : null,
+          source: r.source.trim() || null,
+        }));
+
+      if (validRefs.length > 0) {
+        await supabase.from("publication_references").insert(validRefs);
+      }
+
+      // Redirect to creator dashboard
       router.push("/creator/dashboard");
-    }, 600);
+      router.refresh();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save publication.";
+      setErrorMessage(msg);
+      setIsSubmitting(false);
+    }
   };
 
-  const selectedCategoryObj = MOCK_CATEGORIES.find((c) => c.id === categoryId) || MOCK_CATEGORIES[0];
+  const handleSaveDraft = (e: React.FormEvent) => {
+    e.preventDefault();
+    savePublication(false);
+  };
+
+  const handleSubmitForPublish = (e: React.FormEvent) => {
+    e.preventDefault();
+    savePublication(true);
+  };
+
+  const selectedCategoryObj = categories.find((c) => c.id === categoryId) || categories[0] || {
+    id: "unknown",
+    name: "General Science",
+    slug: "general",
+  };
+
+  if (loadingAuth) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="cosmic-card p-8 rounded-2xl flex items-center gap-3 text-slate-400 font-mono text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+          <span>Verifying researcher credentials...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -118,7 +308,7 @@ export default function NewPublicationPage() {
             Publishing Studio
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Author and submit open scientific publications, research notes, and educational essays.
+            Author and publish open scientific publications, research notes, and educational essays.
           </p>
         </div>
 
@@ -129,7 +319,7 @@ export default function NewPublicationPage() {
             variant="outline"
             size="sm"
             onClick={() => setIsPreviewOpen(true)}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 cursor-pointer"
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Preview</span>
@@ -141,9 +331,13 @@ export default function NewPublicationPage() {
             size="sm"
             onClick={handleSaveDraft}
             disabled={isSubmitting}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5" />
+            {isSubmitting && submitAction === "draft" ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
             <span>Save Draft</span>
           </Button>
 
@@ -151,18 +345,30 @@ export default function NewPublicationPage() {
             type="button"
             variant="primary"
             size="sm"
-            onClick={handleSubmitForReview}
+            onClick={handleSubmitForPublish}
             disabled={isSubmitting}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 cursor-pointer"
           >
-            <Send className="w-3.5 h-3.5" />
-            <span>Submit</span>
+            {isSubmitting && submitAction === "publish" ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Send className="w-3.5 h-3.5" />
+            )}
+            <span>Publish Now</span>
           </Button>
         </div>
       </div>
 
+      {/* Error Alert */}
+      {errorMessage && (
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{errorMessage}</span>
+        </div>
+      )}
+
       {/* Editor Form */}
-      <form className="space-y-8">
+      <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
         
         {/* 1. Title & URL Slug */}
         <div className="space-y-4">
@@ -200,9 +406,9 @@ export default function NewPublicationPage() {
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500 cursor-pointer"
             >
-              {MOCK_CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -217,7 +423,7 @@ export default function NewPublicationPage() {
             <select
               value={publicationType}
               onChange={(e) => setPublicationType(e.target.value as PublicationType)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500 cursor-pointer"
             >
               {PUBLICATION_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -364,7 +570,7 @@ export default function NewPublicationPage() {
               <button
                 type="button"
                 onClick={() => setIsPreviewOpen(false)}
-                className="text-xs font-mono text-slate-400 hover:text-white px-2.5 py-1 rounded bg-slate-800"
+                className="text-xs font-mono text-slate-400 hover:text-white px-2.5 py-1 rounded bg-slate-800 cursor-pointer"
               >
                 Close Preview
               </button>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, Calendar, Eye, Heart, Download, FileText } from "lucide-react";
 import { Publication } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
 
 interface LatestPublicationsProps {
   publications: Publication[];
@@ -49,7 +50,7 @@ export function LatestPublications({ publications }: LatestPublicationsProps) {
                   </span>
                   <span className="flex items-center gap-1 text-slate-500">
                     <Calendar className="w-3 h-3 text-slate-500" />
-                    {pub.publishedAt || pub.createdAt}
+                    {formatDate(pub.publishedAt || pub.createdAt)}
                   </span>
                   {pub.readingTimeMinutes && (
                     <span className="flex items-center gap-1 text-slate-500">

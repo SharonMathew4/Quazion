@@ -4,6 +4,7 @@ import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
 import { Calendar, Clock, RefreshCw, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
 
 interface PublicationHeaderProps {
   publication: Publication;
@@ -76,7 +77,7 @@ export function PublicationHeader({ publication }: PublicationHeaderProps) {
         <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 font-mono">
           <span className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            Published: {publication.publishedAt || publication.createdAt}
+            Published: {formatDate(publication.publishedAt || publication.createdAt)}
           </span>
 
           {publication.updatedAt && (
