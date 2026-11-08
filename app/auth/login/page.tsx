@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,184 +11,73 @@ import {
   ArrowLeft, 
   AlertCircle, 
   CheckCircle2, 
-  Mail, 
-  Lock, 
-  User, 
-  Building,
-  Eye, 
-  EyeOff,
   Loader2,
-  X,
-  ExternalLink
+  ExternalLink,
+  Award,
+  Lock,
+  Sparkles,
+  HelpCircle,
+  X
 } from "lucide-react";
 
-function AuthForm() {
+function AuthPortal() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isSignUp = searchParams.get("mode") === "signup" || pathname?.includes("/signup");
+  const rawNext = searchParams.get("next") || "/creator/dashboard";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/creator/dashboard";
 
-  const [mode, setMode] = useState<"login" | "signup">(isSignUp ? "signup" : "login");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(
-    searchParams.get("error") === "auth_failed" ? "Authentication could not be completed. Please try again." : null
-  );
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | "orcid" | null>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  
+  const rawError = searchParams.get("error");
+  let formattedError = rawError;
+  if (rawError === "auth_failed") {
+    formattedError = "OAuth authentication could not be completed. Please try again.";
+  } else if (rawError === "orcid_not_configured") {
+    formattedError = "ORCID API is not configured yet. Set NEXT_PUBLIC_ORCID_CLIENT_ID and ORCID_CLIENT_SECRET in .env.local.";
+  } else if (rawError === "session_expired") {
+    formattedError = "Your session expired. Please sign in again.";
+  }
 
-  // Form state
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
-  const [affiliation, setAffiliation] = useState("");
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(formattedError);
   const supabase = createClient();
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setLoading(true);
-
+  const handleOAuthSignIn = async (provider: "google" | "github") => {
     try {
-      if (mode === "signup") {
-        if (!displayName.trim() || !username.trim()) {
-          setErrorMessage("Please provide your full name and a unique username.");
-          setLoading(false);
-          return;
-        }
-
-        if (password.length < 6) {
-          setErrorMessage("Password must be at least 6 characters long.");
-          setLoading(false);
-          return;
-        }
-
-        const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-
-        // 1. Sign up user with metadata
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: password,
-          options: {
-            data: {
-              display_name: displayName.trim(),
-              username: cleanUsername,
-              affiliation: affiliation.trim(),
-            },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-
-        if (signUpError) {
-          setErrorMessage(signUpError.message);
-          setLoading(false);
-          return;
-        }
-
-        // If session exists immediately (email confirmation disabled in Supabase)
-        if (data?.session && data?.user) {
-          await supabase.from("profiles").upsert(
-            {
-              id: data.user.id,
-              username: cleanUsername,
-              display_name: displayName.trim(),
-              affiliation: affiliation.trim() || undefined,
-              role: "CREATOR",
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "id" }
-          );
-
-          router.push("/creator/dashboard");
-          router.refresh();
-          return;
-        }
-
-        // If email confirmation is required
-        setSuccessMessage(
-          `Account created! A confirmation email has been sent to ${email}. Please verify your email before signing in.`
-        );
-        setLoading(false);
-      } else {
-        // Sign In mode
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password,
-        });
-
-        if (signInError) {
-          setErrorMessage(signInError.message);
-          setLoading(false);
-          return;
-        }
-
-        if (data?.user) {
-          // Ensure profile exists in public.profiles table
-          const meta = data.user.user_metadata || {};
-          const cleanUsername = meta.username || data.user.email?.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "") || `user_${data.user.id.slice(0, 8)}`;
-          const displayName = meta.display_name || meta.full_name || meta.name || data.user.email?.split("@")[0] || "Researcher";
-
-          try {
-            await supabase.from("profiles").upsert(
-              {
-                id: data.user.id,
-                username: cleanUsername,
-                display_name: displayName,
-                role: "CREATOR",
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: "id" }
-            );
-          } catch {
-            // Dashboard auto-heals if this fails
-          }
-
-          const next = searchParams.get("next") || "/creator/dashboard";
-          router.push(next);
-          router.refresh();
-        }
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
-      setErrorMessage(msg);
-      setLoading(false);
-    }
-  };
-
-  const proceedGoogleAuth = async () => {
-    try {
-      setLoading(true);
-      setShowGoogleModal(false);
       setErrorMessage(null);
+      setLoadingProvider(provider);
       const origin = window.location.origin;
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
         options: {
-          redirectTo: `${origin}/auth/callback`,
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       });
 
       if (error) {
-        setErrorMessage(
-          error.message.toLowerCase().includes("not enabled") || error.message.toLowerCase().includes("unsupported")
-            ? "Google OAuth is not enabled in your Supabase project. Please enable Google in Supabase Dashboard (Authentication > Providers > Google), or use Email & Password."
-            : error.message
-        );
-        setLoading(false);
+        if (
+          error.message.toLowerCase().includes("not enabled") || 
+          error.message.toLowerCase().includes("unsupported") ||
+          error.message.toLowerCase().includes("disabled")
+        ) {
+          setShowConfigModal(true);
+        } else {
+          setErrorMessage(error.message);
+        }
+        setLoadingProvider(null);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to initialize Google authentication.";
+      const message = err instanceof Error ? err.message : `Failed to initialize ${provider} authentication.`;
       setErrorMessage(message);
-      setLoading(false);
+      setLoadingProvider(null);
     }
   };
 
-  const handleGoogleLogin = () => {
-    setShowGoogleModal(true);
+  const handleOrcidSignIn = () => {
+    setLoadingProvider("orcid");
+    setErrorMessage(null);
+    window.location.href = `/auth/orcid?mode=login&next=${encodeURIComponent(next)}`;
   };
 
   return (
@@ -208,63 +97,24 @@ function AuthForm() {
 
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center mx-auto mb-2">
+          <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center mx-auto mb-2 shadow-inner">
             <Atom className="w-6 h-6 text-sky-400 animate-pulse" />
           </div>
           <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-            {mode === "login" ? "Welcome Back to QUAZION" : "Join QUAZION Archive"}
+            QUAZION Open Science Portal
           </h1>
           <p className="text-xs sm:text-sm text-slate-400">
-            {mode === "login"
-              ? "Sign in to manage your scientific publications and drafts."
-              : "Create a researcher account to author, submit, and publish papers."}
+            Sign in with your verified academic or developer identity to author, review, and publish scientific manuscripts.
           </p>
         </div>
 
-        {/* Mode Switcher Tabs */}
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setErrorMessage(null);
-              setSuccessMessage(null);
-            }}
-            className={`flex-1 py-2 text-xs font-mono font-medium rounded-lg transition-all cursor-pointer ${
-              mode === "login"
-                ? "bg-slate-800 text-sky-400 shadow-sm"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode("signup");
-              setErrorMessage(null);
-              setSuccessMessage(null);
-            }}
-            className={`flex-1 py-2 text-xs font-mono font-medium rounded-lg transition-all cursor-pointer ${
-              mode === "signup"
-                ? "bg-slate-800 text-sky-400 shadow-sm"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Create Account
-          </button>
+        {/* Security Banner */}
+        <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-800/40 text-xs text-slate-300 flex items-center gap-2.5">
+          <Shield className="w-4 h-4 text-sky-400 shrink-0" />
+          <span className="text-[11px] leading-relaxed">
+            Zero-password infrastructure with cryptographic OAuth 2.0 PKCE authentication.
+          </span>
         </div>
-
-        {/* Success Alert */}
-        {successMessage && (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="font-semibold">Verification link sent</p>
-              <p className="text-slate-300 leading-relaxed">{successMessage}</p>
-            </div>
-          </div>
-        )}
 
         {/* Error Alert */}
         {errorMessage && (
@@ -274,182 +124,126 @@ function AuthForm() {
           </div>
         )}
 
-        {/* Email & Password Form */}
-        <form onSubmit={handleEmailAuth} className="space-y-4">
-          {mode === "signup" && (
-            <>
-              {/* Full Name */}
-              <div className="space-y-1">
-                <label className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Full Name / Display Name *</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Dr. Sharon Mathew"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-
-              {/* Username */}
-              <div className="space-y-1">
-                <label className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-                  <span className="text-sky-400 font-bold">@</span>
-                  <span>Username *</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. sharonmathew"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-mono"
-                />
-              </div>
-
-              {/* Scientific Affiliation */}
-              <div className="space-y-1">
-                <label className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-                  <Building className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Institutional Affiliation (Optional)</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Astrophysics Research Lab / Independent"
-                  value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Email Address */}
-          <div className="space-y-1">
-            <label className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-sky-400" />
-              <span>Email Address *</span>
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="researcher@institution.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-            />
-          </div>
-
-          {/* Password */}
-          <div className="space-y-1">
-            <label className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-sky-400" />
-              <span>Password *</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Submit Button */}
+        {/* OAuth Authentication Options */}
+        <div className="space-y-3 pt-1">
+          
+          {/* ORCID Academic Identifier */}
           <Button
-            type="submit"
-            variant="primary"
+            type="button"
+            variant="outline"
             size="lg"
-            disabled={loading}
-            className="w-full mt-2 font-medium"
+            onClick={handleOrcidSignIn}
+            disabled={loadingProvider !== null}
+            className="w-full flex items-center justify-between border-emerald-500/40 bg-emerald-950/20 hover:bg-emerald-900/30 text-emerald-300 hover:text-emerald-200 font-medium py-3 px-4 rounded-xl transition-all cursor-pointer group shadow-sm"
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>{mode === "login" ? "Authenticating..." : "Creating Account..."}</span>
-              </span>
-            ) : mode === "login" ? (
-              "Sign In to Studio"
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-md bg-[#A6CE39] flex items-center justify-center text-slate-950 font-bold text-xs shrink-0 shadow">
+                iD
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-slate-100 group-hover:text-emerald-300 transition-colors">
+                  Continue with ORCID
+                </div>
+                <div className="text-[10px] font-mono text-emerald-400/80">
+                  Open Researcher &amp; Contributor ID
+                </div>
+              </div>
+            </div>
+            {loadingProvider === "orcid" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
             ) : (
-              "Register Researcher Account"
+              <Award className="w-4 h-4 text-emerald-400/70 group-hover:text-emerald-300 transition-colors" />
             )}
           </Button>
-        </form>
 
-        {/* Divider */}
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-800" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase font-mono">
-            <span className="bg-slate-900/90 px-3 text-slate-500">Or continue with</span>
-          </div>
-        </div>
-
-        {/* Google OAuth Action Button */}
-        <div>
+          {/* Google OAuth Action Button */}
           <Button
             type="button"
             variant="secondary"
-            size="md"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-100 font-medium py-2.5 cursor-pointer"
+            size="lg"
+            onClick={() => handleOAuthSignIn("google")}
+            disabled={loadingProvider !== null}
+            className="w-full flex items-center justify-between border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-100 font-medium py-3 px-4 rounded-xl cursor-pointer group"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-              />
-            </svg>
-            <span>Continue with Google</span>
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+              <span className="text-sm font-medium">Continue with Google</span>
+            </div>
+            {loadingProvider === "google" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
+            ) : (
+              <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
+            )}
+          </Button>
+
+          {/* GitHub OAuth Action Button */}
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            onClick={() => handleOAuthSignIn("github")}
+            disabled={loadingProvider !== null}
+            className="w-full flex items-center justify-between border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-100 font-medium py-3 px-4 rounded-xl cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 shrink-0 fill-current text-slate-100" viewBox="0 0 24 24">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                />
+              </svg>
+              <span className="text-sm font-medium">Continue with GitHub</span>
+            </div>
+            {loadingProvider === "github" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
+            ) : (
+              <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
+            )}
           </Button>
         </div>
 
-        {/* Security & Terms Notice */}
-        <div className="pt-3 border-t border-slate-800/80 space-y-2 text-center">
-          <div className="flex items-center gap-1.5 justify-center text-xs text-slate-500">
-            <Shield className="w-3.5 h-3.5 text-emerald-400" />
-            <span>End-to-end encrypted session &amp; RLS security</span>
+        {/* Security & Academic Standards */}
+        <div className="pt-4 border-t border-slate-800/80 space-y-2.5 text-center">
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-400 font-mono">
+            <div className="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80 flex items-center justify-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>RLS Zero-Trust</span>
+            </div>
+            <div className="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80 flex items-center justify-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>PKCE Encrypted</span>
+            </div>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed">
-            By signing in or registering, you agree to the QUAZION Open Scientific Publishing Guidelines.
+            By signing in, you agree to the QUAZION Open Scientific Publishing Code of Conduct and Research Ethics Guidelines.
           </p>
         </div>
 
       </div>
 
-      {/* Google OAuth Configuration Helper Modal */}
-      {showGoogleModal && (
+      {/* Provider Configuration Guide Modal */}
+      {showConfigModal && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in"
-          onClick={() => setShowGoogleModal(false)}
+          onClick={() => setShowConfigModal(false)}
         >
           <div
             className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4 cosmic-card"
@@ -461,13 +255,13 @@ function AuthForm() {
                   <Atom className="w-4 h-4 text-sky-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-100">Google Authentication</h3>
-                  <span className="text-[11px] font-mono text-slate-400">Supabase OAuth Provider</span>
+                  <h3 className="text-base font-bold text-slate-100">Provider Configuration</h3>
+                  <span className="text-[11px] font-mono text-slate-400">Supabase OAuth Setup</span>
                 </div>
               </div>
               <button
-                onClick={() => setShowGoogleModal(false)}
-                className="text-slate-500 hover:text-slate-300 p-1"
+                onClick={() => setShowConfigModal(false)}
+                className="text-slate-500 hover:text-slate-300 p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -475,35 +269,22 @@ function AuthForm() {
 
             <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 text-xs text-slate-300 leading-relaxed">
               <p className="font-semibold text-slate-200">
-                To sign in with Google, Google OAuth must be enabled in your Supabase project:
+                This OAuth provider is not yet enabled in your Supabase project:
               </p>
-              <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px] font-mono">
-                <li>Create credentials in Google Cloud Console</li>
-                <li>Set Redirect URI to Supabase Auth callback</li>
-                <li>Enable Google in Supabase Dashboard (Auth &gt; Providers)</li>
+              <ol className="list-decimal list-inside space-y-1.5 text-slate-400 text-[11px] font-mono">
+                <li>Open Supabase Dashboard &gt; Authentication &gt; Providers</li>
+                <li>Enable Google / GitHub with your Client ID &amp; Secret</li>
+                <li>Set Callback URL: <code className="text-sky-300">https://&lt;project&gt;.supabase.co/auth/v1/callback</code></li>
               </ol>
-              <p className="text-[11px] text-sky-400 pt-1">
-                Tip: You can register and use all features right now with Email &amp; Password!
-              </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <div className="flex justify-end pt-1">
               <Button
                 variant="primary"
                 size="sm"
-                onClick={proceedGoogleAuth}
-                className="flex-1 flex items-center justify-center gap-1.5 font-medium"
+                onClick={() => setShowConfigModal(false)}
               >
-                <span>Proceed with Google</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowGoogleModal(false)}
-                className="flex-1 text-xs"
-              >
-                Use Email &amp; Password
+                Got It
               </Button>
             </div>
           </div>
@@ -520,12 +301,12 @@ export default function LoginPage() {
         <div className="min-h-[85vh] flex items-center justify-center">
           <div className="cosmic-card p-8 rounded-2xl flex items-center gap-3 text-slate-400 font-mono text-sm">
             <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
-            <span>Loading authentication studio...</span>
+            <span>Loading authentication portal...</span>
           </div>
         </div>
       }
     >
-      <AuthForm />
+      <AuthPortal />
     </Suspense>
   );
 }
