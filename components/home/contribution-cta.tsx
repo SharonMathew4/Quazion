@@ -1,56 +1,53 @@
 import React from "react";
 import Link from "next/link";
-import { ShieldCheck, FileCheck, Award, Sparkles, ArrowRight } from "lucide-react";
+import { ShieldCheck, FileCheck, Award, Binary, ArrowRight, FileText, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /**
- * Contribution CTA Banner Section — Section 9
- * Open Archive Philosophy and Call-To-Action for researchers to publish on QUAZION.
+ * Contribution CTA Banner Component
+ * Academic Call for Papers and Open Science submission invitation for researchers.
  */
 export function ContributionCta() {
   const publishingPerks = [
     {
       title: "Universal Open Access",
-      desc: "Free for readers and authors alike — zero paywalls or publishing fees.",
+      desc: "Free for readers and authors alike — zero paywalls and zero author processing charges (APC).",
       icon: ShieldCheck,
     },
     {
-      title: "Peer-Moderated Quality",
-      desc: "Community review and moderation ensures rigor and factual integrity.",
+      title: "Double-Blind Peer Review",
+      desc: "Methodological rigor verified by accredited domain specialists and post-publication inquiry.",
       icon: Award,
     },
     {
-      title: "LaTeX & Equations Native",
-      desc: "Built-in support for mathematical formulas, charts, and code snippets.",
-      icon: Sparkles,
+      title: "Native LaTeX & Equations",
+      desc: "Typeset complex mathematical proofs, tensor fields, and formulas with print-grade KaTeX.",
+      icon: Binary,
     },
     {
-      title: "Immutable Digital Handle",
-      desc: "Permanent record preservation with structured DOI metadata.",
+      title: "Permanent DOI Citation",
+      desc: "Preserved with permanent Crossref digital handles, ORCID attribution, and BibTeX indexing.",
       icon: FileCheck,
     },
   ];
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-      <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-[#090d15] p-8 sm:p-12 relative overflow-hidden shadow-2xl">
-        {/* Subtle background gradient accent */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/5 blur-[120px] pointer-events-none rounded-full" />
-
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-6 font-sans">
+      <div className="rounded-md border border-slate-300 bg-white p-8 sm:p-12 shadow-xs">
         <div className="max-w-3xl mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 text-xs font-mono mb-6">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Open Science Publishing Medium</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm border border-rose-200 bg-rose-50 text-rose-800 text-xs font-sans font-semibold mb-5">
+            <span className="w-2 h-2 rounded-full bg-rose-700 inline-block" />
+            <span>Call for Papers • Peer-Moderated Submissions</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100 mb-4 tracking-tight">
-            Publish Your Research &amp; Observations Openly
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight leading-tight">
+            Publish Your Research With Quazion Open Science
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-            QUAZION is built on the belief that scientific discovery belongs to humanity.
-            Whether you are an astrophysicist reporting compact binary simulations, a theorist investigating spacetime metrics,
-            or an educator explaining quantum state dynamics, QUAZION provides a transparent platform to publish and preserve your work.
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-sans">
+            Scientific progress demands open, unencumbered dissemination. Whether you are reporting cosmological simulations, 
+            investigating condensed matter phenomena, or publishing novel proofs, QUAZION provides a rigorous, 
+            permanent medium to share your discoveries with the global scientific community.
           </p>
         </div>
 
@@ -61,29 +58,31 @@ export function ContributionCta() {
             return (
               <div
                 key={perk.title}
-                className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2"
+                className="p-5 rounded-md bg-slate-50 border border-slate-200 space-y-2 hover:border-slate-300 transition-colors"
               >
-                <div className="p-2 rounded-lg bg-slate-900 w-fit text-sky-400">
+                <div className="p-2 rounded bg-white border border-slate-200 w-fit text-rose-700">
                   <Icon className="w-4 h-4" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-200">{perk.title}</h3>
-                <p className="text-xs text-slate-400 leading-normal">{perk.desc}</p>
+                <h3 className="text-sm font-bold text-slate-900">{perk.title}</h3>
+                <p className="text-xs text-slate-600 leading-normal">{perk.desc}</p>
               </div>
             );
           })}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           <Link href="/creator/publications/new">
-            <Button variant="primary" size="lg" className="flex items-center gap-2 px-6 py-3">
-              <span>Submit Your Publication</span>
+            <Button variant="primary" size="lg" className="flex items-center gap-2 font-semibold">
+              <FileText className="w-4 h-4" />
+              <span>Submit Manuscript for Review</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-          <Link href="/about">
-            <Button variant="outline" size="lg" className="px-6 py-3">
-              Read Editorial Guidelines
+          <Link href="/about#guidelines">
+            <Button variant="outline" size="lg" className="flex items-center gap-2 text-slate-700">
+              <BookOpen className="w-4 h-4 text-slate-500" />
+              <span>Author Guidelines &amp; Formatting</span>
             </Button>
           </Link>
         </div>

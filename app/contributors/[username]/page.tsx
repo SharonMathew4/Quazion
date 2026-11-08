@@ -3,8 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { PublicationCard } from "@/components/publications/publication-card";
-import { ArrowLeft, BookOpen, MapPin, Building, Globe, Award, Sparkles } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, BookOpen, MapPin, Building, Globe, Award, ShieldCheck } from "lucide-react";
 import { Profile, Publication, Category } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -24,8 +23,8 @@ export async function generateMetadata({ params }: Props) {
 
   if (!profile) return { title: "Contributor Not Found — QUAZION" };
   return {
-    title: `${profile.display_name} (@${username}) — QUAZION`,
-    description: profile.bio || "Researcher on QUAZION",
+    title: `${profile.display_name} (@${username}) — Faculty Profile | QUAZION`,
+    description: profile.bio || "Academic researcher publishing on QUAZION Open Science Archive",
   };
 }
 
@@ -107,23 +106,23 @@ export default async function ContributorProfilePage({ params }: Props) {
   });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 font-sans">
       {/* Back button */}
       <div>
         <Link
           href="/contributors"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-400 transition-colors font-mono"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-rose-700 transition-colors font-medium"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to contributors</span>
+          <span>Back to contributors directory</span>
         </Link>
       </div>
 
       {/* Contributor Profile Header Card */}
-      <div className="cosmic-card rounded-2xl p-6 sm:p-8 space-y-6">
+      <div className="academic-card rounded-md p-6 sm:p-8 space-y-6 bg-white border border-slate-200 shadow-2xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 justify-between">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-3xl font-mono text-sky-400 font-bold shadow-xl overflow-hidden">
+            <div className="w-20 h-20 rounded-full bg-slate-100 border-2 border-slate-300 flex items-center justify-center text-3xl font-bold text-slate-800 shadow-xs overflow-hidden shrink-0">
               {author.avatarUrl ? (
                 <img src={author.avatarUrl} alt={author.displayName} className="w-full h-full object-cover" />
               ) : (
@@ -131,94 +130,108 @@ export default async function ContributorProfilePage({ params }: Props) {
               )}
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
+              <div className="flex items-center gap-2.5">
+                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
                   {author.displayName}
                 </h1>
-                <Badge variant="accent">{author.role}</Badge>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
+                  {author.role}
+                </span>
               </div>
-              <p className="text-sm font-mono text-slate-400">
+              <p className="text-xs font-mono text-slate-500">
                 @{author.username}
               </p>
               {author.headline ? (
-                <p className="text-xs text-slate-300 font-medium">
+                <p className="text-xs text-slate-700 font-medium">
                   {author.headline}
                 </p>
               ) : author.affiliation ? (
-                <p className="text-xs text-sky-400 font-medium">
+                <p className="text-xs text-slate-800 font-semibold">
                   {author.affiliation}
                 </p>
               ) : null}
             </div>
           </div>
 
-          {/* Social Counts */}
-          <div className="flex items-center gap-6 border-t sm:border-t-0 sm:border-l border-slate-800 pt-4 sm:pt-0 sm:pl-8 text-slate-400 font-mono text-xs w-full sm:w-auto justify-around sm:justify-start">
+          {/* Academic Metrics */}
+          <div className="flex items-center gap-6 border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-8 text-slate-600 font-sans text-xs w-full sm:w-auto justify-around sm:justify-start">
             <div className="text-center">
-              <div className="text-lg font-bold text-slate-100">
+              <div className="text-xl font-bold text-slate-900 font-mono">
                 {authorPublications.length}
               </div>
-              <div className="text-[11px] text-slate-500">Papers</div>
+              <div className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Published Papers</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-slate-100">
+              <div className="text-xl font-bold text-slate-900 font-mono">
                 {author.followersCount || 0}
               </div>
-              <div className="text-[11px] text-slate-500">Followers</div>
+              <div className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Citations / Alerts</div>
             </div>
           </div>
         </div>
 
-        {/* Location & Website meta */}
-        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-2 border-t border-slate-800/60">
+        {/* Location, Affiliation & ORCID Line */}
+        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 pt-3 border-t border-slate-100">
           {author.affiliation && (
-            <span className="flex items-center gap-1">
-              <Building className="w-3.5 h-3.5 text-slate-500" />
+            <span className="flex items-center gap-1.5 font-medium text-slate-800">
+              <Building className="w-3.5 h-3.5 text-slate-400" />
               {author.affiliation}
             </span>
           )}
           {author.location && (
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-slate-500" />
+            <span className="flex items-center gap-1 text-slate-500">
+              <MapPin className="w-3.5 h-3.5 text-slate-400" />
               {author.location}
             </span>
           )}
           {author.website && (
-            <a href={author.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sky-400 hover:underline">
-              <Globe className="w-3.5 h-3.5" />
-              Website
+            <a
+              href={author.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-rose-700 hover:underline font-medium"
+            >
+              <Globe className="w-3.5 h-3.5 text-slate-400" />
+              Institutional Website
             </a>
           )}
           {author.orcid && (
-            <span className="flex items-center gap-1 font-mono text-[11px] text-emerald-400">
-              <Award className="w-3.5 h-3.5" />
-              ORCID: {author.orcid}
-            </span>
+            <a
+              href={`https://orcid.org/${author.orcid}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 font-mono text-[11px] text-slate-800 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded"
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-[#A6CE39] inline-block" />
+              <span>ORCID: {author.orcid}</span>
+            </a>
           )}
         </div>
 
         {/* Bio / About */}
         {(author.about || author.bio) && (
-          <div className="pt-4 border-t border-slate-800/80">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">
-              About
+          <div className="pt-4 border-t border-slate-100">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Academic Background &amp; Research Interests
             </h2>
-            <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap font-sans">
               {author.about || author.bio}
             </p>
           </div>
         )}
 
-        {/* Skills */}
+        {/* Skills & Expertise */}
         {author.skills && author.skills.length > 0 && (
-          <div className="space-y-2 pt-2">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-amber-400 flex items-center gap-1.5 font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Skills &amp; Expertise</span>
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Research Domains &amp; Methodologies
             </h3>
             <div className="flex flex-wrap gap-1.5">
               {author.skills.map((s) => (
-                <span key={s} className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60">
+                <span
+                  key={s}
+                  className="text-xs px-2.5 py-0.5 rounded-sm bg-slate-100 text-slate-800 border border-slate-200 font-medium"
+                >
                   {s}
                 </span>
               ))}
@@ -229,9 +242,11 @@ export default async function ContributorProfilePage({ params }: Props) {
 
       {/* Publications by Author */}
       <div className="space-y-6">
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-400">
-          <BookOpen className="w-4 h-4 text-sky-400" />
-          <span>Published Research ({authorPublications.length})</span>
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-900">
+            <BookOpen className="w-4 h-4 text-rose-700" />
+            <span>Peer-Reviewed Bibliography ({authorPublications.length})</span>
+          </div>
         </div>
 
         {authorPublications.length > 0 ? (
@@ -241,8 +256,8 @@ export default async function ContributorProfilePage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="cosmic-card p-8 rounded-xl text-center text-xs text-slate-500 font-mono">
-            No published manuscripts yet.
+          <div className="academic-card p-8 rounded-md text-center text-xs text-slate-500 bg-white border border-slate-200">
+            No published manuscripts recorded yet in the archive.
           </div>
         )}
       </div>

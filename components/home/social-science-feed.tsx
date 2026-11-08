@@ -8,31 +8,26 @@ import {
   MessageSquare, 
   Bookmark, 
   Share2, 
-  Sparkles, 
   Clock, 
   Eye, 
   Check, 
   ExternalLink, 
-  BookOpen, 
   Filter, 
-  Flame, 
-  TrendingUp, 
   Calendar, 
   Layers, 
   Send,
-  Atom, 
-  Compass, 
-  Globe, 
-  Binary, 
-  Cpu, 
   Search,
   UserCheck,
   UserPlus,
   HelpCircle,
-  Award
+  Award,
+  FileText,
+  ShieldCheck,
+  CheckCircle2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CategoryBadge } from "@/components/publications/category-badge";
 import { QuickReadModal } from "@/components/publications/quick-read-modal";
 import { formatShortDate } from "@/lib/utils";
 
@@ -50,6 +45,10 @@ interface PeerComment {
   timestamp: string;
 }
 
+/**
+ * Curated Research Stream & Discipline Index
+ * Scholarly research feed presenting active peer-moderated studies, discussions, and author inquiries.
+ */
 export function SocialScienceFeed({
   initialPublications,
   categories,
@@ -77,7 +76,7 @@ export function SocialScienceFeed({
   const [pollVoted, setPollVoted] = useState<number | null>(null);
   const [pollVotes, setPollVotes] = useState<number[]>([42, 28, 18, 12]);
 
-  // Toggle Like
+  // Toggle Like / Endorsement
   const handleLikeToggle = (pubId: string) => {
     setLikes((prev) => ({ ...prev, [pubId]: !prev[pubId] }));
   };
@@ -104,8 +103,8 @@ export function SocialScienceFeed({
 
     const newComment: PeerComment = {
       id: `user-${Date.now()}`,
-      author: "Verified Contributor (You)",
-      affiliation: "Open Researcher",
+      author: "Verified Researcher (You)",
+      affiliation: "Open Science Contributor",
       text,
       timestamp: "Just now",
     };
@@ -135,114 +134,106 @@ export function SocialScienceFeed({
     setPollVoted(index);
   };
 
-  // Domain icon map
-  const domainIcons: Record<string, React.ElementType> = {
-    all: Layers,
-    astrophysics: Sparkles,
-    cosmology: Globe,
-    "theoretical-physics": Atom,
-    "space-science": Compass,
-    mathematics: Binary,
-    "quantum-mechanics": Cpu,
-  };
-
   // Filter & Sort Logic
   const filteredPublications = useMemo(() => {
     return initialPublications
       .filter((pub) => {
-        // Domain filter
-        if (selectedDomain !== "all" && pub.category.slug !== selectedDomain) {
+        // Domain Filter
+        if (selectedDomain !== "all" && pub.category?.slug !== selectedDomain) {
           return false;
         }
-        // Publication type filter
+
+        // Content Type Filter
         if (selectedType !== "all" && pub.publicationType !== selectedType) {
           return false;
         }
-        // Search query filter
+
+        // Search Filter
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
-          const matchTitle = pub.title.toLowerCase().includes(q);
-          const matchAbstract = pub.abstract.toLowerCase().includes(q);
-          const matchAuthor = pub.author.displayName.toLowerCase().includes(q);
-          const matchTag = pub.tags?.some((t) => t.toLowerCase().includes(q));
-          if (!matchTitle && !matchAbstract && !matchAuthor && !matchTag) {
+          const matchesTitle = pub.title.toLowerCase().includes(q);
+          const matchesAbstract = pub.abstract.toLowerCase().includes(q);
+          const matchesAuthor = pub.author.displayName.toLowerCase().includes(q);
+          const matchesTag = pub.tags?.some((t) => t.toLowerCase().includes(q));
+
+          if (!matchesTitle && !matchesAbstract && !matchesAuthor && !matchesTag) {
             return false;
           }
         }
+
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === "trending") {
-          return (b.likes * 3 + b.views) - (a.likes * 3 + a.views);
+        if (sortBy === "latest") {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }
         if (sortBy === "views") {
-          return b.views - a.views;
+          return (b.views || 0) - (a.views || 0);
         }
-        // latest
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        // Trending: Combination of likes, views, and downloads
+        const scoreA = (a.likes || 0) * 3 + (a.downloads || 0) * 2 + (a.views || 0);
+        const scoreB = (b.likes || 0) * 3 + (b.downloads || 0) * 2 + (b.views || 0);
+        return scoreB - scoreA;
       });
-  }, [initialPublications, selectedDomain, selectedType, searchQuery, sortBy]);
+  }, [initialPublications, selectedDomain, selectedType, sortBy, searchQuery]);
 
-  // Poll percentage calculator
-  const totalPollVotes = pollVotes.reduce((a, b) => a + b, 0);
+  const totalPollVotes = pollVotes.reduce((acc, curr) => acc + curr, 0);
 
   return (
     <>
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8">
-        {/* Section Title & Subtitle */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 pb-4 border-b border-slate-800/80 gap-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-4 pb-12 font-sans">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between pb-4 mb-6 border-b border-slate-200 gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400 mb-1">
-              <TrendingUp className="w-4 h-4" />
-              <span>Open Science Feed</span>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-800 mb-1">
+              <span className="w-2 h-2 rounded-full bg-rose-700 inline-block" />
+              <span>Peer-Reviewed Research Stream</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
-              Explore &amp; Discuss Scientific Discoveries
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              Explore &amp; Deliberate Scientific Inquiries
             </h2>
           </div>
 
           {/* Feed Search Input */}
-          <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative w-full md:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search feed, authors, DOIs..."
+              placeholder="Filter by keyword, DOI, author..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+              className="w-full bg-white border border-slate-300 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400 transition-colors shadow-2xs"
             />
           </div>
         </div>
 
-        {/* 1. Sticky Domain Filter Pills (Social Media Style) */}
+        {/* 1. Discipline Filter Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none no-scrollbar">
           <button
             onClick={() => setSelectedDomain("all")}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-sm text-xs font-medium flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
               selectedDomain === "all"
-                ? "bg-sky-500 text-slate-950 font-bold shadow-lg shadow-sky-500/20"
-                : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700"
+                ? "bg-slate-900 text-white font-semibold shadow-xs"
+                : "bg-white border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>All Domains</span>
+            <span>All Disciplines</span>
           </button>
 
           {categories.map((cat) => {
-            const Icon = domainIcons[cat.slug] || Atom;
             const isSelected = selectedDomain === cat.slug;
 
             return (
               <button
                 key={cat.id}
                 onClick={() => setSelectedDomain(cat.slug)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-sm text-xs font-medium flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-sky-500 text-slate-950 font-bold shadow-lg shadow-sky-500/20"
-                    : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
                 <span>{cat.name}</span>
               </button>
             );
@@ -250,13 +241,15 @@ export function SocialScienceFeed({
         </div>
 
         {/* 2. Format & Sort Control Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 mb-8 text-xs font-mono">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-md bg-slate-50 border border-slate-200 mb-8 text-xs font-sans">
           {/* Content Type Selector */}
           <div className="flex items-center gap-1.5 overflow-x-auto">
-            <span className="text-slate-500 hidden sm:inline mr-1">Type:</span>
+            <span className="text-slate-500 font-medium hidden sm:inline mr-1 text-[11px] uppercase tracking-wider">
+              Type:
+            </span>
             {[
               { id: "all", label: "All Formats" },
-              { id: "Research Paper", label: "Research" },
+              { id: "Research Paper", label: "Research Papers" },
               { id: "Observation Report", label: "Observations" },
               { id: "Editorial", label: "Editorials" },
               { id: "Review Article", label: "Reviews" },
@@ -264,10 +257,10 @@ export function SocialScienceFeed({
               <button
                 key={t.id}
                 onClick={() => setSelectedType(t.id)}
-                className={`px-2.5 py-1 rounded-md transition-all ${
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer text-xs ${
                   selectedType === t.id
-                    ? "bg-slate-800 text-sky-400 font-semibold border border-sky-500/30"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-white text-rose-800 font-bold border border-slate-300 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {t.label}
@@ -277,49 +270,56 @@ export function SocialScienceFeed({
 
           {/* Sort Selector */}
           <div className="flex items-center gap-2">
-            <span className="text-slate-500">Sort:</span>
-            <div className="flex bg-slate-900 rounded-lg p-0.5 border border-slate-800">
+            <span className="text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+              Sort:
+            </span>
+            <div className="flex bg-white rounded border border-slate-200 p-0.5">
               <button
                 onClick={() => setSortBy("trending")}
-                className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition-all ${
-                  sortBy === "trending" ? "bg-slate-800 text-sky-300 font-bold" : "text-slate-400"
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                  sortBy === "trending"
+                    ? "bg-slate-100 text-slate-900 font-bold"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <Flame className="w-3 h-3 text-amber-400" />
-                <span>Trending</span>
+                Highest Impact
               </button>
               <button
                 onClick={() => setSortBy("latest")}
-                className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition-all ${
-                  sortBy === "latest" ? "bg-slate-800 text-sky-300 font-bold" : "text-slate-400"
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                  sortBy === "latest"
+                    ? "bg-slate-100 text-slate-900 font-bold"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <Clock className="w-3 h-3 text-emerald-400" />
-                <span>Latest</span>
+                Recently Published
               </button>
               <button
                 onClick={() => setSortBy("views")}
-                className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition-all ${
-                  sortBy === "views" ? "bg-slate-800 text-sky-300 font-bold" : "text-slate-400"
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                  sortBy === "views"
+                    ? "bg-slate-100 text-slate-900 font-bold"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <Eye className="w-3 h-3 text-sky-400" />
-                <span>Impact</span>
+                Most Read
               </button>
             </div>
           </div>
         </div>
 
-        {/* 3. Main Two-Column Layout (Feed + Social Sidebar) */}
+        {/* 3. Main Two-Column Layout (Feed + Academic Sidebar) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Main Social Feed Stream (8 Columns) */}
+          {/* Main Research Feed (8 Columns) */}
           <div className="lg:col-span-8 space-y-6">
             {filteredPublications.length === 0 ? (
-              <div className="p-12 text-center cosmic-card rounded-2xl bg-slate-900/40 border border-slate-800 space-y-3">
-                <Filter className="w-8 h-8 text-slate-500 mx-auto animate-pulse" />
-                <h3 className="text-base font-bold text-slate-200">No publications found</h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  No research match the selected filter criteria. Try resetting the domain filter or search query.
+              <div className="p-12 text-center academic-card rounded-md bg-white border border-slate-200 space-y-3">
+                <Filter className="w-8 h-8 text-slate-400 mx-auto" />
+                <h3 className="text-base font-bold text-slate-900">
+                  No manuscripts found
+                </h3>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto">
+                  No studies match the selected criteria. Try resetting the domain filter or search query.
                 </p>
                 <Button
                   variant="outline"
@@ -345,34 +345,37 @@ export function SocialScienceFeed({
                 return (
                   <article
                     key={pub.id}
-                    className="cosmic-card rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all overflow-hidden flex flex-col justify-between"
+                    className="academic-card rounded-md bg-white border border-slate-200 hover:border-slate-400 hover:shadow-xs transition-all overflow-hidden flex flex-col justify-between"
                   >
-                    {/* Author & Header Meta Row (Social Post Header) */}
-                    <div className="p-4 sm:p-5 pb-3 flex items-center justify-between gap-3 border-b border-slate-800/60">
+                    {/* Author & Header Meta Row */}
+                    <div className="p-4 sm:p-5 pb-3 flex items-center justify-between gap-3 border-b border-slate-100">
                       <div className="flex items-center gap-3">
                         {pub.author.avatarUrl ? (
                           <img
                             src={pub.author.avatarUrl}
                             alt={pub.author.displayName}
-                            className="w-10 h-10 rounded-full object-cover border border-sky-500/30"
+                            className="w-9 h-9 rounded-full object-cover border border-slate-300"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-sky-400 font-mono text-sm">
+                          <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-800 text-xs">
                             {pub.author.displayName.slice(0, 2).toUpperCase()}
                           </div>
                         )}
 
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-100 text-sm hover:text-sky-300 transition-colors">
+                            <Link
+                              href={`/contributors/${pub.author.username}`}
+                              className="font-bold text-slate-900 text-sm hover:text-rose-700 transition-colors"
+                            >
                               {pub.author.displayName}
-                            </span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-950/80 text-sky-400 border border-sky-800/40">
+                            </Link>
+                            <span className="text-[10px] font-sans px-1.5 py-0.2 rounded-xs bg-slate-100 text-slate-700 border border-slate-200">
                               {pub.author.role}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 truncate max-w-[200px] sm:max-w-xs">
-                            {pub.author.affiliation || "Independent Researcher"}
+                          <p className="text-xs text-slate-500 truncate max-w-[200px] sm:max-w-xs">
+                            {pub.author.affiliation || "University Department / Institute"}
                           </p>
                         </div>
                       </div>
@@ -380,20 +383,20 @@ export function SocialScienceFeed({
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleFollowToggle(pub.author.id)}
-                          className={`text-xs font-mono px-2.5 py-1 rounded-full border transition-all flex items-center gap-1 ${
+                          className={`text-xs px-2.5 py-1 rounded-sm border transition-all flex items-center gap-1 cursor-pointer ${
                             isFollowed
-                              ? "bg-slate-800 border-slate-700 text-slate-300"
-                              : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500 hover:text-slate-950"
+                              ? "bg-slate-100 border-slate-300 text-slate-800 font-medium"
+                              : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
                           }`}
                         >
                           {isFollowed ? (
                             <>
-                              <UserCheck className="w-3 h-3" />
+                              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
                               <span>Following</span>
                             </>
                           ) : (
                             <>
-                              <UserPlus className="w-3 h-3" />
+                              <UserPlus className="w-3.5 h-3.5 text-slate-500" />
                               <span>Follow</span>
                             </>
                           )}
@@ -401,30 +404,32 @@ export function SocialScienceFeed({
                       </div>
                     </div>
 
-                    {/* Post Content Body */}
-                    <div className="p-4 sm:p-5 space-y-3.5">
-                      {/* Meta Pill Badges */}
+                    {/* Publication Content Body */}
+                    <div className="p-4 sm:p-5 space-y-3">
+                      {/* Meta Badges */}
                       <div className="flex flex-wrap items-center gap-2 text-xs">
-                        <Badge variant="outline" className="border-sky-500/30 text-sky-300 bg-sky-950/40 font-mono text-[11px]">
-                          {pub.category.name}
-                        </Badge>
-                        <Badge variant="accent" className="font-mono text-[11px]">
+                        <CategoryBadge category={pub.category} clickable={false} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
                           {pub.publicationType}
-                        </Badge>
-                        <span className="text-slate-500 font-mono text-[11px] flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-slate-500" />
+                        </span>
+                        <span className="text-slate-500 text-[11px] flex items-center gap-1 font-mono">
+                          <Calendar className="w-3 h-3 text-slate-400" />
                           {formatShortDate(pub.publishedAt || pub.createdAt)}
                         </span>
                         {pub.readingTimeMinutes && (
-                          <span className="text-slate-500 font-mono text-[11px] flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-500" />
+                          <span className="text-slate-500 text-[11px] flex items-center gap-1 font-mono">
+                            <Clock className="w-3 h-3 text-slate-400" />
                             {pub.readingTimeMinutes}m read
                           </span>
                         )}
+                        <span className="text-emerald-700 text-[11px] font-medium flex items-center gap-1 ml-auto">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                          <span>Open Access</span>
+                        </span>
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg sm:text-xl font-bold text-slate-100 hover:text-sky-300 transition-colors leading-snug">
+                      <h3 className="font-serif text-lg sm:text-xl font-bold text-slate-900 hover:text-rose-700 transition-colors leading-snug">
                         <Link href={`/publications/${pub.slug}`}>
                           {pub.title}
                         </Link>
@@ -432,121 +437,127 @@ export function SocialScienceFeed({
 
                       {/* Visual Banner (if available) */}
                       {pub.coverImage && (
-                        <div className="relative w-full h-48 sm:h-64 rounded-xl overflow-hidden border border-slate-800 bg-slate-950 group/img">
+                        <div className="relative w-full h-48 sm:h-60 rounded-md overflow-hidden border border-slate-200 bg-slate-100 group/img">
                           <img
                             src={pub.coverImage}
                             alt={pub.title}
-                            className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500 opacity-90"
+                            className="w-full h-full object-cover group-hover/img:scale-102 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
                         </div>
                       )}
 
                       {/* Abstract / Scientific Narrative */}
-                      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans">
                         {pub.abstract}
                       </p>
 
                       {/* Key Takeaway Callout */}
-                      <div className="p-3 rounded-xl bg-sky-950/20 border-l-2 border-sky-400 text-xs text-sky-200">
-                        <span className="font-semibold text-sky-400 font-mono uppercase tracking-wider block text-[10px] mb-0.5">
-                          Key Discovery &amp; Insight
+                      <div className="p-3 rounded-sm bg-rose-50/70 border-l-3 border-rose-700 text-xs text-slate-800 italic leading-relaxed">
+                        <span className="font-bold text-rose-800 uppercase tracking-wider block text-[10px] mb-0.5 not-italic">
+                          Core Conclusion
                         </span>
-                        <p className="italic text-slate-300">
-                          &ldquo;{pub.abstract.slice(0, 180)}...&rdquo;
-                        </p>
+                        &ldquo;{pub.abstract.slice(0, 180)}...&rdquo;
                       </div>
 
-                      {/* Hashtag pills */}
+                      {/* Academic Keyword pills (no #) */}
                       {pub.tags && pub.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">
+                            Keywords:
+                          </span>
                           {pub.tags.map((tag) => (
                             <button
                               key={tag}
                               onClick={() => setSearchQuery(tag)}
-                              className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-sky-300 border border-slate-700/50 transition-colors"
+                              className="text-[11px] px-2 py-0.5 rounded-sm bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors font-medium cursor-pointer"
                             >
-                              #{tag}
+                              {tag}
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
 
-                    {/* Social Interaction Action Bar */}
-                    <div className="px-4 sm:px-5 py-3 border-t border-slate-800/80 bg-slate-950/50 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                    {/* Scholarly Interaction Action Bar */}
+                    <div className="px-4 sm:px-5 py-3 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3 text-xs font-sans">
                       {/* Left: Like, Comment, Bookmark, Share */}
                       <div className="flex items-center gap-1 sm:gap-2">
                         {/* Like Button */}
                         <button
                           onClick={() => handleLikeToggle(pub.id)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors cursor-pointer border ${
                             isLiked
-                              ? "bg-rose-500/10 text-rose-400 font-bold"
-                              : "text-slate-400 hover:text-rose-400 hover:bg-slate-800/50"
+                              ? "bg-rose-50 text-rose-700 border-rose-200 font-semibold"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                           }`}
+                          title="Peer Endorse"
                         >
-                          <Heart className={`w-4 h-4 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
-                          <span>{pub.likes + (isLiked ? 1 : 0)}</span>
+                          <Heart
+                            className={`w-3.5 h-3.5 ${
+                              isLiked ? "fill-rose-600 text-rose-600" : "text-rose-600"
+                            }`}
+                          />
+                          <span>{pub.likes + (isLiked ? 1 : 0)} Endorse</span>
                         </button>
 
-                        {/* Peer Review Notes / Comments Button */}
+                        {/* Comments Toggle */}
                         <button
                           onClick={() => handleCommentsToggle(pub.id)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
-                            isCommentsOpen
-                              ? "bg-sky-500/10 text-sky-400 font-bold"
-                              : "text-slate-400 hover:text-sky-400 hover:bg-slate-800/50"
-                          }`}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+                          title="Open Peer Deliberations"
                         >
-                          <MessageSquare className="w-4 h-4" />
-                          <span>{postComments.length}</span>
+                          <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+                          <span>{postComments.length} Review Notes</span>
                         </button>
 
-                        {/* Save / Bookmark Button */}
+                        {/* Bookmark */}
                         <button
                           onClick={() => handleBookmarkToggle(pub.id)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+                          className={`p-1.5 rounded transition-colors cursor-pointer border ${
                             isSaved
-                              ? "bg-amber-500/10 text-amber-400 font-bold"
-                              : "text-slate-400 hover:text-amber-400 hover:bg-slate-800/50"
+                              ? "bg-slate-900 text-white border-slate-900"
+                              : "bg-white text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
                           }`}
-                          title={isSaved ? "Saved to Reading Library" : "Save for later"}
+                          title={isSaved ? "Saved to Reading List" : "Save for Citation"}
                         >
-                          <Bookmark className={`w-4 h-4 ${isSaved ? "fill-amber-400 text-amber-400" : ""}`} />
-                          <span className="hidden sm:inline">{isSaved ? "Saved" : "Save"}</span>
+                          <Bookmark className={`w-3.5 h-3.5 ${isSaved ? "fill-white" : ""}`} />
                         </button>
 
-                        {/* Share / Copy DOI Button */}
+                        {/* Share DOI */}
                         <button
                           onClick={() => handleShare(pub)}
-                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-sky-300 hover:bg-slate-800/50 transition-all"
-                          title="Share link & DOI"
+                          className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-white text-slate-500 border border-slate-200 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer font-mono text-[11px]"
+                          title="Copy Permanent Handle / DOI"
                         >
                           {copiedId === pub.id ? (
-                            <Check className="w-4 h-4 text-emerald-400" />
+                            <>
+                              <Check className="w-3 h-3 text-emerald-600" />
+                              <span className="text-emerald-700 font-semibold font-sans">Copied</span>
+                            </>
                           ) : (
-                            <Share2 className="w-4 h-4" />
+                            <>
+                              <Share2 className="w-3 h-3 text-slate-400" />
+                              <span>DOI</span>
+                            </>
                           )}
-                          <span className="hidden sm:inline">{copiedId === pub.id ? "Copied" : "Share"}</span>
                         </button>
                       </div>
 
-                      {/* Right: Quick Read Modal Trigger & Read Full Paper */}
+                      {/* Right: Quick Read & Full Manuscript Link */}
                       <div className="flex items-center gap-2">
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => setActiveModalPub(pub)}
-                          className="px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 hover:text-sky-300 hover:border-sky-500/50 flex items-center gap-1 transition-all text-[11px]"
+                          className="text-xs h-7 px-2.5 text-slate-700 hover:text-slate-900"
                         >
-                          <BookOpen className="w-3.5 h-3.5" />
-                          <span>Quick Read</span>
-                        </button>
-
+                          Abstract
+                        </Button>
                         <Link
                           href={`/publications/${pub.slug}`}
-                          className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-400 hover:bg-sky-500 hover:text-slate-950 flex items-center gap-1 transition-all text-[11px] font-semibold"
+                          className="text-xs font-semibold text-rose-700 hover:text-rose-900 flex items-center gap-1"
                         >
-                          <span>Full Paper</span>
+                          <span>Full Article</span>
                           <ExternalLink className="w-3 h-3" />
                         </Link>
                       </div>
@@ -554,14 +565,14 @@ export function SocialScienceFeed({
 
                     {/* Expandable Peer Comments / Review Section */}
                     {isCommentsOpen && (
-                      <div className="p-4 sm:p-5 border-t border-slate-800/80 bg-slate-950/70 space-y-4 animate-in fade-in duration-200">
-                        <div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
-                          <span className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
-                            <MessageSquare className="w-3.5 h-3.5 text-sky-400" />
-                            <span>Open Peer Deliberations ({postComments.length})</span>
+                      <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 space-y-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <MessageSquare className="w-3.5 h-3.5 text-rose-700" />
+                            <span>Peer Review Notes &amp; Observations ({postComments.length})</span>
                           </span>
                           <span className="text-[11px] font-mono text-slate-500">
-                            Transparent review
+                            Open Post-Publication Moderation
                           </span>
                         </div>
 
@@ -570,22 +581,22 @@ export function SocialScienceFeed({
                           {postComments.map((comment) => (
                             <div
                               key={comment.id}
-                              className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs space-y-1"
+                              className="p-3 rounded-md bg-white border border-slate-200 text-xs space-y-1 shadow-2xs"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-bold text-slate-200">
+                                  <span className="font-bold text-slate-900">
                                     {comment.author}
                                   </span>
-                                  <span className="text-slate-400 text-[10px] hidden sm:inline">
+                                  <span className="text-slate-500 text-[11px] hidden sm:inline">
                                     • {comment.affiliation}
                                   </span>
                                 </div>
-                                <span className="text-[10px] font-mono text-slate-500">
+                                <span className="text-[10px] font-mono text-slate-400">
                                   {comment.timestamp}
                                 </span>
                               </div>
-                              <p className="text-slate-300 font-sans leading-relaxed">
+                              <p className="text-slate-700 font-sans leading-relaxed">
                                 {comment.text}
                               </p>
                             </div>
@@ -596,7 +607,7 @@ export function SocialScienceFeed({
                         <div className="flex items-center gap-2 pt-2">
                           <input
                             type="text"
-                            placeholder="Add a peer review observation or question..."
+                            placeholder="Contribute peer observation, methodological critique, or question..."
                             value={newCommentText[pub.id] || ""}
                             onChange={(e) =>
                               setNewCommentText((prev) => ({ ...prev, [pub.id]: e.target.value }))
@@ -604,14 +615,16 @@ export function SocialScienceFeed({
                             onKeyDown={(e) => {
                               if (e.key === "Enter") handleAddComment(pub.id);
                             }}
-                            className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                            className="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500"
                           />
                           <Button
+                            variant="primary"
                             size="sm"
                             onClick={() => handleAddComment(pub.id)}
-                            className="text-xs px-3 py-1.5 h-auto"
+                            className="text-xs px-3 py-1.5 h-auto font-medium"
                           >
-                            <Send className="w-3.5 h-3.5" />
+                            <Send className="w-3.5 h-3.5 mr-1" />
+                            <span>Post</span>
                           </Button>
                         </div>
                       </div>
@@ -622,57 +635,57 @@ export function SocialScienceFeed({
             )}
           </div>
 
-          {/* Right Social Sidebar (4 Columns) */}
+          {/* Right Academic Sidebar (4 Columns) */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* 1. Trending Science Topics */}
-            <div className="cosmic-card p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="text-xs font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Trending Scientific Topics</span>
+            {/* 1. Academic Subject Directory */}
+            <div className="academic-card p-5 rounded-md bg-white border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-rose-700 inline-block" />
+                  <span>Disciplines Directory</span>
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">Live</span>
+                <span className="text-[10px] font-mono text-slate-500">Subject Index</span>
               </div>
 
-              <div className="space-y-2 text-xs">
+              <div className="space-y-1.5 text-xs">
                 {categories.slice(0, 6).map((cat) => (
                   <button
                     key={cat.slug}
                     onClick={() => setSelectedDomain(cat.slug)}
-                    className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/60 transition-colors text-left group"
+                    className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-50 transition-colors text-left group cursor-pointer"
                   >
                     <div>
-                      <span className="font-mono text-slate-200 group-hover:text-sky-300 font-semibold block">
-                        #{cat.name.replace(/\s+/g, "")}
+                      <span className="font-medium text-slate-800 group-hover:text-rose-700 block">
+                        {cat.name}
                       </span>
-                      <span className="text-[10px] text-slate-500">{cat.name}</span>
+                      <span className="text-[11px] text-slate-500 line-clamp-1">{cat.description}</span>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-                      Domain
+                    <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      Archive
                     </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* 2. Community Scientific Poll of the Week */}
-            <div className="cosmic-card p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="text-xs font-mono uppercase tracking-wider text-sky-400 font-bold flex items-center gap-1.5">
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  <span>Research Consensus Poll</span>
+            {/* 2. Research Consensus Inquiry of the Week */}
+            <div className="academic-card p-5 rounded-md bg-white border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                  <HelpCircle className="w-3.5 h-3.5 text-rose-700" />
+                  <span>Scientific Consensus Poll</span>
                 </span>
-                <span className="text-[10px] font-mono text-slate-400">
+                <span className="text-[10px] font-mono text-slate-500">
                   {totalPollVotes} votes
                 </span>
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-slate-200 leading-snug">
-                  Which methodology will first resolve the nature of Dark Matter?
+                <h4 className="text-xs font-semibold text-slate-900 leading-snug">
+                  Which observational mechanism will first resolve the nature of Dark Matter?
                 </h4>
 
-                <div className="space-y-2 pt-1 text-xs font-mono">
+                <div className="space-y-2 pt-1 text-xs font-sans">
                   {[
                     "Direct detection (LZ / XENONnT)",
                     "Space surveys (Euclid / Roman)",
@@ -688,22 +701,22 @@ export function SocialScienceFeed({
                         key={option}
                         onClick={() => handleVote(idx)}
                         disabled={pollVoted !== null}
-                        className={`w-full relative overflow-hidden p-2.5 rounded-xl border text-left transition-all ${
+                        className={`w-full relative overflow-hidden p-2.5 rounded border text-left transition-all cursor-pointer ${
                           isSelected
-                            ? "border-sky-500 bg-sky-950/40 text-slate-100 font-bold"
-                            : "border-slate-800 bg-slate-950 hover:border-slate-700 text-slate-300"
+                            ? "border-rose-300 bg-rose-50/50 text-rose-900 font-bold"
+                            : "border-slate-200 bg-slate-50 hover:border-slate-300 text-slate-800"
                         }`}
                       >
                         {pollVoted !== null && (
                           <div
-                            className="absolute top-0 bottom-0 left-0 bg-sky-500/15 transition-all duration-700"
+                            className="absolute top-0 bottom-0 left-0 bg-rose-200/40 transition-all duration-700"
                             style={{ width: `${percent}%` }}
                           />
                         )}
                         <div className="relative flex items-center justify-between z-10">
-                          <span className="truncate pr-2">{option}</span>
+                          <span className="truncate pr-2 text-xs">{option}</span>
                           {pollVoted !== null && (
-                            <span className="text-sky-400 font-bold shrink-0">{percent}%</span>
+                            <span className="text-rose-800 font-bold shrink-0 font-mono text-[11px]">{percent}%</span>
                           )}
                         </div>
                       </button>
@@ -713,15 +726,15 @@ export function SocialScienceFeed({
               </div>
             </div>
 
-            {/* 3. Top Contributors to Follow */}
-            <div className="cosmic-card p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="text-xs font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-                  <Award className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Researchers to Follow</span>
+            {/* 3. Featured Editorial Contributors */}
+            <div className="academic-card p-5 rounded-md bg-white border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-rose-700" />
+                  <span>Principal Contributors</span>
                 </span>
-                <Link href="/contributors" className="text-[11px] font-mono text-sky-400 hover:underline">
-                  View all
+                <Link href="/contributors" className="text-[11px] font-semibold text-rose-700 hover:underline">
+                  Directory &rarr;
                 </Link>
               </div>
 
@@ -737,29 +750,29 @@ export function SocialScienceFeed({
                             <img
                               src={author.avatarUrl}
                               alt={author.displayName}
-                              className="w-8 h-8 rounded-full object-cover border border-slate-700 shrink-0"
+                              className="w-8 h-8 rounded-full object-cover border border-slate-300 shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-sky-400 shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-800 shrink-0">
                               {author.displayName.slice(0, 2).toUpperCase()}
                             </div>
                           )}
                           <div className="truncate">
-                            <span className="font-bold text-slate-200 block truncate">
+                            <span className="font-bold text-slate-900 block truncate">
                               {author.displayName}
                             </span>
                             <span className="text-[11px] text-slate-500 truncate block">
-                              {author.affiliation || "Active Researcher"}
+                              {author.affiliation || "Faculty / Researcher"}
                             </span>
                           </div>
                         </div>
 
                         <button
                           onClick={() => handleFollowToggle(author.id)}
-                          className={`text-[11px] font-mono px-2.5 py-1 rounded-full border transition-all shrink-0 ${
+                          className={`text-[11px] px-2.5 py-1 rounded border transition-all shrink-0 cursor-pointer ${
                             isFollowed
-                              ? "bg-slate-800 border-slate-700 text-slate-300"
-                              : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500 hover:text-slate-950"
+                              ? "bg-slate-100 border-slate-300 text-slate-800 font-medium"
+                              : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                           }`}
                         >
                           {isFollowed ? "Following" : "Follow"}
@@ -768,31 +781,31 @@ export function SocialScienceFeed({
                     );
                   })
                 ) : (
-                  <div className="p-4 rounded-xl bg-slate-950/40 border border-dashed border-slate-800 text-center space-y-1.5">
-                    <p className="text-xs text-slate-400">No public contributor profiles yet.</p>
-                    <Link href="/auth/login?mode=signup" className="text-[11px] font-mono text-sky-400 hover:underline block">
-                      Join as a contributor &rarr;
+                  <div className="p-4 rounded bg-slate-50 border border-dashed border-slate-200 text-center space-y-1.5">
+                    <p className="text-xs text-slate-500">No public contributor records yet.</p>
+                    <Link href="/auth/login?mode=signup" className="text-[11px] font-semibold text-rose-700 hover:underline block">
+                      Register as a Researcher &rarr;
                     </Link>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* 4. Creator Callout Banner */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-sky-950/40 via-slate-900 to-indigo-950/30 border border-sky-500/20 space-y-3">
-              <div className="flex items-center gap-2 text-sky-400 font-mono text-xs uppercase font-semibold">
-                <Sparkles className="w-4 h-4" />
-                <span>Publish Research</span>
+            {/* 4. Call for Submissions Card */}
+            <div className="p-5 rounded-md bg-slate-900 text-white space-y-3 shadow-xs">
+              <div className="flex items-center gap-2 text-rose-400 text-xs uppercase font-bold tracking-wider">
+                <FileText className="w-4 h-4" />
+                <span>Call for Manuscripts</span>
               </div>
-              <h4 className="text-sm font-bold text-slate-100">
-                Are you conducting scientific research?
+              <h4 className="text-sm font-bold text-white font-serif">
+                Conducting Empirical or Theoretical Research?
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                Submit manuscripts, observational datasets, and theoretical proofs directly to the open community archive.
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                Submit papers, observational datasets, and proofs directly to the peer-moderated open archive. Zero author publication fees.
               </p>
               <Link href="/creator/publications/new" className="block pt-1">
-                <Button size="sm" className="w-full text-xs">
-                  Submit Publication Now
+                <Button variant="primary" size="sm" className="w-full text-xs font-semibold">
+                  Submit Manuscript Now
                 </Button>
               </Link>
             </div>
@@ -801,13 +814,15 @@ export function SocialScienceFeed({
       </section>
 
       {/* Quick Read Pop-up Modal */}
-      <QuickReadModal
-        publication={activeModalPub}
-        isOpen={!!activeModalPub}
-        onClose={() => setActiveModalPub(null)}
-        onLikeToggle={handleLikeToggle}
-        isLiked={activeModalPub ? !!likes[activeModalPub.id] : false}
-      />
+      {activeModalPub && (
+        <QuickReadModal
+          publication={activeModalPub}
+          isOpen={!!activeModalPub}
+          onClose={() => setActiveModalPub(null)}
+          onLikeToggle={handleLikeToggle}
+          isLiked={activeModalPub ? !!likes[activeModalPub.id] : false}
+        />
+      )}
     </>
   );
 }

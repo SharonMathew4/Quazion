@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Profile } from "@/types";
-import { ShieldCheck, BookOpen, ExternalLink } from "lucide-react";
+import { BookOpen, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface AuthorSummaryProps {
@@ -10,55 +10,64 @@ interface AuthorSummaryProps {
 
 /**
  * AuthorSummary Component
- * Sidebar card presenting author credentials, affiliation, ORCID badge,
- * bio snippet, and total publication metrics.
+ * Academic faculty and principal investigator card for the manuscript sidebar.
  */
 export function AuthorSummary({ author }: AuthorSummaryProps) {
   return (
-    <div className="cosmic-card p-6 rounded-2xl bg-slate-900/50 border border-slate-800 space-y-4">
+    <div className="academic-card p-6 rounded-md bg-white border border-slate-200 space-y-4 font-sans shadow-2xs">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-700/80 flex items-center justify-center font-mono font-bold text-lg text-sky-400">
+        <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-lg text-slate-800 shrink-0">
           {author.displayName.charAt(0)}
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-bold text-slate-100 text-base">
-              <Link href={`/contributors/${author.username}`} className="hover:text-sky-300 transition-colors">
+            <h3 className="font-bold text-slate-900 text-base">
+              <Link
+                href={`/contributors/${author.username}`}
+                className="hover:text-rose-700 transition-colors"
+              >
                 {author.displayName}
               </Link>
             </h3>
-            <Badge variant="accent" className="text-[10px] px-1.5 py-0">
+            <span className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 px-1.5 py-0.2 rounded-xs border border-slate-200">
               {author.role}
-            </Badge>
+            </span>
           </div>
-          <p className="text-xs text-sky-400 font-sans mt-0.5">
-            {author.affiliation || "Independent Researcher"}
+          <p className="text-xs text-slate-600 font-sans mt-0.5">
+            {author.affiliation || "Faculty / Scientific Researcher"}
           </p>
         </div>
       </div>
 
       {author.orcid && (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono">
-          <ShieldCheck className="w-3.5 h-3.5" />
+        <a
+          href={`https://orcid.org/${author.orcid}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-slate-700 text-xs font-mono hover:border-slate-300 transition-colors"
+        >
+          <span className="w-3 h-3 rounded-full bg-[#a6ce39] text-white flex items-center justify-center text-[8px] font-bold">
+            iD
+          </span>
           <span>ORCID: {author.orcid}</span>
-        </div>
+        </a>
       )}
 
-      <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed font-sans">
-        {author.bio || "Scientific contributor publishing open research on QUAZION."}
+      <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed font-sans">
+        {author.bio || "Active scientific researcher and contributor publishing open access literature on QUAZION."}
       </p>
 
-      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
-        <span className="flex items-center gap-1 text-slate-400">
-          <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 font-sans">
+        <span className="flex items-center gap-1.5 text-slate-600">
+          <BookOpen className="w-3.5 h-3.5 text-slate-400" />
           <span>{author.totalPublications ?? 1} publications</span>
         </span>
 
         <Link
           href={`/contributors/${author.username}`}
-          className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-sans font-medium transition-colors"
+          className="inline-flex items-center gap-1 text-rose-700 hover:text-rose-900 font-semibold transition-colors text-xs"
         >
-          <span>View Profile</span>
+          <span>Author Profile</span>
           <ExternalLink className="w-3 h-3" />
         </Link>
       </div>

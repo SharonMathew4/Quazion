@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "katex/dist/katex.min.css";
 import "./globals.css";
 
 import { Navbar } from "@/components/layout/navbar";
@@ -59,9 +58,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased dark"
+      className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col cosmic-bg text-[#f0f4fc]">
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-rose-100 selection:text-rose-900 font-sans">
         <Navbar />
         <main className="flex-1 flex flex-col">{children}</main>
         <Footer />

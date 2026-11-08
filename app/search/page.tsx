@@ -25,21 +25,24 @@ function SearchContent() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 font-sans">
       {/* Title */}
       <div>
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400 mb-2">
-          <Search className="w-4 h-4" />
-          <span>Universal Archive Index</span>
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-rose-800 font-bold mb-2">
+          <Search className="w-4 h-4 text-rose-700" />
+          <span>Universal Journal Archive Index</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
+        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
           Search Scientific Repository
         </h1>
+        <p className="text-slate-600 mt-2 text-sm sm:text-base max-w-2xl font-sans leading-relaxed">
+          Index-wide search across manuscript titles, structured abstracts, verified faculty authors, DOIs, and disciplines.
+        </p>
       </div>
 
       {/* Search Input Bar */}
       <div className="max-w-3xl">
-        <div className="flex items-center bg-slate-900 border border-slate-700/80 rounded-xl p-2 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20 shadow-lg">
+        <div className="flex items-center bg-white border border-slate-300 rounded p-2 focus-within:border-slate-500 focus-within:ring-1 focus-within:ring-slate-500 shadow-2xs">
           <div className="pl-3 pr-2 text-slate-400">
             <Search className="w-5 h-5" />
           </div>
@@ -47,14 +50,14 @@ function SearchContent() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search across titles, abstracts, authors, categories, tags..."
-            className="w-full bg-transparent text-sm sm:text-base text-slate-100 placeholder-slate-500 focus:outline-none py-1"
+            placeholder="Search across titles, abstracts, authors, categories, tags, DOIs..."
+            className="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:outline-none py-1 font-sans"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="text-xs text-slate-400 hover:text-white px-2 py-1 cursor-pointer"
+              className="text-xs text-slate-400 hover:text-slate-700 px-2 py-1 cursor-pointer font-mono"
             >
               Clear
             </button>
@@ -63,10 +66,10 @@ function SearchContent() {
       </div>
 
       {/* Results Header */}
-      <div className="flex items-center justify-between text-xs text-slate-400 font-mono pt-4 border-t border-slate-800">
+      <div className="flex items-center justify-between text-xs text-slate-600 font-mono pt-4 border-t border-slate-200">
         <span>
-          Showing {results.length} publication{results.length === 1 ? "" : "s"}
-          {query ? ` for &ldquo;${query}&rdquo;` : ""}
+          Showing {results.length} manuscript{results.length === 1 ? "" : "s"}
+          {query ? ` matching query &ldquo;${query}&rdquo;` : ""}
         </span>
       </div>
 
@@ -78,14 +81,14 @@ function SearchContent() {
           ))}
         </div>
       ) : (
-        <div className="cosmic-card rounded-xl p-12 text-center max-w-lg mx-auto">
-          <BookOpen className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-200 mb-1">
-            {query ? "No publications matched your search" : "No publications in the archive"}
+        <div className="academic-card rounded p-12 text-center max-w-lg mx-auto bg-white border border-dashed border-slate-200 shadow-2xs">
+          <BookOpen className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+          <h3 className="font-serif text-base font-semibold text-slate-900 mb-1">
+            {query ? "No manuscripts matched your search" : "No manuscripts in the archive"}
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 font-sans">
             {query
-              ? "Try searching for alternative topics or keywords."
+              ? "Try searching for alternative scientific terms, author surnames, or broader disciplines."
               : "The archive currently has no published papers. Be the first to publish research."}
           </p>
         </div>
@@ -96,7 +99,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-16 text-slate-400 font-mono text-sm">Loading archive index...</div>}>
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-16 text-slate-600 font-mono text-sm">Loading archive index...</div>}>
       <SearchContent />
     </Suspense>
   );

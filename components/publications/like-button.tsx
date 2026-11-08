@@ -79,25 +79,27 @@ export function LikeButton({ publicationId, initialLikes }: LikeButtonProps) {
   return (
     <Button
       type="button"
-      variant="secondary"
+      variant="outline"
       size="sm"
       data-publication-id={publicationId}
       onClick={handleToggleLike}
       disabled={loading}
-      className="flex items-center gap-1.5 transition-colors cursor-pointer"
-      title={hasLiked ? "Unlike publication" : "Like publication"}
+      className={`flex items-center gap-1.5 transition-colors cursor-pointer border-slate-300 ${
+        hasLiked ? "bg-rose-50 text-rose-700 border-rose-200" : "text-slate-700 hover:bg-slate-50"
+      }`}
+      title={hasLiked ? "Remove endorsement" : "Endorse publication"}
     >
       {loading ? (
         <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
       ) : (
         <Heart
           className={`w-3.5 h-3.5 transition-colors ${
-            hasLiked ? "fill-rose-500 text-rose-500" : "text-rose-500/80"
+            hasLiked ? "fill-rose-600 text-rose-600" : "text-rose-600"
           }`}
         />
       )}
-      <span className="font-mono text-xs">
-        {hasLiked ? "Liked" : "Like"} ({likes})
+      <span className="font-sans text-xs font-medium">
+        {hasLiked ? "Endorsed" : "Endorse"} ({likes})
       </span>
     </Button>
   );

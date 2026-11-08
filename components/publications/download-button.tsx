@@ -59,19 +59,19 @@ export function DownloadButton({
       size="sm"
       onClick={handleDownload}
       disabled={downloading}
-      className="flex items-center gap-1.5 transition-colors cursor-pointer"
+      className="flex items-center gap-1.5 transition-colors cursor-pointer border-slate-300 text-slate-700 hover:bg-slate-50"
     >
       {downloaded ? (
-        <Check className="w-3.5 h-3.5 text-emerald-400" />
+        <Check className="w-3.5 h-3.5 text-emerald-600" />
       ) : (
-        <Download className="w-3.5 h-3.5 text-slate-400" />
+        <Download className="w-3.5 h-3.5 text-slate-600" />
       )}
-      <span className="font-mono text-xs">
+      <span className="font-sans text-xs font-medium">
         {downloading
-          ? "Fetching..."
+          ? "Preparing PDF..."
           : downloaded
-          ? "Downloaded"
-          : `Document (${downloads})`}
+          ? "PDF Saved"
+          : `Download (${downloads})`}
       </span>
     </Button>
   );

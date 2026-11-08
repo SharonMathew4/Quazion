@@ -10,13 +10,14 @@ import {
   Bookmark, 
   Share2, 
   Clock, 
-  Sparkles, 
   BookOpen, 
   FileText,
-  Check
+  Check,
+  ShieldCheck
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CategoryBadge } from "./category-badge";
 import { formatDate } from "@/lib/utils";
 
 interface QuickReadModalProps {
@@ -27,6 +28,10 @@ interface QuickReadModalProps {
   isLiked?: boolean;
 }
 
+/**
+ * QuickReadModal Component
+ * Academic abstract modal dialog for reviewing manuscript details without leaving the feed.
+ */
 export function QuickReadModal({
   publication,
   isOpen,
@@ -64,31 +69,29 @@ export function QuickReadModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200 font-sans"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col cosmic-card"
+        className="relative w-full max-w-3xl max-h-[90vh] bg-white border border-slate-300 rounded-md shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950/50">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-            <span className="font-mono text-xs text-sky-400 uppercase tracking-wider">
-              Quick Research Preview
+            <span className="w-2 h-2 rounded-full bg-rose-700" />
+            <span className="font-semibold text-xs text-slate-800 uppercase tracking-wider">
+              Research Abstract &amp; Metadata
             </span>
-            <Badge variant="outline" className="text-[11px] font-mono border-slate-700 text-slate-300">
-              {publication.category.name}
-            </Badge>
-            <Badge variant="accent" className="text-[11px] font-mono">
+            <CategoryBadge category={publication.category} clickable={false} />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
               {publication.publicationType}
-            </Badge>
+            </span>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -96,78 +99,68 @@ export function QuickReadModal({
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6 text-slate-200">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6 text-slate-800">
           {/* Title */}
           <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-100 tracking-tight leading-snug">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
               {publication.title}
             </h2>
 
             {/* Author Byline */}
-            <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
-              <span className="font-semibold text-slate-200">
+            <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600">
+              <span className="font-semibold text-slate-900">
                 By {publication.author.displayName}
               </span>
               {publication.author.affiliation && (
-                <span className="text-slate-400 border-l border-slate-800 pl-3">
+                <span className="text-slate-500 border-l border-slate-200 pl-3">
                   {publication.author.affiliation}
                 </span>
               )}
-              <span className="text-slate-500 border-l border-slate-800 pl-3">
+              <span className="text-slate-500 border-l border-slate-200 pl-3 font-mono">
                 {formatDate(publication.publishedAt || publication.createdAt)}
               </span>
               {publication.readingTimeMinutes && (
-                <span className="flex items-center gap-1 text-slate-400 border-l border-slate-800 pl-3">
-                  <Clock className="w-3.5 h-3.5 text-sky-400" />
+                <span className="flex items-center gap-1 text-slate-500 border-l border-slate-200 pl-3 font-mono">
+                  <Clock className="w-3.5 h-3.5 text-slate-400" />
                   {publication.readingTimeMinutes} min read
                 </span>
               )}
             </div>
           </div>
 
-          {/* Cover Image if available */}
-          {publication.coverImage && (
-            <div className="relative w-full h-48 sm:h-64 rounded-xl overflow-hidden border border-slate-800">
-              <img
-                src={publication.coverImage}
-                alt={publication.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-            </div>
-          )}
-
           {/* Key Discovery Highlight Box */}
-          <div className="p-4 rounded-xl bg-sky-950/20 border border-sky-500/20 text-sky-200 text-xs sm:text-sm leading-relaxed space-y-1">
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-sky-400 font-semibold">
-              <Sparkles className="w-4 h-4 text-sky-400" />
-              <span>Core Scientific Finding</span>
-            </div>
-            <p className="italic text-slate-300">
-              &ldquo;{publication.abstract.slice(0, 240)}...&rdquo;
+          <div className="p-4 rounded-sm bg-rose-50/70 border-l-3 border-rose-700 text-xs sm:text-sm leading-relaxed space-y-1 text-slate-800">
+            <span className="font-bold text-rose-800 uppercase tracking-wider block text-[10px]">
+              Principal Scientific Finding
+            </span>
+            <p className="italic text-slate-700">
+              &ldquo;{publication.abstract.slice(0, 260)}...&rdquo;
             </p>
           </div>
 
           {/* Abstract */}
           <div className="space-y-2">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-              <span>Abstract</span>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+              <span>Full Abstract</span>
             </h3>
-            <p className="text-sm text-slate-300 leading-relaxed font-sans">
+            <p className="text-sm text-slate-600 leading-relaxed font-sans">
               {publication.abstract}
             </p>
           </div>
 
-          {/* Tags */}
+          {/* Academic Keywords */}
           {publication.tags && publication.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-2">
+            <div className="flex flex-wrap items-center gap-1.5 pt-2">
+              <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">
+                Keywords:
+              </span>
               {publication.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-300 border border-slate-700/60"
+                  className="text-[11px] px-2 py-0.5 rounded-sm bg-slate-100 text-slate-700 border border-slate-200 font-medium"
                 >
-                  #{tag}
+                  {tag}
                 </span>
               ))}
             </div>
@@ -175,15 +168,15 @@ export function QuickReadModal({
 
           {/* References Preview */}
           {publication.references && publication.references.length > 0 && (
-            <div className="pt-4 border-t border-slate-800 space-y-2">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-slate-400" />
+            <div className="pt-4 border-t border-slate-200 space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-slate-500" />
                 <span>Selected Citations ({publication.references.length})</span>
               </h4>
-              <ul className="space-y-1 text-xs text-slate-400">
+              <ul className="space-y-1 text-xs text-slate-600">
                 {publication.references.slice(0, 3).map((ref) => (
                   <li key={ref.id} className="truncate">
-                    • <strong className="text-slate-300">{ref.authors}</strong> ({ref.year || "n.d."}): {ref.title}
+                    • <strong className="text-slate-800">{ref.authors}</strong> ({ref.year || "n.d."}): {ref.title}
                   </li>
                 ))}
               </ul>
@@ -192,39 +185,39 @@ export function QuickReadModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-5 border-t border-slate-800 bg-slate-950/70 gap-3">
-          {/* Social interaction buttons */}
-          <div className="flex items-center gap-2 text-xs font-mono">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-5 border-t border-slate-200 bg-slate-50 gap-3">
+          {/* Interaction buttons */}
+          <div className="flex items-center gap-2 text-xs font-sans">
             <button
               onClick={() => onLikeToggle && onLikeToggle(publication.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all cursor-pointer ${
                 isLiked
-                  ? "bg-rose-500/10 border-rose-500/40 text-rose-400"
-                  : "bg-slate-800/60 border-slate-700 text-slate-300 hover:text-rose-400"
+                  ? "bg-rose-50 border-rose-300 text-rose-700 font-semibold"
+                  : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
               }`}
             >
-              <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
-              <span>{publication.likes + (isLiked ? 1 : 0)}</span>
+              <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-rose-600 text-rose-600" : "text-rose-600"}`} />
+              <span>{isLiked ? "Endorsed" : "Endorse"} ({publication.likes + (isLiked ? 1 : 0)})</span>
             </button>
 
             <button
               onClick={() => setSaved(!saved)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all cursor-pointer ${
                 saved
-                  ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
-                  : "bg-slate-800/60 border-slate-700 text-slate-300 hover:text-amber-400"
+                  ? "bg-slate-900 border-slate-900 text-white font-medium"
+                  : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
               }`}
             >
-              <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span>{saved ? "Saved" : "Save"}</span>
+              <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-white" : ""}`} />
+              <span>{saved ? "Saved" : "Save for Citation"}</span>
             </button>
 
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-slate-800/60 border-slate-700 text-slate-300 hover:text-sky-300 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded border bg-white border-slate-300 text-slate-700 hover:bg-slate-100 transition-all cursor-pointer font-mono text-[11px]"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
-              <span>{copied ? "Link Copied!" : "Share DOI"}</span>
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-slate-500" />}
+              <span>{copied ? "Copied" : "Copy DOI"}</span>
             </button>
           </div>
 
@@ -234,9 +227,10 @@ export function QuickReadModal({
             className="w-full sm:w-auto"
             onClick={onClose}
           >
-            <Button className="w-full sm:w-auto flex items-center justify-center gap-2">
+            <Button variant="primary" className="w-full sm:w-auto flex items-center justify-center gap-2 font-semibold">
+              <FileText className="w-4 h-4" />
               <span>Read Full Manuscript</span>
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </Button>
           </Link>
         </div>

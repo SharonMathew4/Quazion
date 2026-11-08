@@ -110,12 +110,12 @@ function InlineTextArea({
   if (!editing) {
     return (
       <div className="group relative">
-        <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap font-sans min-h-[20px]">
-          {value || <span className="text-slate-500 italic">{placeholder}</span>}
+        <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap font-sans min-h-[20px]">
+          {value || <span className="text-slate-400 italic">{placeholder}</span>}
         </p>
         <button
           onClick={() => { setDraft(value); setEditing(true); }}
-          className="absolute top-0 right-0 p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-400 transition-all"
+          className="absolute top-0 right-0 p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-700 transition-all cursor-pointer"
           title="Edit"
         >
           <Pencil className="w-3.5 h-3.5" />
@@ -131,19 +131,19 @@ function InlineTextArea({
         onChange={(e) => setDraft(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 resize-none"
+        className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 resize-none font-sans"
         autoFocus
       />
       <div className="flex items-center gap-2">
         <button
           onClick={() => { onSave(draft); setEditing(false); }}
-          className="px-3 py-1 rounded-lg bg-sky-500 text-slate-950 text-xs font-semibold hover:bg-sky-400 transition-colors flex items-center gap-1"
+          className="px-3 py-1 rounded bg-rose-700 text-white text-xs font-semibold hover:bg-rose-800 transition-colors flex items-center gap-1 cursor-pointer"
         >
           <Check className="w-3 h-3" /> Save
         </button>
         <button
           onClick={() => setEditing(false)}
-          className="px-3 py-1 rounded-lg border border-slate-700 text-slate-400 text-xs hover:text-slate-200 transition-colors flex items-center gap-1"
+          className="px-3 py-1 rounded border border-slate-300 text-slate-600 text-xs hover:text-slate-900 transition-colors flex items-center gap-1 cursor-pointer"
         >
           <X className="w-3 h-3" /> Cancel
         </button>
@@ -174,13 +174,13 @@ function EditableTagList({
     return (
       <div className="group">
         <div className="flex items-center justify-between mb-2">
-          <h4 className={`text-xs font-mono uppercase tracking-wider ${color} flex items-center gap-1.5 font-semibold`}>
-            <Icon className="w-3.5 h-3.5" />
+          <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-bold">
+            <Icon className={`w-3.5 h-3.5 ${color}`} />
             <span>{label}</span>
           </h4>
           <button
             onClick={() => { setDraft(tags.join(", ")); setEditing(true); }}
-            className="p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-400 transition-all"
+            className="p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-700 transition-all cursor-pointer"
           >
             <Pencil className="w-3 h-3" />
           </button>
@@ -190,13 +190,13 @@ function EditableTagList({
             tags.map((tag) => (
               <span
                 key={tag}
-                className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60"
+                className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200"
               >
                 {tag}
               </span>
             ))
           ) : (
-            <span className="text-xs text-slate-500 italic">Click edit to add {label.toLowerCase()}</span>
+            <span className="text-xs text-slate-400 italic">Click edit to add {label.toLowerCase()}</span>
           )}
         </div>
       </div>
@@ -205,8 +205,8 @@ function EditableTagList({
 
   return (
     <div className="space-y-2">
-      <h4 className={`text-xs font-mono uppercase tracking-wider ${color} flex items-center gap-1.5 font-semibold`}>
-        <Icon className="w-3.5 h-3.5" />
+      <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-bold">
+        <Icon className={`w-3.5 h-3.5 ${color}`} />
         <span>{label}</span>
       </h4>
       <input
@@ -214,7 +214,7 @@ function EditableTagList({
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         placeholder="Separate with commas: Machine Learning, Quantum Computing, ..."
-        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+        className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
         autoFocus
       />
       <div className="flex items-center gap-2">
@@ -224,13 +224,13 @@ function EditableTagList({
             onSave(parsed);
             setEditing(false);
           }}
-          className="px-3 py-1 rounded-lg bg-sky-500 text-slate-950 text-xs font-semibold hover:bg-sky-400 flex items-center gap-1"
+          className="px-3 py-1 rounded bg-rose-700 text-white text-xs font-semibold hover:bg-rose-800 flex items-center gap-1 cursor-pointer"
         >
           <Check className="w-3 h-3" /> Save
         </button>
         <button
           onClick={() => setEditing(false)}
-          className="px-3 py-1 rounded-lg border border-slate-700 text-slate-400 text-xs hover:text-slate-200 flex items-center gap-1"
+          className="px-3 py-1 rounded border border-slate-300 text-slate-600 text-xs hover:text-slate-900 flex items-center gap-1 cursor-pointer"
         >
           <X className="w-3 h-3" /> Cancel
         </button>
@@ -269,13 +269,13 @@ function ExperienceSection({
     return (
       <div className="group space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-mono uppercase tracking-wider text-sky-400 flex items-center gap-1.5 font-semibold">
-            <Briefcase className="w-3.5 h-3.5" />
+          <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-bold">
+            <Briefcase className="w-3.5 h-3.5 text-slate-600" />
             <span>Experience</span>
           </h4>
           <button
             onClick={() => { setDraft(items); setEditing(true); }}
-            className="p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-400 transition-all"
+            className="p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-700 transition-all cursor-pointer"
           >
             <Pencil className="w-3 h-3" />
           </button>
@@ -284,25 +284,25 @@ function ExperienceSection({
         {items.length > 0 ? (
           <div className="space-y-3">
             {items.map((exp, i) => (
-              <div key={i} className="flex gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
-                  <Briefcase className="w-5 h-5 text-sky-400" />
+              <div key={i} className="flex gap-3 p-3 rounded bg-slate-50 border border-slate-200">
+                <div className="w-10 h-10 rounded bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <Briefcase className="w-5 h-5 text-slate-700" />
                 </div>
                 <div>
-                  <h5 className="text-sm font-semibold text-slate-100">{exp.title || "Position"}</h5>
-                  <p className="text-xs text-slate-400">{exp.organization || "Organization"}</p>
+                  <h5 className="text-sm font-semibold text-slate-900">{exp.title || "Position"}</h5>
+                  <p className="text-xs text-slate-600">{exp.organization || "Organization"}</p>
                   <p className="text-[11px] text-slate-500 font-mono">
                     {exp.startYear || "?"} – {exp.current ? "Present" : exp.endYear || "?"}
                   </p>
                   {exp.description && (
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{exp.description}</p>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">{exp.description}</p>
                   )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-500 italic">No experience listed yet. Click edit to add.</p>
+          <p className="text-xs text-slate-400 italic">No experience listed yet. Click edit to add.</p>
         )}
       </div>
     );
@@ -310,16 +310,16 @@ function ExperienceSection({
 
   return (
     <div className="space-y-3">
-      <h4 className="text-xs font-mono uppercase tracking-wider text-sky-400 flex items-center gap-1.5 font-semibold">
-        <Briefcase className="w-3.5 h-3.5" />
+      <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-bold">
+        <Briefcase className="w-3.5 h-3.5 text-slate-600" />
         <span>Experience</span>
       </h4>
 
       {draft.map((exp, idx) => (
-        <div key={idx} className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 relative">
+        <div key={idx} className="p-3 rounded bg-slate-50 border border-slate-200 space-y-2 relative">
           <button
             onClick={() => removeItem(idx)}
-            className="absolute top-2 right-2 text-slate-500 hover:text-rose-400 p-1"
+            className="absolute top-2 right-2 text-slate-400 hover:text-rose-700 p-1 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -328,14 +328,14 @@ function ExperienceSection({
             placeholder="Title (e.g., Postdoctoral Researcher)"
             value={exp.title}
             onChange={(e) => updateItem(idx, "title", e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
           />
           <input
             type="text"
             placeholder="Organization (e.g., CERN)"
             value={exp.organization}
             onChange={(e) => updateItem(idx, "organization", e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
           />
           <div className="flex gap-2">
             <input
@@ -343,7 +343,7 @@ function ExperienceSection({
               placeholder="Start Year"
               value={exp.startYear || ""}
               onChange={(e) => updateItem(idx, "startYear", parseInt(e.target.value) || 0)}
-              className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-1/2 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
             <input
               type="number"
@@ -351,15 +351,15 @@ function ExperienceSection({
               value={exp.endYear || ""}
               onChange={(e) => updateItem(idx, "endYear", parseInt(e.target.value) || 0)}
               disabled={!!exp.current}
-              className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 disabled:opacity-50"
+              className="w-1/2 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans disabled:opacity-50"
             />
           </div>
-          <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
             <input
               type="checkbox"
               checked={!!exp.current}
               onChange={(e) => updateItem(idx, "current", e.target.checked)}
-              className="rounded border-slate-700"
+              className="rounded border-slate-300"
             />
             Currently working here
           </label>
@@ -368,25 +368,25 @@ function ExperienceSection({
             value={exp.description || ""}
             onChange={(e) => updateItem(idx, "description", e.target.value)}
             rows={2}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 resize-none"
+            className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 resize-none font-sans"
           />
         </div>
       ))}
 
-      <button onClick={addItem} className="text-xs text-sky-400 hover:text-sky-300 font-medium flex items-center gap-1">
+      <button onClick={addItem} className="text-xs text-rose-700 hover:text-rose-800 font-medium flex items-center gap-1 cursor-pointer">
         <Plus className="w-3 h-3" /> Add Experience
       </button>
 
       <div className="flex items-center gap-2 pt-1">
         <button
           onClick={() => { onSave(draft.filter((e) => e.title.trim())); setEditing(false); }}
-          className="px-3 py-1 rounded-lg bg-sky-500 text-slate-950 text-xs font-semibold hover:bg-sky-400 flex items-center gap-1"
+          className="px-3 py-1 rounded bg-rose-700 text-white text-xs font-semibold hover:bg-rose-800 flex items-center gap-1 cursor-pointer"
         >
           <Check className="w-3 h-3" /> Save
         </button>
         <button
           onClick={() => setEditing(false)}
-          className="px-3 py-1 rounded-lg border border-slate-700 text-slate-400 text-xs hover:text-slate-200 flex items-center gap-1"
+          className="px-3 py-1 rounded border border-slate-300 text-slate-600 text-xs hover:text-slate-900 flex items-center gap-1 cursor-pointer"
         >
           <X className="w-3 h-3" /> Cancel
         </button>
@@ -423,13 +423,13 @@ function EducationSection({
     return (
       <div className="group space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 font-semibold">
-            <GraduationCap className="w-3.5 h-3.5" />
+          <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-bold">
+            <GraduationCap className="w-3.5 h-3.5 text-slate-600" />
             <span>Education</span>
           </h4>
           <button
             onClick={() => { setDraft(items); setEditing(true); }}
-            className="p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-400 transition-all"
+            className="p-1 rounded opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-700 transition-all cursor-pointer"
           >
             <Pencil className="w-3 h-3" />
           </button>
@@ -438,13 +438,13 @@ function EducationSection({
         {items.length > 0 ? (
           <div className="space-y-3">
             {items.map((edu, i) => (
-              <div key={i} className="flex gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-5 h-5 text-emerald-400" />
+              <div key={i} className="flex gap-3 p-3 rounded bg-slate-50 border border-slate-200">
+                <div className="w-10 h-10 rounded bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                  <GraduationCap className="w-5 h-5 text-slate-700" />
                 </div>
                 <div>
-                  <h5 className="text-sm font-semibold text-slate-100">{edu.institution || "Institution"}</h5>
-                  <p className="text-xs text-slate-400">{edu.degree} in {edu.field}</p>
+                  <h5 className="text-sm font-semibold text-slate-900">{edu.institution || "Institution"}</h5>
+                  <p className="text-xs text-slate-600">{edu.degree} in {edu.field}</p>
                   <p className="text-[11px] text-slate-500 font-mono">
                     {edu.startYear || "?"} – {edu.endYear || "?"}
                   </p>
@@ -453,7 +453,7 @@ function EducationSection({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-500 italic">No education listed yet. Click edit to add.</p>
+          <p className="text-xs text-slate-400 italic">No education listed yet. Click edit to add.</p>
         )}
       </div>
     );
@@ -461,16 +461,16 @@ function EducationSection({
 
   return (
     <div className="space-y-3">
-      <h4 className="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 font-semibold">
-        <GraduationCap className="w-3.5 h-3.5" />
+      <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-bold">
+        <GraduationCap className="w-3.5 h-3.5 text-slate-600" />
         <span>Education</span>
       </h4>
 
       {draft.map((edu, idx) => (
-        <div key={idx} className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 relative">
+        <div key={idx} className="p-3 rounded bg-slate-50 border border-slate-200 space-y-2 relative">
           <button
             onClick={() => removeItem(idx)}
-            className="absolute top-2 right-2 text-slate-500 hover:text-rose-400 p-1"
+            className="absolute top-2 right-2 text-slate-400 hover:text-rose-700 p-1 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -479,7 +479,7 @@ function EducationSection({
             placeholder="Institution (e.g., Massachusetts Institute of Technology)"
             value={edu.institution}
             onChange={(e) => updateItem(idx, "institution", e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
           />
           <div className="flex gap-2">
             <input
@@ -487,14 +487,14 @@ function EducationSection({
               placeholder="Degree (e.g., PhD)"
               value={edu.degree}
               onChange={(e) => updateItem(idx, "degree", e.target.value)}
-              className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-1/2 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
             <input
               type="text"
               placeholder="Field (e.g., Quantum Physics)"
               value={edu.field}
               onChange={(e) => updateItem(idx, "field", e.target.value)}
-              className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-1/2 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
           </div>
           <div className="flex gap-2">
@@ -503,33 +503,33 @@ function EducationSection({
               placeholder="Start Year"
               value={edu.startYear || ""}
               onChange={(e) => updateItem(idx, "startYear", parseInt(e.target.value) || 0)}
-              className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-1/2 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
             <input
               type="number"
               placeholder="End Year"
               value={edu.endYear || ""}
               onChange={(e) => updateItem(idx, "endYear", parseInt(e.target.value) || 0)}
-              className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-1/2 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
           </div>
         </div>
       ))}
 
-      <button onClick={addItem} className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1">
+      <button onClick={addItem} className="text-xs text-rose-700 hover:text-rose-800 font-medium flex items-center gap-1 cursor-pointer">
         <Plus className="w-3 h-3" /> Add Education
       </button>
 
       <div className="flex items-center gap-2 pt-1">
         <button
           onClick={() => { onSave(draft.filter((e) => e.institution.trim())); setEditing(false); }}
-          className="px-3 py-1 rounded-lg bg-sky-500 text-slate-950 text-xs font-semibold hover:bg-sky-400 flex items-center gap-1"
+          className="px-3 py-1 rounded bg-rose-700 text-white text-xs font-semibold hover:bg-rose-800 flex items-center gap-1 cursor-pointer"
         >
           <Check className="w-3 h-3" /> Save
         </button>
         <button
           onClick={() => setEditing(false)}
-          className="px-3 py-1 rounded-lg border border-slate-700 text-slate-400 text-xs hover:text-slate-200 flex items-center gap-1"
+          className="px-3 py-1 rounded border border-slate-300 text-slate-600 text-xs hover:text-slate-900 flex items-center gap-1 cursor-pointer"
         >
           <X className="w-3 h-3" /> Cancel
         </button>
@@ -762,9 +762,9 @@ function CreatorDashboardContent() {
   /* ─── Loading State ─── */
   if (loading) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <div className="cosmic-card p-8 rounded-2xl flex items-center gap-3 text-slate-400 font-mono text-sm">
-          <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+      <div className="min-h-[70vh] flex items-center justify-center bg-slate-50">
+        <div className="academic-card p-8 rounded bg-white border border-slate-200 shadow-2xs flex items-center gap-3 text-slate-700 font-mono text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-rose-700" />
           <span>Loading your researcher profile...</span>
         </div>
       </div>
@@ -773,17 +773,18 @@ function CreatorDashboardContent() {
 
   if (!profile) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <div className="cosmic-card p-8 rounded-2xl text-center space-y-4 max-w-md">
-          <Sparkles className="w-8 h-8 text-sky-400 mx-auto animate-pulse" />
-          <h3 className="text-base font-bold text-slate-100">Welcome to Creator Studio</h3>
-          <p className="text-xs text-slate-400">
+      <div className="min-h-[70vh] flex items-center justify-center bg-slate-50">
+        <div className="academic-card p-8 rounded bg-white border border-slate-200 shadow-2xs text-center space-y-4 max-w-md">
+          <Sparkles className="w-8 h-8 text-rose-700 mx-auto" />
+          <h3 className="font-serif text-lg font-bold text-slate-900">Welcome to Researcher Studio</h3>
+          <p className="text-xs text-slate-600">
             Your authenticated session is active. Click below to load your researcher profile.
           </p>
           <Button
             size="sm"
+            variant="primary"
             onClick={() => window.location.reload()}
-            className="w-full"
+            className="w-full font-semibold"
           >
             Load Profile
           </Button>
@@ -799,18 +800,13 @@ function CreatorDashboardContent() {
     <div className="max-w-5xl mx-auto pb-20 space-y-0">
 
       {/* ══════ PROFILE BANNER ══════ */}
-      <div className="relative h-48 sm:h-56 rounded-b-2xl overflow-hidden bg-gradient-to-r from-slate-900 via-sky-950/50 to-indigo-950/40 border-b border-slate-800">
-        {profile.banner_url ? (
+      <div className="relative h-44 sm:h-52 rounded-b-md overflow-hidden bg-slate-900 border-b border-slate-200">
+        {profile.banner_url && (
           <img src={profile.banner_url} alt="Banner" className="w-full h-full object-cover opacity-60" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-900/30 via-slate-950 to-indigo-900/20">
-            <div className="absolute top-6 right-8 w-40 h-40 bg-sky-500/10 blur-[80px] rounded-full" />
-            <div className="absolute bottom-4 left-12 w-32 h-32 bg-indigo-500/10 blur-[60px] rounded-full" />
-          </div>
         )}
         {/* Banner edit hint */}
         <div className="absolute bottom-3 right-4 opacity-0 hover:opacity-100 transition-opacity">
-          <span className="text-[10px] font-mono text-slate-400 bg-slate-950/70 px-2 py-1 rounded flex items-center gap-1">
+          <span className="text-[10px] font-mono text-slate-300 bg-slate-900/80 px-2 py-1 rounded flex items-center gap-1">
             <Camera className="w-3 h-3" /> Edit banner
           </span>
         </div>
@@ -818,22 +814,22 @@ function CreatorDashboardContent() {
 
       {/* ══════ PROFILE HEADER CARD ══════ */}
       <div className="px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20 relative z-10">
-        <div className="cosmic-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-5">
+        <div className="academic-card rounded-md p-5 sm:p-6 bg-white border border-slate-200 space-y-5 shadow-xs">
           {/* Avatar + Core Info Row */}
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
             {/* Avatar */}
             <div className="relative group shrink-0">
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl border-4 border-slate-900 bg-slate-800 overflow-hidden shadow-xl">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white bg-slate-100 overflow-hidden shadow-sm">
                 {profile.avatar_url ? (
                   <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-sky-600 to-indigo-700 text-3xl font-extrabold text-white font-mono">
+                  <div className="w-full h-full flex items-center justify-center bg-slate-900 text-3xl font-bold text-white font-serif">
                     {profile.display_name.slice(0, 2).toUpperCase()}
                   </div>
                 )}
               </div>
-              <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
-                <Check className="w-3 h-3 text-slate-950" />
+              <span className="absolute bottom-0 right-1 w-6 h-6 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
+                <Check className="w-3 h-3 text-white" />
               </span>
             </div>
 
@@ -847,22 +843,22 @@ function CreatorDashboardContent() {
                       type="text"
                       value={fieldDraft}
                       onChange={(e) => setFieldDraft(e.target.value)}
-                      className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-lg font-bold text-slate-100 focus:outline-none focus:border-sky-500"
+                      className="bg-white border border-slate-300 rounded px-2.5 py-1 text-lg font-bold text-slate-900 focus:outline-none focus:border-slate-500 font-serif"
                       autoFocus
                     />
-                    <button onClick={() => saveInlineField("display_name")} className="text-sky-400 hover:text-sky-300"><Check className="w-4 h-4" /></button>
-                    <button onClick={() => setEditingField(null)} className="text-slate-500 hover:text-slate-300"><X className="w-4 h-4" /></button>
+                    <button onClick={() => saveInlineField("display_name")} className="text-emerald-600 hover:text-emerald-700 cursor-pointer"><Check className="w-4 h-4" /></button>
+                    <button onClick={() => setEditingField(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-4 h-4" /></button>
                   </div>
                 ) : (
                   <h1
-                    className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight cursor-pointer hover:text-sky-300 transition-colors"
+                    className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight cursor-pointer hover:text-rose-700 transition-colors"
                     onClick={() => { setFieldDraft(profile.display_name); setEditingField("display_name"); }}
                     title="Click to edit name"
                   >
                     {profile.display_name}
                   </h1>
                 )}
-                <Badge variant="accent" className="font-mono text-[10px]">{profile.role}</Badge>
+                <Badge variant="navy" className="text-[10px] uppercase font-bold">{profile.role}</Badge>
               </div>
 
               {/* Headline (editable inline) */}
@@ -873,19 +869,19 @@ function CreatorDashboardContent() {
                     value={fieldDraft}
                     onChange={(e) => setFieldDraft(e.target.value)}
                     placeholder="e.g., Postdoctoral Fellow in Quantum Information Science"
-                    className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                    className="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500"
                     autoFocus
                   />
-                  <button onClick={() => saveInlineField("headline")} className="text-sky-400 hover:text-sky-300"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => setEditingField(null)} className="text-slate-500 hover:text-slate-300"><X className="w-4 h-4" /></button>
+                  <button onClick={() => saveInlineField("headline")} className="text-emerald-600 hover:text-emerald-700 cursor-pointer"><Check className="w-4 h-4" /></button>
+                  <button onClick={() => setEditingField(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-4 h-4" /></button>
                 </div>
               ) : (
                 <p
-                  className="text-sm text-slate-300 cursor-pointer hover:text-sky-300 transition-colors"
+                  className="text-sm text-slate-700 cursor-pointer hover:text-rose-700 transition-colors font-medium"
                   onClick={() => { setFieldDraft(profile.headline || ""); setEditingField("headline"); }}
                   title="Click to edit headline"
                 >
-                  {profile.headline || <span className="text-slate-500 italic">Add a professional headline...</span>}
+                  {profile.headline || <span className="text-slate-400 italic font-normal">Add a professional academic headline...</span>}
                 </p>
               )}
 
@@ -957,30 +953,26 @@ function CreatorDashboardContent() {
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-xs text-slate-400 leading-relaxed font-sans max-w-2xl">{profile.bio}</p>
+            <p className="text-xs text-slate-600 leading-relaxed font-sans max-w-2xl">{profile.bio}</p>
           )}
 
-          {/* Social Stats Bar */}
-          <div className="flex flex-wrap items-center gap-6 pt-3 border-t border-slate-800/80 text-xs font-mono">
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <Users className="w-4 h-4 text-sky-400" />
-              <strong className="text-slate-100">{(profile.followers_count || 0).toLocaleString()}</strong> Followers
+          {/* Academic Stats Bar */}
+          <div className="flex flex-wrap items-center gap-6 pt-3 border-t border-slate-100 text-xs font-sans">
+            <span className="flex items-center gap-1.5 text-slate-600">
+              <Users className="w-4 h-4 text-slate-500" />
+              <strong className="text-slate-900 font-mono">{(profile.followers_count || 0).toLocaleString()}</strong> Citations / Followers
             </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <UserCheck className="w-4 h-4 text-indigo-400" />
-              <strong className="text-slate-100">{(profile.following_count || 0).toLocaleString()}</strong> Following
+            <span className="flex items-center gap-1.5 text-slate-600">
+              <FileText className="w-4 h-4 text-rose-700" />
+              <strong className="text-slate-900 font-mono">{publishedCount}</strong> Published Manuscripts
             </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <FileText className="w-4 h-4 text-emerald-400" />
-              <strong className="text-slate-100">{publishedCount}</strong> Publications
+            <span className="flex items-center gap-1.5 text-slate-600">
+              <Eye className="w-4 h-4 text-slate-500" />
+              <strong className="text-slate-900 font-mono">{totalViews.toLocaleString()}</strong> Article Reads
             </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <Eye className="w-4 h-4 text-slate-400" />
-              <strong className="text-slate-100">{totalViews.toLocaleString()}</strong> Views
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <Heart className="w-4 h-4 text-rose-400" />
-              <strong className="text-slate-100">{totalLikes.toLocaleString()}</strong> Likes
+            <span className="flex items-center gap-1.5 text-slate-600">
+              <Heart className="w-4 h-4 text-rose-600" />
+              <strong className="text-slate-900 font-mono">{totalLikes.toLocaleString()}</strong> Peer Endorsements
             </span>
           </div>
         </div>
@@ -988,15 +980,15 @@ function CreatorDashboardContent() {
 
       {/* ══════ TOAST MESSAGES ══════ */}
       {errorMessage && (
-        <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+        <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 p-3 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
-          <button onClick={() => setErrorMessage(null)} className="ml-auto"><X className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setErrorMessage(null)} className="ml-auto cursor-pointer"><X className="w-3.5 h-3.5" /></button>
         </div>
       )}
       {successMessage && (
-        <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
-          <Check className="w-4 h-4 shrink-0" />
+        <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 p-3 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+          <Check className="w-4 h-4 shrink-0 text-emerald-600" />
           <span>{successMessage}</span>
         </div>
       )}
@@ -1005,26 +997,26 @@ function CreatorDashboardContent() {
       <div className="px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
 
         {/* ─── Navigation Tabs ─── */}
-        <div className="flex items-center gap-1 border-b border-slate-800 overflow-x-auto">
+        <div className="flex items-center gap-1 border-b border-slate-200 overflow-x-auto">
           {([
-            { id: "publications" as const, label: "Publications", icon: FileText, count: publications.length },
-            { id: "liked" as const, label: "Liked Papers", icon: Heart, count: likedPubIds.length },
-            { id: "saved" as const, label: "Saved / Library", icon: Bookmark, count: savedPubIds.length },
-            { id: "about" as const, label: "About & Profile", icon: BookOpen },
+            { id: "publications" as const, label: "My Manuscripts", icon: FileText, count: publications.length },
+            { id: "liked" as const, label: "Endorsed Research", icon: Heart, count: likedPubIds.length },
+            { id: "saved" as const, label: "Reading Library", icon: Bookmark, count: savedPubIds.length },
+            { id: "about" as const, label: "Faculty Profile", icon: BookOpen },
           ]).map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-mono whitespace-nowrap border-b-2 transition-all ${
+              className={`flex items-center gap-2 px-4 py-3 text-xs whitespace-nowrap border-b-2 transition-all cursor-pointer font-sans ${
                 activeTab === tab.id
-                  ? "border-sky-400 text-sky-400 font-bold"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  ? "border-rose-700 text-rose-800 font-bold"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
               }`}
             >
               <tab.icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded-full text-slate-300 font-mono">{tab.count}</span>
+                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono border border-slate-200">{tab.count}</span>
               )}
             </button>
           ))}
@@ -1036,18 +1028,18 @@ function CreatorDashboardContent() {
             {/* Metrics Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: "Total Papers", value: publications.length, sub: `${draftCount} drafts`, icon: FileText, color: "text-sky-400" },
-                { label: "Total Views", value: totalViews, sub: "Across all papers", icon: Eye, color: "text-indigo-400" },
-                { label: "Likes Received", value: totalLikes, sub: "Community appreciation", icon: Heart, color: "text-rose-400" },
-                { label: "Downloads", value: totalDownloads, sub: "PDF accesses", icon: Download, color: "text-emerald-400" },
+                { label: "Total Manuscripts", value: publications.length, sub: `${draftCount} drafts`, icon: FileText, color: "text-rose-700" },
+                { label: "Article Reads", value: totalViews, sub: "Institutional views", icon: Eye, color: "text-slate-700" },
+                { label: "Peer Endorsements", value: totalLikes, sub: "Community citations", icon: Heart, color: "text-rose-700" },
+                { label: "PDF Downloads", value: totalDownloads, sub: "Direct paper accesses", icon: Download, color: "text-slate-700" },
               ].map((m) => (
-                <div key={m.label} className="cosmic-card p-4 rounded-xl">
-                  <div className="flex items-center justify-between text-slate-400 mb-1.5">
-                    <span className="text-[11px] font-mono">{m.label}</span>
+                <div key={m.label} className="academic-card p-4 rounded bg-white border border-slate-200 shadow-2xs">
+                  <div className="flex items-center justify-between text-slate-500 mb-1.5">
+                    <span className="text-[11px] font-mono uppercase tracking-wider">{m.label}</span>
                     <m.icon className={`w-4 h-4 ${m.color}`} />
                   </div>
-                  <div className="text-xl font-bold text-slate-100 font-mono">{m.value.toLocaleString()}</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">{m.sub}</div>
+                  <div className="text-xl font-bold text-slate-900 font-serif">{m.value.toLocaleString()}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-sans">{m.sub}</div>
                 </div>
               ))}
             </div>
@@ -1060,8 +1052,8 @@ function CreatorDashboardContent() {
                   <button
                     key={f}
                     onClick={() => setPubFilter(f)}
-                    className={`px-3 py-1.5 rounded-lg transition-colors ${
-                      pubFilter === f ? "bg-slate-800 text-sky-400 font-semibold" : "text-slate-400 hover:text-white"
+                    className={`px-3 py-1.5 rounded transition-colors cursor-pointer ${
+                      pubFilter === f ? "bg-slate-900 text-white font-semibold" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     }`}
                   >
                     {f.charAt(0).toUpperCase() + f.slice(1)} ({cnt})
@@ -1072,26 +1064,26 @@ function CreatorDashboardContent() {
 
             {/* Publication List */}
             {filteredPubs.length > 0 ? (
-              <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-900/40">
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded overflow-hidden bg-white shadow-2xs">
                 {filteredPubs.map((pub) => (
                   <div
                     key={pub.id}
-                    className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-900/70 transition-colors"
+                    className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition-colors"
                   >
                     <div className="space-y-1.5 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant={pub.status === "PUBLISHED" ? "success" : "warning"}>{pub.status}</Badge>
                         <span className="text-[11px] text-slate-500 font-mono">{pub.category?.name || "General"} • {pub.publication_type}</span>
                       </div>
-                      <h3 className="text-sm font-semibold text-slate-100 truncate">{pub.title}</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 truncate font-serif">{pub.title}</h3>
                       <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
                         <span>{formatDate(pub.created_at)}</span>
                         {pub.status === "PUBLISHED" && (
                           <>
                             <span>•</span>
-                            <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{pub.views_count}</span>
-                            <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{pub.likes_count}</span>
-                            <span className="flex items-center gap-1"><Download className="w-3 h-3" />{pub.downloads_count}</span>
+                            <span className="flex items-center gap-1"><Eye className="w-3 h-3 text-slate-400" />{pub.views_count}</span>
+                            <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-rose-600" />{pub.likes_count}</span>
+                            <span className="flex items-center gap-1"><Download className="w-3 h-3 text-slate-400" />{pub.downloads_count}</span>
                           </>
                         )}
                       </div>
@@ -1109,13 +1101,13 @@ function CreatorDashboardContent() {
                           </Button>
                         </Link>
                       ) : (
-                        <span className="text-[11px] text-amber-400 font-mono px-2.5 py-1 rounded bg-amber-950/40 border border-amber-500/20">Draft</span>
+                        <span className="text-[11px] text-amber-700 font-mono px-2.5 py-1 rounded bg-amber-50 border border-amber-200">Draft</span>
                       )}
                       <button
                         type="button"
                         onClick={() => handleDeletePublication(pub.id, pub.title)}
                         title="Delete"
-                        className="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                        className="p-2 rounded text-slate-400 hover:text-rose-700 hover:bg-slate-100 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1124,13 +1116,13 @@ function CreatorDashboardContent() {
                 ))}
               </div>
             ) : (
-              <div className="cosmic-card rounded-2xl p-12 text-center border border-dashed border-slate-800">
-                <FileText className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-slate-200 mb-1">No manuscripts found</h3>
-                <p className="text-xs text-slate-400 mb-4">You haven&apos;t created any publications or drafts yet.</p>
+              <div className="academic-card rounded p-12 text-center border border-dashed border-slate-200 bg-white">
+                <FileText className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+                <h3 className="font-serif text-base font-semibold text-slate-900 mb-1">No manuscripts found</h3>
+                <p className="text-xs text-slate-500 mb-4 font-sans">You haven&apos;t created any publications or drafts yet.</p>
                 <Link href="/creator/publications/new">
                   <Button variant="primary" size="sm" className="inline-flex items-center gap-2 font-semibold">
-                    <Plus className="w-4 h-4" /> Create your first publication
+                    <Plus className="w-4 h-4" /> Submit your first manuscript
                   </Button>
                 </Link>
               </div>
@@ -1140,17 +1132,17 @@ function CreatorDashboardContent() {
 
         {/* ═══ TAB: Liked Papers ═══ */}
         {activeTab === "liked" && (
-          <div className="cosmic-card rounded-2xl p-8 sm:p-12 text-center border border-slate-800 space-y-3">
-            <Heart className="w-10 h-10 text-rose-400/50 mx-auto" />
-            <h3 className="text-lg font-bold text-slate-200">Papers You&apos;ve Liked</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          <div className="academic-card rounded p-8 sm:p-12 text-center border border-slate-200 bg-white space-y-3 shadow-2xs">
+            <Heart className="w-10 h-10 text-rose-600 mx-auto" />
+            <h3 className="font-serif text-lg font-bold text-slate-900">Endorsed Manuscripts</h3>
+            <p className="text-xs text-slate-600 max-w-sm mx-auto font-sans leading-relaxed">
               {likedPubIds.length > 0
-                ? `You have liked ${likedPubIds.length} publication${likedPubIds.length > 1 ? "s" : ""}. Browse the feed to discover and like more research.`
-                : "Like papers from the feed or publications page and they will appear here for quick access."}
+                ? `You have endorsed ${likedPubIds.length} publication${likedPubIds.length > 1 ? "s" : ""}. Browse the archive to discover and endorse more scholarly research.`
+                : "Endorse papers from the journal feed or archive and they will appear here for rapid academic reference."}
             </p>
             <Link href="/publications">
               <Button variant="outline" size="sm" className="flex items-center gap-2 mx-auto mt-2">
-                <TrendingUp className="w-4 h-4" /> Browse Publications
+                <TrendingUp className="w-4 h-4" /> Browse Archive
               </Button>
             </Link>
           </div>
@@ -1158,17 +1150,17 @@ function CreatorDashboardContent() {
 
         {/* ═══ TAB: Saved / Library ═══ */}
         {activeTab === "saved" && (
-          <div className="cosmic-card rounded-2xl p-8 sm:p-12 text-center border border-slate-800 space-y-3">
-            <Bookmark className="w-10 h-10 text-amber-400/50 mx-auto" />
-            <h3 className="text-lg font-bold text-slate-200">Your Reading Library</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          <div className="academic-card rounded p-8 sm:p-12 text-center border border-slate-200 bg-white space-y-3 shadow-2xs">
+            <Bookmark className="w-10 h-10 text-amber-600 mx-auto" />
+            <h3 className="font-serif text-lg font-bold text-slate-900">Your Scholarly Library</h3>
+            <p className="text-xs text-slate-600 max-w-sm mx-auto font-sans leading-relaxed">
               {savedPubIds.length > 0
-                ? `You have saved ${savedPubIds.length} paper${savedPubIds.length > 1 ? "s" : ""} to your personal reading library.`
-                : "Bookmark papers from the feed to build your personal scientific reading library."}
+                ? `You have bookmarked ${savedPubIds.length} paper${savedPubIds.length > 1 ? "s" : ""} to your personal research library.`
+                : "Bookmark publications from the journal feed to assemble your personal scientific reference collection."}
             </p>
             <Link href="/">
               <Button variant="outline" size="sm" className="flex items-center gap-2 mx-auto mt-2">
-                <Star className="w-4 h-4" /> Explore Feed
+                <Star className="w-4 h-4" /> Explore Journal Feed
               </Button>
             </Link>
           </div>
@@ -1180,9 +1172,9 @@ function CreatorDashboardContent() {
             {/* Left Column: Main Content (8 cols) */}
             <div className="lg:col-span-8 space-y-6">
               {/* About / Description */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800 space-y-3">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-sky-400 font-semibold flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5" />
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 space-y-3 shadow-2xs">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-800 font-bold flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-rose-700" />
                   <span>About</span>
                 </h3>
                 <InlineTextArea
@@ -1194,7 +1186,7 @@ function CreatorDashboardContent() {
               </div>
 
               {/* Experience */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800">
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 shadow-2xs">
                 <ExperienceSection
                   items={profile.experience || []}
                   onSave={(items) => saveProfileField("experience", items)}
@@ -1202,7 +1194,7 @@ function CreatorDashboardContent() {
               </div>
 
               {/* Education */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800">
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 shadow-2xs">
                 <EducationSection
                   items={profile.education || []}
                   onSave={(items) => saveProfileField("education", items)}
@@ -1210,23 +1202,23 @@ function CreatorDashboardContent() {
               </div>
 
               {/* Skills */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800">
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 shadow-2xs">
                 <EditableTagList
                   tags={profile.skills || []}
                   label="Skills & Expertise"
                   icon={Sparkles}
-                  color="text-amber-400"
+                  color="text-amber-600"
                   onSave={(tags) => saveProfileField("skills", tags)}
                 />
               </div>
 
               {/* Interests */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800">
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 shadow-2xs">
                 <EditableTagList
                   tags={profile.interests || []}
                   label="Research Interests"
                   icon={Star}
-                  color="text-indigo-400"
+                  color="text-rose-700"
                   onSave={(tags) => saveProfileField("interests", tags)}
                 />
               </div>
@@ -1235,8 +1227,8 @@ function CreatorDashboardContent() {
             {/* Right Column: Quick Edit Sidebar (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
               {/* Quick Profile Fields */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800 space-y-4">
-                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold">Profile Details</h4>
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 space-y-4 shadow-2xs">
+                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 font-bold">Profile Details</h4>
 
                 {([
                   { key: "display_name", label: "Display Name", icon: Users, value: profile.display_name },
@@ -1248,8 +1240,8 @@ function CreatorDashboardContent() {
                   { key: "website", label: "Website", icon: Globe, value: profile.website || "" },
                 ] as const).map((field) => (
                   <div key={field.key} className="space-y-1">
-                    <label className="text-[11px] font-mono text-slate-500 flex items-center gap-1">
-                      <field.icon className="w-3 h-3" />
+                    <label className="text-[11px] font-mono text-slate-600 flex items-center gap-1 font-medium">
+                      <field.icon className="w-3 h-3 text-slate-400" />
                       {field.label}
                     </label>
                     {editingField === `sidebar_${field.key}` ? (
@@ -1258,71 +1250,71 @@ function CreatorDashboardContent() {
                           type="text"
                           value={fieldDraft}
                           onChange={(e) => setFieldDraft(e.target.value)}
-                          className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+                          className="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-sans"
                           autoFocus
                           onKeyDown={(e) => { if (e.key === "Enter") { saveProfileField(field.key, fieldDraft); setEditingField(null); } }}
                         />
-                        <button onClick={() => { saveProfileField(field.key, fieldDraft); setEditingField(null); }} className="text-sky-400 hover:text-sky-300"><Check className="w-4 h-4" /></button>
-                        <button onClick={() => setEditingField(null)} className="text-slate-500"><X className="w-4 h-4" /></button>
+                        <button onClick={() => { saveProfileField(field.key, fieldDraft); setEditingField(null); }} className="text-rose-700 hover:text-rose-800 cursor-pointer"><Check className="w-4 h-4" /></button>
+                        <button onClick={() => setEditingField(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-4 h-4" /></button>
                       </div>
                     ) : (
                       <div
-                        className="text-xs text-slate-300 bg-slate-950/40 rounded-lg px-2.5 py-1.5 border border-slate-800/60 cursor-pointer hover:border-sky-500/40 transition-colors min-h-[28px] flex items-center"
+                        className="text-xs text-slate-800 bg-slate-50 rounded px-2.5 py-1.5 border border-slate-200 cursor-pointer hover:border-slate-400 transition-colors min-h-[28px] flex items-center"
                         onClick={() => { setFieldDraft(field.value); setEditingField(`sidebar_${field.key}`); }}
                       >
-                        {field.value || <span className="text-slate-500 italic">Click to add...</span>}
+                        {field.value || <span className="text-slate-400 italic font-sans">Click to add...</span>}
                       </div>
                     )}
                   </div>
                 ))}
 
                 {/* ORCID Academic Verification Widget */}
-                <div className="pt-3 border-t border-slate-800/80 space-y-2">
+                <div className="pt-3 border-t border-slate-100 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 font-semibold">
+                    <label className="text-[11px] font-mono text-slate-700 flex items-center gap-1.5 font-bold">
                       <div className="w-4 h-4 rounded bg-[#A6CE39] text-slate-950 font-bold text-[9px] flex items-center justify-center">
                         iD
                       </div>
                       <span>ORCID Identity</span>
                     </label>
                     {profile.orcid ? (
-                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium">
                         OAuth Verified
                       </span>
                     ) : (
-                      <span className="text-[10px] font-mono text-amber-400 bg-amber-950/40 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-mono text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-medium">
                         Unlinked
                       </span>
                     )}
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-2">
+                  <div className="p-3 rounded bg-slate-50 border border-slate-200 text-xs space-y-2">
                     {profile.orcid ? (
                       <div>
-                        <div className="font-mono text-slate-200 text-xs">
+                        <div className="font-mono text-slate-900 text-xs font-semibold">
                           {profile.orcid}
                         </div>
                         <a
                           href={`https://orcid.org/${profile.orcid}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] text-sky-400 hover:underline flex items-center gap-1 mt-0.5"
+                          className="text-[11px] text-rose-700 hover:underline flex items-center gap-1 mt-0.5 font-sans"
                         >
-                          <span>View on orcid.org</span>
+                          <span>View record on orcid.org</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
                     ) : (
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
                         Connect your authenticated ORCID iD to claim publication credits and verify your researcher identity.
                       </p>
                     )}
 
                     <Link
                       href="/auth/orcid?mode=link&next=/creator/dashboard"
-                      className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-lg text-xs font-mono font-medium transition-colors bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-500/30"
+                      className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded text-xs font-mono font-medium transition-colors bg-white hover:bg-slate-100 text-emerald-800 border border-emerald-300 shadow-2xs"
                     >
-                      <Award className="w-3.5 h-3.5" />
+                      <Award className="w-3.5 h-3.5 text-emerald-700" />
                       <span>{profile.orcid ? "Re-authorize ORCID" : "Link ORCID iD"}</span>
                     </Link>
                   </div>
@@ -1330,10 +1322,10 @@ function CreatorDashboardContent() {
               </div>
 
               {/* Social Links */}
-              <div className="cosmic-card p-5 rounded-2xl border border-slate-800 space-y-3">
-                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
-                  <LinkIcon className="w-3.5 h-3.5" />
-                  <span>Social Links</span>
+              <div className="academic-card p-5 rounded bg-white border border-slate-200 space-y-3 shadow-2xs">
+                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-800 font-bold flex items-center gap-1.5">
+                  <LinkIcon className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Scholarly & Social Profiles</span>
                 </h4>
 
                 {([
@@ -1348,7 +1340,7 @@ function CreatorDashboardContent() {
 
                   return (
                     <div key={link.key} className="space-y-1">
-                      <label className="text-[10px] font-mono text-slate-500">{link.label}</label>
+                      <label className="text-[10px] font-mono text-slate-600">{link.label}</label>
                       {editingField === `social_${link.key}` ? (
                         <div className="flex items-center gap-1.5">
                           <input
@@ -1356,7 +1348,7 @@ function CreatorDashboardContent() {
                             value={fieldDraft}
                             onChange={(e) => setFieldDraft(e.target.value)}
                             placeholder={`https://${link.key}.com/...`}
-                            className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+                            className="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-sans"
                             autoFocus
                           />
                           <button
@@ -1365,18 +1357,18 @@ function CreatorDashboardContent() {
                               saveProfileField("social_links", updated);
                               setEditingField(null);
                             }}
-                            className="text-sky-400 hover:text-sky-300"
+                            className="text-rose-700 hover:text-rose-800 cursor-pointer"
                           >
                             <Check className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setEditingField(null)} className="text-slate-500"><X className="w-4 h-4" /></button>
+                          <button onClick={() => setEditingField(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-4 h-4" /></button>
                         </div>
                       ) : (
                         <div
-                          className="text-xs text-slate-400 bg-slate-950/40 rounded-lg px-2.5 py-1.5 border border-slate-800/60 cursor-pointer hover:border-sky-500/40 transition-colors truncate"
+                          className="text-xs text-slate-700 bg-slate-50 rounded px-2.5 py-1.5 border border-slate-200 cursor-pointer hover:border-slate-400 transition-colors truncate"
                           onClick={() => { setFieldDraft(val); setEditingField(`social_${link.key}`); }}
                         >
-                          {val || <span className="text-slate-500 italic">Add link...</span>}
+                          {val || <span className="text-slate-400 italic">Add profile link...</span>}
                         </div>
                       )}
                     </div>
@@ -1385,15 +1377,15 @@ function CreatorDashboardContent() {
               </div>
 
               {/* Share Profile Card */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-sky-950/30 via-slate-900 to-indigo-950/20 border border-sky-500/20 space-y-2">
-                <div className="flex items-center gap-2 text-sky-400 text-xs font-mono font-semibold">
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Share Your Profile</span>
+              <div className="p-4 rounded bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center gap-2 text-slate-800 text-xs font-mono font-bold">
+                  <Share2 className="w-3.5 h-3.5 text-rose-700" />
+                  <span>Public Faculty Record</span>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Your public profile is visible at:
+                <p className="text-[11px] text-slate-600 font-sans">
+                  Your peer-reviewed publications and credentials are publicly discoverable at:
                 </p>
-                <code className="block text-[11px] text-sky-300 bg-slate-950/60 px-2 py-1 rounded font-mono truncate">
+                <code className="block text-[11px] text-slate-800 bg-white border border-slate-200 px-2.5 py-1.5 rounded font-mono truncate">
                   /contributors/{profile.username}
                 </code>
               </div>
@@ -1404,9 +1396,9 @@ function CreatorDashboardContent() {
 
       {/* Saving indicator */}
       {saving && (
-        <div className="fixed bottom-6 right-6 bg-slate-900 border border-sky-500/30 px-4 py-2 rounded-xl flex items-center gap-2 text-xs text-sky-400 font-mono shadow-lg z-50">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span>Saving...</span>
+        <div className="fixed bottom-6 right-6 bg-white border border-slate-300 px-4 py-2 rounded flex items-center gap-2 text-xs text-slate-800 font-mono shadow-md z-50">
+          <Loader2 className="w-4 h-4 animate-spin text-rose-700" />
+          <span>Saving updates...</span>
         </div>
       )}
     </div>
@@ -1417,9 +1409,9 @@ export default function CreatorDashboard() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-950">
-          <div className="cosmic-card p-8 rounded-2xl flex items-center gap-3 text-slate-400 font-mono text-sm">
-            <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="academic-card p-8 rounded bg-white border border-slate-200 shadow-2xs flex items-center gap-3 text-slate-700 font-mono text-sm">
+            <Loader2 className="w-5 h-5 animate-spin text-rose-700" />
             <span>Loading Researcher Studio...</span>
           </div>
         </div>
