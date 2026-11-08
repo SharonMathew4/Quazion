@@ -44,6 +44,8 @@ import {
   SocialLinks,
 } from "@/types";
 import { getSanitizedErrorMessage } from "@/lib/security-errors";
+import { showToast } from "@/components/ui/toast";
+import { reportClientError } from "@/lib/client-logger";
 
 /* ─────────────── Type Definitions ─────────────── */
 
@@ -661,6 +663,7 @@ function CreatorDashboardContent() {
           .order("created_at", { ascending: false });
 
         if (pubError) {
+          reportClientError("CreatorDashboard_PubFetch", pubError);
           setErrorMessage("Unable to load your publications at this time.");
         } else if (pubData) {
           interface RawDashboardItem extends Omit<CreatorPublication, "category"> {
@@ -691,6 +694,7 @@ function CreatorDashboardContent() {
           setSavedPubIds(savedData.map((s) => s.publication_id));
         }
       } catch (err: unknown) {
+        reportClientError("CreatorDashboard_Load", err);
         setErrorMessage(
           getSanitizedErrorMessage(err, "Failed to load creator dashboard data.")
         );
@@ -715,6 +719,7 @@ function CreatorDashboardContent() {
         .eq("id", userId);
 
       if (error) {
+        reportClientError("CreatorDashboard_UpdateProfileField", error, { field });
         setErrorMessage(
           getSanitizedErrorMessage(error, `Failed to update ${field}. Please verify input and try again.`)
         );
@@ -723,7 +728,8 @@ function CreatorDashboardContent() {
         setSuccessMessage("Profile updated!");
         setTimeout(() => setSuccessMessage(null), 2000);
       }
-    } catch {
+    } catch (err) {
+      reportClientError("CreatorDashboard_UpdateProfileField_Catch", err, { field });
       setErrorMessage("Unexpected error saving profile.");
     } finally {
       setSaving(false);
@@ -741,12 +747,19 @@ function CreatorDashboardContent() {
     try {
       const { error } = await supabase.from("publications").delete().eq("id", id);
       if (error) {
-        alert("Failed to delete manuscript. Please try again.");
+        reportClientError("CreatorDashboard_DeletePublication", error, { pubId: id });
+        showToast(
+          getSanitizedErrorMessage(error, "Failed to delete manuscript. Please try again."),
+          "error",
+          "Deletion Error"
+        );
       } else {
         setPublications((prev) => prev.filter((p) => p.id !== id));
+        showToast(`"${title}" has been permanently removed.`, "success", "Manuscript Deleted");
       }
-    } catch {
-      alert("An unexpected error occurred while deleting the publication.");
+    } catch (err) {
+      reportClientError("CreatorDashboard_DeletePublication_Catch", err, { pubId: id });
+      showToast("An unexpected error occurred while deleting the publication.", "error");
     }
   };
 

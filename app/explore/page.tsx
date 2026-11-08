@@ -5,6 +5,7 @@ import { MOCK_CATEGORIES, MOCK_PUBLICATIONS } from "@/lib/mock-data";
 import { ArrowRight, Compass, BookOpen } from "lucide-react";
 import { PublicationCard } from "@/components/publications/publication-card";
 import { Category, Publication } from "@/types";
+import { logServerWarn } from "@/lib/server-logger";
 
 export const dynamic = "force-dynamic";
 
@@ -154,7 +155,9 @@ export default async function ExplorePage() {
       });
     }
   } catch (err) {
-    console.warn("[SERVER] Notice: failed to load explore data from Supabase, using fallback:", err);
+    logServerWarn("ExplorePage_SupabaseLoad", "Failed to load explore data from Supabase, using fallback", {
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 
   // If local publications are empty, populate featured additions from arXiv

@@ -7,6 +7,9 @@ import { PublicationComment, Profile } from "@/types";
 import { MessageSquare, Send, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { reportClientError } from "@/lib/client-logger";
+import { showToast } from "@/components/ui/toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DiscussionCommentsProps {
   publicationId: string;
@@ -160,9 +163,14 @@ export function DiscussionComments({ publicationId }: DiscussionCommentsProps) {
         };
         setComments((prev) => [...prev, addedComment]);
         setNewComment("");
+        showToast("Observation contributed to discussion.", "success");
+      } else if (error) {
+        reportClientError("DiscussionComments_PostError", error, { publicationId });
+        showToast("Unable to post comment. Please try again.", "error");
       }
-    } catch {
-      // Keep errors server-side; do not expose internal exceptions to client console
+    } catch (err) {
+      reportClientError("DiscussionComments_PostCatch", err, { publicationId });
+      showToast("An unexpected error occurred while posting.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -180,9 +188,14 @@ export function DiscussionComments({ publicationId }: DiscussionCommentsProps) {
 
       if (!error) {
         setComments((prev) => prev.filter((c) => c.id !== id));
+        showToast("Comment deleted.", "info");
+      } else {
+        reportClientError("DiscussionComments_DeleteError", error, { id });
+        showToast("Unable to delete comment.", "error");
       }
-    } catch {
-      // Keep errors server-side; do not expose internal exceptions to client console
+    } catch (err) {
+      reportClientError("DiscussionComments_DeleteCatch", err, { id });
+      showToast("Unexpected error deleting comment.", "error");
     } finally {
       setDeletingId(null);
     }
@@ -257,12 +270,36 @@ export function DiscussionComments({ publicationId }: DiscussionCommentsProps) {
 
       {/* Comments List */}
       {loading ? (
-        <div className="flex items-center justify-center p-8 text-slate-400">
-          <Loader2 className="w-6 h-6 animate-spin" />
+        <div className="space-y-3">
+          <div className="p-4 rounded-md bg-white border border-slate-200 space-y-2">
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="w-7 h-7 rounded-full" />
+              <div className="space-y-1">
+                <Skeleton className="h-3.5 w-28 rounded-sm" />
+                <Skeleton className="h-2.5 w-16 rounded-sm" />
+              </div>
+            </div>
+            <Skeleton className="h-3 w-full rounded-sm pl-9" />
+            <Skeleton className="h-3 w-4/5 rounded-sm pl-9" />
+          </div>
+          <div className="p-4 rounded-md bg-white border border-slate-200 space-y-2">
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="w-7 h-7 rounded-full" />
+              <div className="space-y-1">
+                <Skeleton className="h-3.5 w-24 rounded-sm" />
+                <Skeleton className="h-2.5 w-16 rounded-sm" />
+              </div>
+            </div>
+            <Skeleton className="h-3 w-3/4 rounded-sm pl-9" />
+          </div>
         </div>
       ) : comments.length === 0 ? (
-        <div className="p-6 rounded-md border border-dashed border-slate-200 bg-white text-center text-xs text-slate-500">
-          No discussion comments posted yet.
+        <div className="p-8 rounded-md border border-dashed border-slate-200 bg-white text-center space-y-1.5 shadow-2xs">
+          <MessageSquare className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+          <h4 className="font-serif text-sm font-semibold text-slate-800">No peer inquiries or notes recorded yet</h4>
+          <p className="text-xs text-slate-500 font-sans max-w-sm mx-auto">
+            Be the first researcher to contribute a methodological inquiry, analytical critique, or replication observation.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">

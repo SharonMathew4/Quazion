@@ -100,10 +100,10 @@ export function PublicationCard({ publication }: PublicationCardProps) {
           className="flex items-center gap-2 hover:text-rose-700 transition-colors group/author"
         >
           <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-[10px] font-bold text-slate-700">
-            {publication.author.displayName.charAt(0)}
+            {(publication.author?.displayName || publication.author?.username || "R").charAt(0).toUpperCase()}
           </div>
           <span className="font-medium text-slate-800 group-hover/author:text-rose-700">
-            {publication.author.displayName}
+            {publication.author?.displayName || publication.author?.username || "Researcher"}
           </span>
           {publication.author.affiliation && (
             <span className="text-[11px] text-slate-500 hidden sm:inline">

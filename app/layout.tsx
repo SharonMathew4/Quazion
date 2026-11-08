@@ -4,6 +4,8 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { AuthHashScrubber } from "@/components/auth/auth-hash-scrubber";
+import { NetworkStatus } from "@/components/ui/network-status";
+import { ToastContainer } from "@/components/ui/toast";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
@@ -62,6 +64,8 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-rose-100 selection:text-rose-900 font-sans">
+        <NetworkStatus />
+        <ToastContainer />
         <AuthHashScrubber />
         <Navbar />
         <main className="flex-1 flex flex-col">{children}</main>

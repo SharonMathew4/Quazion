@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchArxivPublications } from "@/lib/arxiv";
+import { logServerError } from "@/lib/server-logger";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ publications });
   } catch (err: unknown) {
-    console.error("[SERVER_ARXIV] Failed to query arXiv API:", err);
+    logServerError("API_arxiv_route", err);
     return NextResponse.json(
       { error: "Unable to retrieve external publications at this time.", publications: [] },
       { status: 500 }

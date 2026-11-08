@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSanitizedErrorMessage } from "@/lib/security-errors";
+import { reportClientError } from "@/lib/client-logger";
 
 const PUBLICATION_TYPES: PublicationType[] = [
   "Research Paper",
@@ -71,6 +72,77 @@ export default function NewPublicationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitAction, setSubmitAction] = useState<"draft" | "publish" | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hasRestorableDraft, setHasRestorableDraft] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const backup = localStorage.getItem("quazion_new_draft_backup");
+      if (backup) {
+        const parsed = JSON.parse(backup);
+        return Boolean(parsed?.title || parsed?.abstract || parsed?.content);
+      }
+    } catch {
+      return false;
+    }
+    return false;
+  });
+
+  const restoreLocalDraft = () => {
+    try {
+      const backup = localStorage.getItem("quazion_new_draft_backup");
+      if (backup) {
+        const parsed = JSON.parse(backup);
+        if (parsed.title) setTitle(parsed.title);
+        if (parsed.slug) setSlug(parsed.slug);
+        if (parsed.publicationType) setPublicationType(parsed.publicationType);
+        if (parsed.categoryId) setCategoryId(parsed.categoryId);
+        if (parsed.abstract) setAbstract(parsed.abstract);
+        if (parsed.content) setContent(parsed.content);
+        if (parsed.tagsInput) setTagsInput(parsed.tagsInput);
+        if (parsed.keywordsInput) setKeywordsInput(parsed.keywordsInput);
+        if (parsed.references && Array.isArray(parsed.references)) setReferences(parsed.references);
+        if (parsed.documentUrl) setDocumentUrl(parsed.documentUrl);
+      }
+      setHasRestorableDraft(false);
+    } catch {
+      setHasRestorableDraft(false);
+    }
+  };
+
+  const discardLocalDraft = () => {
+    try {
+      localStorage.removeItem("quazion_new_draft_backup");
+    } catch {
+      // Ignore
+    }
+    setHasRestorableDraft(false);
+  };
+
+  // Auto-save draft every 4 seconds if changes are detected
+  useEffect(() => {
+    if (!title && !abstract && !content) return;
+    const timer = setTimeout(() => {
+      try {
+        const draftData = {
+          title,
+          slug,
+          publicationType,
+          categoryId,
+          abstract,
+          content,
+          tagsInput,
+          keywordsInput,
+          references,
+          documentUrl,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem("quazion_new_draft_backup", JSON.stringify(draftData));
+      } catch {
+        // Silently skip if quota exceeded
+      }
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [title, slug, publicationType, categoryId, abstract, content, tagsInput, keywordsInput, references, documentUrl]);
 
   // Verify auth session & load categories on mount
   useEffect(() => {
@@ -138,6 +210,7 @@ export default function NewPublicationPage() {
       setDocumentUrl(urlData.publicUrl);
       setUploadedFileName(file.name);
     } catch (err: unknown) {
+      reportClientError("NewPublication_UploadPDF", err);
       setErrorMessage(
         getSanitizedErrorMessage(
           err,
@@ -314,10 +387,18 @@ export default function NewPublicationPage() {
         await supabase.from("publication_references").insert(validRefs);
       }
 
+      // Clear local auto-save backup
+      try {
+        localStorage.removeItem("quazion_new_draft_backup");
+      } catch {
+        // Ignore
+      }
+
       // Redirect to creator dashboard
       router.push("/creator/dashboard");
       router.refresh();
     } catch (err: unknown) {
+      reportClientError("NewPublication_Save", err);
       setErrorMessage(
         getSanitizedErrorMessage(
           err,
@@ -425,6 +506,34 @@ export default function NewPublicationPage() {
           </Button>
         </div>
       </div>
+
+      {/* Restorable Draft Alert Banner */}
+      {hasRestorableDraft && (
+        <div className="p-4 rounded bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-3 shadow-2xs font-sans">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>Unsaved manuscript draft detected from a previous writing session.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={restoreLocalDraft}
+              className="text-xs h-7 px-2.5 bg-white border-amber-300 text-amber-900 hover:bg-amber-100/60"
+            >
+              Restore Draft
+            </Button>
+            <button
+              type="button"
+              onClick={discardLocalDraft}
+              className="text-amber-700 hover:text-amber-900 text-xs underline cursor-pointer"
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error Alert */}
       {errorMessage && (

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { PublicationCard } from "@/components/publications/publication-card";
-import { ArrowLeft, BookOpen, MapPin, Building, Globe, Award, ShieldCheck } from "lucide-react";
+import { ArrowLeft, BookOpen, MapPin, Building, Globe } from "lucide-react";
 import { Profile, Publication, Category } from "@/types";
 
 export const dynamic = "force-dynamic";

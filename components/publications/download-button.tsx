@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { reportClientError } from "@/lib/client-logger";
+import { showToast } from "@/components/ui/toast";
 
 interface DownloadButtonProps {
   publicationId?: string;
@@ -24,32 +26,39 @@ export function DownloadButton({
   const handleDownload = async () => {
     setDownloading(true);
 
-    // Record download telemetry in Supabase if publicationId is provided
-    if (publicationId) {
-      try {
-        await supabase.rpc("record_publication_download", {
-          p_pub_id: publicationId,
-        });
-      } catch {
-        // Fallback gracefully
+    try {
+      // Record download telemetry in Supabase if publicationId is provided
+      if (publicationId) {
+        try {
+          await supabase.rpc("record_publication_download", {
+            p_pub_id: publicationId,
+          });
+        } catch (rpcErr) {
+          reportClientError("DownloadButton_RecordRPC", rpcErr, { publicationId });
+        }
       }
+
+      setDownloads((prev) => prev + 1);
+      setDownloaded(true);
+
+      // Create a demonstration text/pdf download blob
+      const content = `QUAZION Open Scientific Archive\nTitle: ${title}\nPublished under Open Access (CC BY 4.0).\nTimestamp: ${new Date().toISOString()}\n\nPermanent Archive Handle: https://quazion.org`;
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast("Download initialized successfully.", "success");
+      setTimeout(() => setDownloaded(false), 3000);
+    } catch (err) {
+      reportClientError("DownloadButton_DownloadFailure", err, { publicationId, title });
+      showToast("Unable to prepare document download. Please try again.", "error");
+    } finally {
+      setDownloading(false);
     }
-
-    setDownloads((prev) => prev + 1);
-    setDownloading(false);
-    setDownloaded(true);
-
-    // Create a demonstration text/pdf download blob
-    const content = `QUAZION Open Scientific Archive\nTitle: ${title}\nPublished under Open Access (CC BY 4.0).\nTimestamp: ${new Date().toISOString()}\n\nPermanent Archive Handle: https://quazion.org`;
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    setTimeout(() => setDownloaded(false), 3000);
   };
 
   return (

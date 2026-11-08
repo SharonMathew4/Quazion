@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { showToast } from "@/components/ui/toast";
+import { reportClientError } from "@/lib/client-logger";
 
 interface LikeButtonProps {
   publicationId: string;
@@ -50,27 +52,50 @@ export function LikeButton({ publicationId, initialLikes }: LikeButtonProps) {
     if (loading) return;
     setLoading(true);
 
+    const prevLiked = hasLiked;
+    const prevLikes = likes;
+
     if (hasLiked) {
       // Optimistic decrement
       setLikes((prev) => Math.max(0, prev - 1));
       setHasLiked(false);
 
-      await supabase
-        .from("publication_likes")
-        .delete()
-        .eq("publication_id", publicationId)
-        .eq("user_id", userId);
+      try {
+        const { error } = await supabase
+          .from("publication_likes")
+          .delete()
+          .eq("publication_id", publicationId)
+          .eq("user_id", userId);
+
+        if (error) throw error;
+      } catch (err) {
+        // Rollback optimistic state
+        setLikes(prevLikes);
+        setHasLiked(prevLiked);
+        reportClientError("LikeButton_RemoveLike", err, { publicationId });
+        showToast("Unable to update endorsement. Please try again.", "error");
+      }
     } else {
       // Optimistic increment
       setLikes((prev) => prev + 1);
       setHasLiked(true);
 
-      await supabase
-        .from("publication_likes")
-        .insert({
-          publication_id: publicationId,
-          user_id: userId,
-        });
+      try {
+        const { error } = await supabase
+          .from("publication_likes")
+          .insert({
+            publication_id: publicationId,
+            user_id: userId,
+          });
+
+        if (error) throw error;
+      } catch (err) {
+        // Rollback optimistic state
+        setLikes(prevLikes);
+        setHasLiked(prevLiked);
+        reportClientError("LikeButton_AddLike", err, { publicationId });
+        showToast("Unable to record endorsement. Please try again.", "error");
+      }
     }
 
     setLoading(false);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { logServerError } from "@/lib/server-logger";
 
 /**
  * Completes researcher registration for direct ORCID sign-ins.
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
             actionLink = linkData?.properties?.action_link || null;
           }
         } else {
-          console.error("[SERVER_AUTH] User creation failed:", createError.message);
+          logServerError("ORCID_complete_UserCreation", createError);
           return NextResponse.json(
             { error: "Unable to register institutional credentials. Please verify your details." },
             { status: 400 }
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
       redirectUrl: actionLink || `${origin}${next}`,
     });
   } catch (err: unknown) {
-    console.error("[SERVER_AUTH] Failed to complete ORCID setup:", err);
+    logServerError("ORCID_complete_Fatal", err);
     return NextResponse.json(
       { error: "An unexpected error occurred during setup. Please try again." },
       { status: 500 }

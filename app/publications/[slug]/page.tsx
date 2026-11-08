@@ -13,6 +13,7 @@ import { PeerReviewSection } from "@/components/publications/peer-review-section
 import { DiscussionComments } from "@/components/publications/discussion-comments";
 import { BookOpen } from "lucide-react";
 import { Publication, Reference } from "@/types";
+import { logServerWarn } from "@/lib/server-logger";
 
 export const dynamic = "force-dynamic";
 
@@ -133,7 +134,10 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
       };
     }
   } catch (err) {
-    console.warn("[SERVER] Notice: error fetching publication by slug from Supabase, attempting fallback:", err);
+    logServerWarn("getPublicationBySlug", "Error fetching publication by slug from Supabase, attempting fallback", {
+      slug,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 
   // Fallback check: see if the slug is an arXiv ID without prefix

@@ -38,20 +38,46 @@ export function formatAuthErrorParam(errorCode: string | null): string | null {
  * Sanitizes unknown client-side exceptions into friendly, non-leaking error messages.
  * Prevents PostgreSQL constraints, table names, and stack traces from reaching UI or logs.
  */
-export function getSanitizedErrorMessage(error: unknown, fallbackMessage: string = "An unexpected error occurred. Please try again."): string {
+export function getSanitizedErrorMessage(
+  error: unknown,
+  fallbackMessage: string = "An unexpected error occurred. Please try again."
+): string {
   if (!error) return fallbackMessage;
 
   const rawMessage = error instanceof Error ? error.message : typeof error === "string" ? error : "";
   const lower = rawMessage.toLowerCase();
 
-  // Network / Connectivity issues
-  if (lower.includes("failed to fetch") || lower.includes("network") || lower.includes("econnrefused") || lower.includes("timeout")) {
-    return "Network connection issue detected. Please check your internet connection and try again.";
+  // Network / Connectivity / Fetch issues
+  if (
+    lower.includes("failed to fetch") ||
+    lower.includes("network") ||
+    lower.includes("econnrefused") ||
+    lower.includes("timeout") ||
+    lower.includes("abort") ||
+    lower.includes("offline")
+  ) {
+    return "Network connection issue detected. Please verify your internet connection and try again.";
   }
 
-  // Unique constraint / duplicate entry
+  // Unique constraint / duplicate entry (PostgreSQL error 23505)
   if (lower.includes("duplicate") || lower.includes("unique") || lower.includes("23505")) {
-    return "A record with this identifier or title already exists. Please provide a distinct title or slug.";
+    return "A manuscript or record with this title or identifier already exists. Please provide a distinct title.";
+  }
+
+  // Foreign key / relation constraint (PostgreSQL error 23503)
+  if (lower.includes("foreign key") || lower.includes("23503")) {
+    return "Referenced category or author record could not be found. Please refresh and try again.";
+  }
+
+  // Row Level Security / Permission denied (PostgreSQL error 42501)
+  if (
+    lower.includes("permission denied") ||
+    lower.includes("row-level security") ||
+    lower.includes("42501") ||
+    lower.includes("unauthorized") ||
+    lower.includes("not allowed")
+  ) {
+    return "You do not have the required permissions to perform this action.";
   }
 
   // Not null violation
@@ -60,11 +86,20 @@ export function getSanitizedErrorMessage(error: unknown, fallbackMessage: string
   }
 
   // File size / storage issues
-  if (lower.includes("exceed") || lower.includes("size") || lower.includes("too large")) {
-    return "The uploaded file exceeds the permissible file size limit.";
+  if (lower.includes("exceed") || lower.includes("size") || lower.includes("too large") || lower.includes("413")) {
+    return "The uploaded file exceeds the permissible file size limit (50MB maximum).";
+  }
+
+  // JWT / Auth expired
+  if (lower.includes("jwt") || lower.includes("token") || lower.includes("expired") || lower.includes("session")) {
+    return "Your session has expired or is invalid. Please sign in again to continue.";
+  }
+
+  // PostgREST 404 / PGRST116 (0 rows returned)
+  if (lower.includes("pgrst116") || lower.includes("not found")) {
+    return "The requested scientific record or manuscript could not be found.";
   }
 
   // Default to secure fallback
   return fallbackMessage;
 }
-

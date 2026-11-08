@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Publication } from "@/types";
 import { ShieldCheck, Check, FileCode, Share2, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { showToast } from "@/components/ui/toast";
 
 interface PublicationMetaProps {
   publication: Publication;
@@ -17,6 +17,7 @@ interface PublicationMetaProps {
 export function PublicationMeta({ publication }: PublicationMetaProps) {
   const [copiedBibtex, setCopiedBibtex] = useState(false);
   const [copiedCitation, setCopiedCitation] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const doi = `10.5281/quazion.${publication.id}`;
   const year = new Date(publication.publishedAt || publication.createdAt).getFullYear();
 
@@ -34,12 +35,14 @@ export function PublicationMeta({ publication }: PublicationMetaProps) {
   const handleCopyBibtex = () => {
     navigator.clipboard.writeText(bibtex);
     setCopiedBibtex(true);
+    showToast("BibTeX record copied to clipboard.", "info");
     setTimeout(() => setCopiedBibtex(false), 2000);
   };
 
   const handleCopyCitation = () => {
     navigator.clipboard.writeText(standardCitation);
     setCopiedCitation(true);
+    showToast("Standard APA citation copied to clipboard.", "info");
     setTimeout(() => setCopiedCitation(false), 2000);
   };
 
@@ -48,10 +51,14 @@ export function PublicationMeta({ publication }: PublicationMetaProps) {
       navigator.share({
         title: publication.title,
         url: window.location.href,
+      }).catch(() => {
+        // User cancelled share
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert("Manuscript link copied to clipboard.");
+      setCopiedLink(true);
+      showToast("Manuscript link copied to clipboard.", "success");
+      setTimeout(() => setCopiedLink(false), 2500);
     }
   };
 
@@ -117,10 +124,10 @@ export function PublicationMeta({ publication }: PublicationMetaProps) {
           <button
             type="button"
             onClick={handleShare}
-            className="p-1.5 rounded bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 transition-colors cursor-pointer"
+            className="p-1.5 rounded bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 transition-colors cursor-pointer flex items-center gap-1 text-xs"
             title="Share Manuscript Handle"
           >
-            <Share2 className="w-4 h-4" />
+            {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
           </button>
         </div>
       </div>
