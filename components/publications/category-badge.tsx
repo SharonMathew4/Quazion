@@ -1,40 +1,41 @@
 import React from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Category } from "@/types";
-import { Sparkles, Globe, Atom, Compass, Binary, Cpu, Layers } from "lucide-react";
 
 interface CategoryBadgeProps {
   category: Category;
   clickable?: boolean;
+  size?: "sm" | "md";
 }
-
-const iconMap: Record<string, React.ElementType> = {
-  Sparkles,
-  Globe,
-  Atom,
-  Compass,
-  Binary,
-  Cpu,
-};
 
 /**
  * CategoryBadge Component
- * Renders domain category badge with icon accent and optional route link.
+ * Journal-grade uppercase category badge reflecting scientific discipline.
  */
-export function CategoryBadge({ category, clickable = true }: CategoryBadgeProps) {
-  const IconComponent = (category.iconName && iconMap[category.iconName]) || Layers;
+export function CategoryBadge({
+  category,
+  clickable = true,
+  size = "sm",
+}: CategoryBadgeProps) {
+  const sizeStyles =
+    size === "sm"
+      ? "text-[10px] tracking-wider px-2 py-0.5"
+      : "text-xs tracking-wider px-2.5 py-1";
 
   const badgeElement = (
-    <Badge variant="accent" className="inline-flex items-center gap-1.5 px-2.5 py-0.5 font-mono text-xs">
-      <IconComponent className="w-3 h-3 text-sky-400" />
-      <span>{category.name}</span>
-    </Badge>
+    <span
+      className={`inline-flex items-center font-bold uppercase rounded-sm bg-rose-50 border border-rose-200 text-rose-800 font-sans ${sizeStyles} transition-colors`}
+    >
+      {category.name}
+    </span>
   );
 
   if (clickable) {
     return (
-      <Link href={`/explore/${category.slug}`} className="hover:opacity-90 transition-opacity">
+      <Link
+        href={`/explore?category=${encodeURIComponent(category.slug)}`}
+        className="hover:opacity-80 transition-opacity"
+      >
         {badgeElement}
       </Link>
     );
