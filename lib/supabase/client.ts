@@ -11,10 +11,7 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a dummy client in development if env is not yet configured
-    console.warn(
-      "Supabase credentials not configured in .env.local. Using mock data mode."
-    );
+    // Return a dummy client if env is not yet configured (no client console leak)
   }
 
   return createBrowserClient(

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatAuthErrorParam, getSanitizedErrorMessage } from "@/lib/security-errors";
 import { Button } from "@/components/ui/button";
 import { 
   ShieldCheck, 
@@ -28,17 +29,31 @@ function AuthPortal() {
   const [showConfigModal, setShowConfigModal] = useState(false);
   
   const rawError = searchParams.get("error");
-  let formattedError = rawError;
-  if (rawError === "auth_failed") {
-    formattedError = "OAuth authentication could not be completed. Please try again.";
-  } else if (rawError === "orcid_not_configured") {
-    formattedError = "ORCID API is not configured yet. Set NEXT_PUBLIC_ORCID_CLIENT_ID and ORCID_CLIENT_SECRET in .env.local.";
-  } else if (rawError === "session_expired") {
-    formattedError = "Your session expired. Please sign in again.";
-  }
+  const formattedError = formatAuthErrorParam(rawError);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(formattedError);
   const supabase = createClient();
+
+  // Security & Auto-Login: Automatically route authenticated researchers to destination
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.replace(next);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        router.replace(next);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [next, router, supabase]);
 
   const handleOAuthSignIn = async (provider: "google" | "github") => {
     try {
@@ -61,13 +76,13 @@ function AuthPortal() {
         ) {
           setShowConfigModal(true);
         } else {
-          setErrorMessage(error.message);
+          setErrorMessage("Sign-in with this provider is currently unavailable. Please try an alternative sign-in method.");
         }
         setLoadingProvider(null);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : `Failed to initialize ${provider} authentication.`;
-      setErrorMessage(message);
+      const sanitized = getSanitizedErrorMessage(err, `Failed to connect with ${provider}. Please try again.`);
+      setErrorMessage(sanitized);
       setLoadingProvider(null);
     }
   };

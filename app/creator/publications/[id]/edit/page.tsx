@@ -21,6 +21,7 @@ import {
   FileCode
 } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { getSanitizedErrorMessage } from "@/lib/security-errors";
 
 const PUBLICATION_TYPES: PublicationType[] = [
   "Research Paper",
@@ -113,7 +114,11 @@ export default function EditPublicationPage() {
           .single();
 
         if (pubError || !pubData) {
-          setErrorMessage(pubError ? pubError.message : "Publication not found.");
+          setErrorMessage(
+            pubError
+              ? getSanitizedErrorMessage(pubError, "Publication not found or inaccessible.")
+              : "Publication not found."
+          );
           setLoading(false);
           return;
         }
@@ -160,8 +165,12 @@ export default function EditPublicationPage() {
           setReferences([{ title: "", authors: "", year: "", source: "" }]);
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to load publication.";
-        setErrorMessage(msg);
+        setErrorMessage(
+          getSanitizedErrorMessage(
+            err,
+            "Failed to load publication. Please verify the link or your permissions."
+          )
+        );
       } finally {
         setLoading(false);
       }
@@ -277,8 +286,12 @@ export default function EditPublicationPage() {
         router.refresh();
       }, 1200);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save revisions.";
-      setErrorMessage(msg);
+      setErrorMessage(
+        getSanitizedErrorMessage(
+          err,
+          "Failed to save manuscript revisions. Please check your inputs and try again."
+        )
+      );
       setIsSubmitting(false);
     }
   };
