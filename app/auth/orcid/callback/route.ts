@@ -3,6 +3,7 @@ import { exchangeOrcidCodeForToken } from "@/lib/orcid";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { cookies } from "next/headers";
+import { logServerError } from "@/lib/server-logger";
 
 /**
  * Handles the OAuth 2.0 callback from ORCID.
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
   // Handle user cancellation or denial
   if (error || !code) {
-    console.error("[SERVER_ORCID] Authorization error from provider:", errorDesc || error);
+    logServerError("ORCID_callback_AuthDenied", new Error(String(errorDesc || error)));
     return NextResponse.redirect(`${origin}/auth/login?error=orcid_cancelled`);
   }
 
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
   try {
     orcidData = await exchangeOrcidCodeForToken({ code, redirectUri });
   } catch (err: unknown) {
-    console.error("[SERVER_ORCID] Token exchange failure:", err);
+    logServerError("ORCID_callback_TokenExchange", err);
     return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
   }
 
@@ -94,7 +95,7 @@ export async function GET(request: Request) {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error("[SERVER_ORCID] Profile update error:", updateError.message);
+      logServerError("ORCID_callback_ProfileUpdate", updateError);
       return NextResponse.redirect(`${origin}${next}?tab=about&error=link_failed`);
     }
 
