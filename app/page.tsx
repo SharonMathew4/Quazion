@@ -11,6 +11,7 @@ import {
   MOCK_CATEGORIES,
   MOCK_FEATURED_CONTRIBUTORS,
 } from "@/lib/mock-data";
+import { logServerWarn } from "@/lib/server-logger";
 
 interface RawPubItem {
   id: string;
@@ -214,7 +215,9 @@ export default async function Home() {
       contributors = [];
     }
   } catch (err) {
-    console.warn("[SERVER] Notice: Falling back to direct arXiv feed on homepage:", err);
+    logServerWarn("HomePage_DataLoad", "Falling back to direct arXiv feed on homepage", {
+      error: err instanceof Error ? err.message : String(err),
+    });
     try {
       allPublications = await fetchArxivPublications({ limit: 18 });
     } catch {
