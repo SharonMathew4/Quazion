@@ -5,10 +5,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PeerReview, PeerReviewVerdict, Profile } from "@/types";
 import { CheckCircle2, AlertTriangle, MessageSquare, ShieldCheck, Send, Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { getSanitizedErrorMessage } from "@/lib/security-errors";
+import { reportClientError } from "@/lib/client-logger";
+import { showToast } from "@/components/ui/toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PeerReviewSectionProps {
   publicationId: string;
@@ -178,6 +180,7 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
         .single();
 
       if (error) {
+        reportClientError("PeerReviewSection_SubmitError", error, { publicationId });
         setErrorMessage(
           getSanitizedErrorMessage(error, "Unable to submit peer review report. Please try again.")
         );
@@ -199,8 +202,10 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
         ]);
         setSummary("");
         setCompetingInterests("");
+        showToast("Formal peer review report submitted successfully.", "success");
       }
     } catch (err: unknown) {
+      reportClientError("PeerReviewSection_SubmitCatch", err, { publicationId });
       setErrorMessage(
         getSanitizedErrorMessage(err, "Unable to submit peer review report. Please try again.")
       );
@@ -381,16 +386,30 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
 
       {/* Reviews List */}
       {loading ? (
-        <div className="flex items-center justify-center p-8 text-slate-400">
-          <Loader2 className="w-6 h-6 animate-spin" />
+        <div className="space-y-4">
+          <div className="academic-card p-5 sm:p-6 rounded-md bg-white border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-9 h-9 rounded-full" />
+                <div className="space-y-1">
+                  <Skeleton className="h-4 w-32 rounded-sm" />
+                  <Skeleton className="h-3 w-24 rounded-sm" />
+                </div>
+              </div>
+              <Skeleton className="h-6 w-24 rounded-sm" />
+            </div>
+            <Skeleton className="h-4 w-full rounded-sm" />
+            <Skeleton className="h-4 w-4/5 rounded-sm" />
+          </div>
         </div>
       ) : reviews.length === 0 ? (
-        <div className="p-8 rounded-md border border-dashed border-slate-300 bg-white text-center space-y-1.5">
-          <p className="text-sm font-medium text-slate-700">
-            No formal peer review reports published yet for this manuscript.
+        <div className="p-8 rounded-md border border-dashed border-slate-300 bg-white text-center space-y-1.5 shadow-2xs">
+          <ShieldCheck className="w-8 h-8 text-slate-300 mx-auto mb-1" />
+          <p className="text-sm font-serif font-semibold text-slate-800">
+            No formal peer review reports published yet for this manuscript
           </p>
-          <p className="text-xs text-slate-500">
-            Credentialed Reviewers and Editors can evaluate preprints to award peer endorsements and methodological verification.
+          <p className="text-xs text-slate-500 font-sans max-w-sm mx-auto">
+            Credentialed Reviewers and Editors evaluate manuscripts to award peer endorsements and methodological reproducibility notes.
           </p>
         </div>
       ) : (
