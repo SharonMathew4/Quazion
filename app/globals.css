@@ -1,29 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  /* Deep cosmic dark environment foundation */
-  --background: #06080d;
-  --surface: #0c1018;
-  --surface-raised: #131926;
-  --surface-border: #1c2538;
-  --surface-border-subtle: #141c2c;
+  /* Surface Foundations - Clean Academic White & Off-White */
+  --background: #f8fafc;            /* Clean scholarly backdrop (Slate 50) */
+  --surface: #ffffff;               /* Pure white paper cards & panels */
+  --surface-raised: #f1f5f9;        /* Subtle contrast section background (Slate 100) */
+  --surface-subtle: #f8fafc;
+  --surface-border: #e2e8f0;        /* Crisp 1px hairline border (Slate 200) */
+  --surface-border-subtle: #f1f5f9; /* Micro-rules and light dividers */
+  --surface-border-strong: #cbd5e1; /* Active/hover borders (Slate 300) */
 
-  /* Typography tokens - scientific high-contrast clarity */
-  --foreground: #f0f4fc;
-  --foreground-muted: #8d9bb0;
-  --foreground-faint: #505d73;
+  /* Academic Ink Typography */
+  --foreground: #0f172a;            /* Deep academic ink (Slate 900) */
+  --foreground-muted: #475569;      /* Scholarly secondary text (Slate 600) */
+  --foreground-faint: #94a3b8;      /* Metadata, dates, and rule labels (Slate 400) */
 
-  /* Cosmic accent hierarchy - subtle starlight cyan & deep nebula blue */
-  --accent-primary: #38bdf8;        /* Starlight Cyan */
-  --accent-primary-hover: #7dd3fc;
-  --accent-glow: rgba(56, 189, 248, 0.12);
-  --accent-secondary: #6366f1;      /* Deep Celestial Indigo */
+  /* Journal Signature Brand Accent - Deep Crimson & Academic Navy */
+  --accent-primary: #be123c;        /* Science.org Crimson (Rose 700) */
+  --accent-primary-hover: #9f1239;  /* Darker Crimson (Rose 800) */
+  --accent-secondary: #0f172a;      /* Deep Academic Navy (Slate 900) */
+  --accent-light: #fff1f2;          /* Crimson subtle badge tint (Rose 50) */
+  --accent-border: #fecdd3;         /* Crimson badge border (Rose 200) */
 
-  /* Status semantic indicators */
-  --status-published: #34d399;      /* Emerald */
-  --status-draft: #facc15;          /* Amber */
-  --status-revision: #fb923c;       /* Warm orange */
-  --status-archived: #94a3b8;       /* Slate */
+  /* Institutional & Peer Review Semantic Indicators */
+  --status-published: #047857;      /* Peer-reviewed emerald (Emerald 700) */
+  --status-published-bg: #ecfdf5;   /* Emerald 50 */
+  --status-review: #b45309;         /* Under Review Amber (Amber 700) */
+  --status-review-bg: #fffbeb;      /* Amber 50 */
+  --status-revision: #c2410c;       /* Revision Required (Orange 700) */
+  --status-revision-bg: #fff7ed;    /* Orange 50 */
+  --status-draft: #475569;          /* Draft/Archived slate (Slate 600) */
+  --status-draft-bg: #f1f5f9;       /* Slate 100 */
+
+  /* ORCID Brand Green */
+  --orcid-green: #a6ce39;
+  --orcid-dark: #82a818;
+
+  /* Typography Stacks */
+  --font-serif: "Source Serif 4", "Merriweather", "Newsreader", "Charter", "Georgia", "Cambria", "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
 }
 
 @theme inline {
@@ -35,8 +51,9 @@
   --color-foreground-muted: var(--foreground-muted);
   --color-foreground-faint: var(--foreground-faint);
   --color-accent: var(--accent-primary);
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
@@ -49,29 +66,37 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle cosmic starfield backdrop - minimal and non-distracting */
-.cosmic-bg {
-  background-color: var(--background);
-  background-image: 
-    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0)),
-    radial-gradient(1px 1px at 80px 140px, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0)),
-    radial-gradient(1.5px 1.5px at 220px 70px, rgba(56, 189, 248, 0.15), rgba(0, 0, 0, 0)),
-    radial-gradient(1px 1px at 320px 240px, rgba(255, 255, 255, 0.09), rgba(0, 0, 0, 0)),
-    radial-gradient(800px 400px at 50% -5%, rgba(14, 28, 54, 0.5), transparent);
-  background-repeat: repeat;
-  background-size: 400px 400px, 400px 400px, 400px 400px, 400px 400px, 100% 100%;
+/* Academic Serif Utility */
+.font-serif {
+  font-family: var(--font-serif);
 }
 
-/* Glass & Card subtle border elevation */
+/* Scholarly Paper Card - Replaces Cosmic Card */
+.academic-card,
 .cosmic-card {
   background-color: var(--surface);
   border: 1px solid var(--surface-border);
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
+.academic-card:hover,
 .cosmic-card:hover {
-  border-color: rgba(56, 189, 248, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 15px var(--accent-glow);
+  border-color: var(--surface-border-strong);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+}
+
+/* Clean Academic Background - Strips Cosmic Starfield */
+.academic-bg,
+.cosmic-bg {
+  background-color: var(--background);
+  background-image: none;
+}
+
+/* Academic Editorial Rule / Divider */
+.academic-rule {
+  border-bottom: 1px solid var(--surface-border);
 }
 
 /* Focus visibility for accessibility */
@@ -80,10 +105,10 @@ body {
   outline-offset: 2px;
 }
 
-/* Custom scrollbars for clean scientific presentation */
+/* Academic Clean Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
@@ -91,10 +116,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-border);
-  border-radius: 4px;
+  background: var(--surface-border-strong);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground-faint);
+  background: var(--foreground-muted);
 }
