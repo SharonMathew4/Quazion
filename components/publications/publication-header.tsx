@@ -19,7 +19,7 @@ interface PublicationHeaderProps {
 export function PublicationHeader({ publication }: PublicationHeaderProps) {
   const version = publication.version || 1;
   const isEndorsed = (publication.endorsementsCount || 0) > 0;
-  const doi = `10.1126/quazion.${publication.id.slice(0, 8)}`;
+  const doi = `10.5281/quazion.${publication.id}`;
   const pubDate = formatDate(publication.publishedAt || publication.createdAt);
 
   return (
@@ -126,7 +126,7 @@ export function PublicationHeader({ publication }: PublicationHeaderProps) {
 
         {/* Institutional Affiliation Line */}
         <p className="text-xs text-slate-500 font-sans">
-          <sup className="text-slate-400 font-mono">1</sup> {publication.author.affiliation || "Department of Advanced Scientific Research, Quazion Research Initiative"}
+          <sup className="text-slate-400 font-mono">1</sup> {publication.author.affiliation || "Independent Researcher"}
         </p>
 
         {/* Publication Metadata Dates */}

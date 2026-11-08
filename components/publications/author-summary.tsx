@@ -34,7 +34,7 @@ export function AuthorSummary({ author }: AuthorSummaryProps) {
             </span>
           </div>
           <p className="text-xs text-slate-600 font-sans mt-0.5">
-            {author.affiliation || "Faculty / Scientific Researcher"}
+            {author.affiliation || "Independent Researcher"}
           </p>
         </div>
       </div>

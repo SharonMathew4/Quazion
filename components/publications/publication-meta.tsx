@@ -17,12 +17,12 @@ interface PublicationMetaProps {
 export function PublicationMeta({ publication }: PublicationMetaProps) {
   const [copiedBibtex, setCopiedBibtex] = useState(false);
   const [copiedCitation, setCopiedCitation] = useState(false);
-  const doi = `10.1126/quazion.${publication.id.slice(0, 8)}`;
+  const doi = `10.5281/quazion.${publication.id}`;
   const year = new Date(publication.publishedAt || publication.createdAt).getFullYear();
 
   const standardCitation = `${publication.author.displayName} (${year}). "${publication.title}". QUAZION Open Science Archive. https://doi.org/${doi}`;
 
-  const bibtex = `@article{quazion_${publication.id.replace(/-/g, "_").slice(0, 12)},
+  const bibtex = `@article{quazion_${publication.id.replace(/-/g, "_")},
   title = {${publication.title}},
   author = {${publication.author.displayName}},
   journal = {QUAZION Open Science Archive},

@@ -110,7 +110,12 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
     loadReviewsAndUser();
   }, [publicationId, supabase]);
 
-  const canReview = currentUser && currentUser.id !== authorId;
+  const canReview =
+    Boolean(
+      currentUser &&
+      ["REVIEWER", "EDITOR", "ADMIN"].includes(currentUser.role) &&
+      currentUser.id !== authorId
+    );
   const userExistingReview = reviews.find((r) => r.reviewer.id === currentUser?.id);
 
   async function handleSubmitReview(e: React.FormEvent) {
@@ -200,6 +205,19 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
         </div>
       </div>
 
+      {/* Non-credentialed user notice */}
+      {!canReview && currentUser && currentUser.id !== authorId && (
+        <div className="p-4 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-600 font-sans flex items-start gap-2.5">
+          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-semibold text-slate-800">Reviewer Credentials Required:</span> Formal peer-review submissions are restricted to accredited Reviewers, Editors, and Editorial Board members. To apply for reviewer credentials, consult the{" "}
+            <Link href="/about#guidelines" className="text-rose-700 hover:underline font-medium">
+              Author &amp; Reviewer Guidelines
+            </Link>.
+          </div>
+        </div>
+      )}
+
       {/* Review Submission Form for Verified Reviewers */}
       {canReview && (
         <form
@@ -212,7 +230,7 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
               <span>{userExistingReview ? "Update Review Assessment" : "Submit Peer Review Assessment"}</span>
             </h3>
             <span className="text-[10px] font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded">
-              Reviewer Role: {currentUser.role}
+              Reviewer Role: {currentUser?.role}
             </span>
           </div>
 
