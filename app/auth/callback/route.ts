@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { logServerError } from "@/lib/server-logger";
 
 /**
  * Handles OAuth 2.0 PKCE Code Exchange for Google and GitHub providers.
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/creator/dashboard";
 
   if (errorDescription) {
-    console.error("[SERVER_AUTH] Supabase OAuth callback error:", errorDescription);
+    logServerError("OAuth_callback_ProviderError", new Error(errorDescription));
     return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
   }
 
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
     if (!error && data?.user) {
       return NextResponse.redirect(`${origin}${next}`);
     } else if (error) {
-      console.error("[SERVER_AUTH] VerifyOtp failure:", error.message);
+      logServerError("OAuth_callback_VerifyOtp", error);
       return NextResponse.redirect(`${origin}/auth/login?error=session_expired`);
     }
   }
@@ -92,7 +93,7 @@ export async function GET(request: Request) {
 
       return NextResponse.redirect(`${origin}${next}`);
     } else if (error) {
-      console.error("[SERVER_AUTH] Exchange code error:", error.message);
+      logServerError("OAuth_callback_ExchangeCode", error);
       return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
     }
   }
