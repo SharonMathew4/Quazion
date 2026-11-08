@@ -1,5 +1,6 @@
 import { Publication, Category, Profile } from "@/types";
 import { MOCK_CATEGORIES } from "@/lib/mock-data";
+import { logServerError, logServerWarn } from "@/lib/server-logger";
 
 /**
  * High-quality curated Unsplash covers for scientific disciplines
@@ -188,7 +189,7 @@ function parseArxivEntry(entryXml: string): Publication | null {
       doi,
     };
   } catch (err) {
-    console.error("[SERVER_ARXIV] Error parsing arXiv entry:", err);
+    logServerError("arxiv:parseArxivEntry", err);
     return null;
   }
 }
@@ -231,7 +232,7 @@ export async function fetchArxivPublications(options: {
     clearTimeout(timeout);
 
     if (!res.ok) {
-      console.warn(`[SERVER_ARXIV] arXiv API responded with HTTP ${res.status}`);
+      logServerWarn("arxiv:fetchArxivPublications", `arXiv API responded with HTTP ${res.status}`);
       return [];
     }
 
@@ -246,7 +247,9 @@ export async function fetchArxivPublications(options: {
 
     return publications;
   } catch (err) {
-    console.warn("[SERVER_ARXIV] Notice: arXiv query timed out or unreachable:", err);
+    logServerWarn("arxiv:fetchArxivPublications", "arXiv query timed out or unreachable", {
+      error: err instanceof Error ? err.message : String(err),
+    });
     return [];
   }
 }
@@ -280,7 +283,9 @@ export async function fetchArxivPublicationById(arxivId: string): Promise<Public
 
     return parseArxivEntry(entryMatch[0]);
   } catch (err) {
-    console.warn(`[SERVER_ARXIV] Notice: arXiv paper fetch failed for ${cleanId}:`, err);
+    logServerWarn("arxiv:fetchArxivPublicationById", `arXiv paper fetch failed for ${cleanId}`, {
+      error: err instanceof Error ? err.message : String(err),
+    });
     return null;
   }
 }
