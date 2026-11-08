@@ -1,23 +1,30 @@
 import React from "react";
 import Link from "next/link";
-import { Atom, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { ExternalLink } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="w-full border-t border-slate-800/80 bg-[#06080d] mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          
+
           {/* Brand and Mission */}
           <div className="md:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center w-7 h-7 rounded bg-slate-900 border border-slate-800">
-                <Atom className="w-4 h-4 text-sky-400" />
+            <Link href="/" className="inline-flex items-center gap-2.5 group">
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 p-0.5 group-hover:border-sky-500/50 transition-colors">
+                <Image
+                  src="/icon.svg"
+                  alt="QUAZION Logo"
+                  width={28}
+                  height={28}
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="font-bold text-base tracking-widest text-slate-100 font-mono">
+              <span className="font-bold text-base tracking-widest text-slate-100 font-mono group-hover:text-sky-300 transition-colors">
                 QUAZION
               </span>
-            </div>
+            </Link>
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed italic">
               &ldquo;Exploring Knowledge Beyond Boundaries&rdquo;
             </p>
