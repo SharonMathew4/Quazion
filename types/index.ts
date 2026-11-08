@@ -123,6 +123,11 @@ export interface Publication {
   publishedAt?: string;
   updatedAt?: string;
   readingTimeMinutes?: number;
+  sourceName?: string;
+  sourceUrl?: string;
+  isExternal?: boolean;
+  externalId?: string;
+  doi?: string;
 }
 
 export type PeerReviewVerdict = "ENDORSED" | "REVISION_REQUESTED" | "COMMENT";

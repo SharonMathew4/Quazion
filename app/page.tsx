@@ -5,10 +5,10 @@ import { EditorialMagazineHero } from "@/components/home/editorial-magazine-hero
 import { SocialScienceFeed } from "@/components/home/social-science-feed";
 import { ContributionCta } from "@/components/home/contribution-cta";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { fetchArxivPublications } from "@/lib/arxiv";
 import { Category, Publication, Profile } from "@/types";
 import {
   MOCK_CATEGORIES,
-  MOCK_PUBLICATIONS,
   MOCK_FEATURED_CONTRIBUTORS,
 } from "@/lib/mock-data";
 
@@ -21,6 +21,7 @@ interface RawPubItem {
   publication_type: Publication["publicationType"];
   status: Publication["status"];
   cover_image?: string | null;
+  document_url?: string | null;
   tags: string[] | null;
   keywords: string[] | null;
   views_count: number | null;
@@ -105,23 +106,26 @@ function mapRawPublication(raw: RawPubItem): Publication {
     likes: raw.likes_count ?? 8,
     downloads: raw.downloads_count ?? 2,
     readingTimeMinutes: raw.reading_time_minutes ?? 6,
+    documentUrl: raw.document_url || undefined,
+    sourceName: "Quazion Community",
+    isExternal: false,
     createdAt: raw.created_at,
     publishedAt: raw.published_at || raw.created_at,
   };
 }
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   let categories: Category[] = MOCK_CATEGORIES;
-  let allPublications: Publication[] = [...MOCK_PUBLICATIONS];
+  let allPublications: Publication[] = [];
   let contributors: Profile[] = MOCK_FEATURED_CONTRIBUTORS;
 
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Fetch live categories, published papers, and contributors concurrently to eliminate TTFB bottleneck
-    const [categoriesRes, publicationsRes, profilesRes] = await Promise.all([
+    // Fetch live categories, published community papers, contributors, and arXiv research in parallel
+    const [categoriesRes, publicationsRes, profilesRes, arxivPubs] = await Promise.all([
       supabase
         .from("categories")
         .select("id, name, slug, description, icon_name")
@@ -136,6 +140,7 @@ export default async function Home() {
           publication_type,
           status,
           cover_image,
+          document_url,
           tags,
           keywords,
           views_count,
@@ -154,28 +159,41 @@ export default async function Home() {
         .from("profiles")
         .select("id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at")
         .limit(6),
+      fetchArxivPublications({ limit: 18 }).catch(() => [] as Publication[]),
     ]);
+
+    const liveData = publicationsRes.data;
+    const userPublications = (liveData && liveData.length > 0)
+      ? (liveData as unknown as RawPubItem[]).map(mapRawPublication)
+      : [];
+
+    // Combine community and arXiv publications, sorting fresh publications first
+    const merged = [...userPublications, ...(arxivPubs || [])];
+    allPublications = merged.sort((a, b) => {
+      const timeA = new Date(a.publishedAt || a.createdAt).getTime();
+      const timeB = new Date(b.publishedAt || b.createdAt).getTime();
+      return timeB - timeA;
+    });
 
     const dbCategories = categoriesRes.data;
     if (dbCategories && dbCategories.length > 0) {
       categories = dbCategories.map((c) => {
         const mockMatch = MOCK_CATEGORIES.find((mc) => mc.slug === c.slug);
+        const count = allPublications.filter((p) => p.category?.slug === c.slug).length;
         return {
           id: c.id,
           name: c.name,
           slug: c.slug,
           description: c.description || "",
           iconName: c.icon_name || mockMatch?.iconName || "Atom",
-          publicationCount: mockMatch?.publicationCount || 0,
+          publicationCount: count || mockMatch?.publicationCount || 0,
         };
       });
-    }
-
-    const liveData = publicationsRes.data;
-    if (liveData && liveData.length > 0) {
-      allPublications = (liveData as unknown as RawPubItem[]).map(mapRawPublication);
     } else {
-      allPublications = [];
+      categories = MOCK_CATEGORIES.map((c) => ({
+        ...c,
+        publicationCount: allPublications.filter((p) => p.category?.slug === c.slug).length,
+      }));
     }
 
     const liveProfiles = profilesRes.data;
@@ -195,8 +213,13 @@ export default async function Home() {
     } else {
       contributors = [];
     }
-  } catch {
-    allPublications = [];
+  } catch (err) {
+    console.warn("[SERVER] Notice: Falling back to direct arXiv feed on homepage:", err);
+    try {
+      allPublications = await fetchArxivPublications({ limit: 18 });
+    } catch {
+      allPublications = [];
+    }
     contributors = [];
   }
 

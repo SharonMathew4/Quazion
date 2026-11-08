@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { fetchArxivPublicationById } from "@/lib/arxiv";
 import { MOCK_PUBLICATIONS } from "@/lib/mock-data";
 import { PublicationHeader } from "@/components/publications/publication-header";
 import { PublicationMeta } from "@/components/publications/publication-meta";
@@ -20,6 +21,13 @@ interface Props {
 }
 
 async function getPublicationBySlug(slug: string): Promise<Publication | null> {
+  // 1. Direct arXiv lookup if slug indicates an external arXiv paper
+  if (slug.startsWith("arxiv-")) {
+    const arxivId = slug.replace(/^arxiv-/i, "");
+    const arxivPub = await fetchArxivPublicationById(arxivId);
+    if (arxivPub) return arxivPub;
+  }
+
   try {
     const supabase = await createServerSupabaseClient();
     const { data: p, error } = await supabase
@@ -32,6 +40,7 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
         content,
         publication_type,
         status,
+        document_url,
         tags,
         keywords,
         views_count,
@@ -116,13 +125,20 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
         changelogNotes: p.changelog_notes || undefined,
         endorsementsCount: p.endorsements_count || 0,
         references: refs,
+        documentUrl: p.document_url || undefined,
+        sourceName: "Quazion Community",
+        isExternal: false,
         createdAt: p.created_at,
         publishedAt: p.published_at,
       };
     }
   } catch (err) {
-    console.warn("Error fetching publication by slug:", err);
+    console.warn("[SERVER] Notice: error fetching publication by slug from Supabase, attempting fallback:", err);
   }
+
+  // Fallback check: see if the slug is an arXiv ID without prefix
+  const arxivFallback = await fetchArxivPublicationById(slug);
+  if (arxivFallback) return arxivFallback;
 
   // Fallback to static mock publications
   const fallback = MOCK_PUBLICATIONS.find((p) => p.slug === slug);

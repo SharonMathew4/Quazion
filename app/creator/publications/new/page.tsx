@@ -15,11 +15,14 @@ import {
   Send, 
   Eye, 
   Plus, 
-  Trash2,
-  AlertCircle,
-  Loader2
+  Trash2, 
+  AlertCircle, 
+  Loader2,
+  UploadCloud,
+  FileCheck
 } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { getSanitizedErrorMessage } from "@/lib/security-errors";
 
 const PUBLICATION_TYPES: PublicationType[] = [
   "Research Paper",
@@ -57,6 +60,12 @@ export default function NewPublicationPage() {
     { title: "", authors: "", year: "", source: "" },
   ]);
 
+  // Document Attachment State
+  const [documentUrl, setDocumentUrl] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
   // Preview & Submit State
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,8 +96,8 @@ export default function NewPublicationPage() {
           setCategories(MOCK_CATEGORIES);
           setCategoryId(MOCK_CATEGORIES[0].id);
         }
-      } catch (err) {
-        console.warn("Failed to load initial publishing data:", err);
+      } catch {
+        // Silently fall back to mock categories if network/DB is unavailable
       } finally {
         setLoadingAuth(false);
       }
@@ -97,6 +106,54 @@ export default function NewPublicationPage() {
   }, [router, supabase]);
 
   // Auto-generate URL slug when title changes
+  // File upload handler
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setErrorMessage("Only PDF documents (.pdf) are supported for manuscript attachments.");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      setErrorMessage("File exceeds the 50MB maximum size limit.");
+      return;
+    }
+
+    setUploadingFile(true);
+    setErrorMessage(null);
+
+    try {
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const path = `${currentUser?.id || "manuscripts"}/${Date.now()}-${sanitizedName}`;
+
+      const { error } = await supabase.storage.from("manuscripts").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const { data: urlData } = supabase.storage.from("manuscripts").getPublicUrl(path);
+      setDocumentUrl(urlData.publicUrl);
+      setUploadedFileName(file.name);
+    } catch (err: unknown) {
+      setErrorMessage(
+        getSanitizedErrorMessage(
+          err,
+          "Unable to upload manuscript document to storage. You may provide a direct document URL below."
+        )
+      );
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFileName(null);
+    setDocumentUrl("");
+  };
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTitle(val);
@@ -132,8 +189,8 @@ export default function NewPublicationPage() {
       setErrorMessage("Please provide an abstract summary.");
       return;
     }
-    if (isPublish && !content.trim()) {
-      setErrorMessage("Cannot publish an empty manuscript. Please add manuscript content.");
+    if (isPublish && !content.trim() && !documentUrl.trim()) {
+      setErrorMessage("Please write manuscript content or attach a PDF manuscript document.");
       return;
     }
 
@@ -202,6 +259,7 @@ export default function NewPublicationPage() {
           category_id: selectedCatId,
           author_id: currentUser.id,
           status: publicationStatus,
+          document_url: documentUrl.trim() || null,
           tags: tagsArray,
           keywords: keywordsArray,
           reading_time_minutes: readingTime,
@@ -224,6 +282,7 @@ export default function NewPublicationPage() {
             category_id: selectedCatId,
             author_id: currentUser.id,
             status: publicationStatus,
+            document_url: documentUrl.trim() || null,
             tags: tagsArray,
             keywords: keywordsArray,
             reading_time_minutes: readingTime,
@@ -259,8 +318,12 @@ export default function NewPublicationPage() {
       router.push("/creator/dashboard");
       router.refresh();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save publication.";
-      setErrorMessage(msg);
+      setErrorMessage(
+        getSanitizedErrorMessage(
+          err,
+          "Failed to save manuscript. Please check your submission details and try again."
+        )
+      );
       setIsSubmitting(false);
     }
   };
@@ -456,7 +519,123 @@ export default function NewPublicationPage() {
           />
         </div>
 
-        {/* 4. Main Content Area */}
+        {/* 4. PDF Manuscript Document Attachment */}
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div>
+              <label className="block text-xs font-mono uppercase tracking-wider text-slate-800 font-bold">
+                Manuscript PDF Upload &amp; Document Attachment
+              </label>
+              <p className="text-[11px] text-slate-500 font-sans">
+                Attach a primary research PDF document (direct upload to academic storage or external open-access link)
+              </p>
+            </div>
+            <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              PDF max 50MB
+            </span>
+          </div>
+
+          {/* Upload Area */}
+          <div className="space-y-3">
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                  handleFileUpload(e.dataTransfer.files[0]);
+                }
+              }}
+              className={`border-2 border-dashed rounded-md p-6 text-center transition-all ${
+                isDragging
+                  ? "border-rose-700 bg-rose-50/50"
+                  : uploadedFileName
+                  ? "border-emerald-300 bg-emerald-50/30"
+                  : "border-slate-300 hover:border-slate-400 bg-slate-50/50"
+              }`}
+            >
+              <input
+                type="file"
+                id="manuscript-file-input"
+                accept=".pdf,application/pdf"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(e.target.files[0]);
+                  }
+                }}
+              />
+
+              {uploadingFile ? (
+                <div className="flex flex-col items-center justify-center space-y-2 py-2">
+                  <Loader2 className="w-7 h-7 animate-spin text-rose-700" />
+                  <p className="text-xs text-slate-700 font-medium">Uploading manuscript to academic vault...</p>
+                </div>
+              ) : uploadedFileName ? (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                      <FileCheck className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-900 truncate max-w-xs sm:max-w-md">
+                        {uploadedFileName}
+                      </p>
+                      <p className="text-[11px] text-emerald-700 font-mono">
+                        Document attached and ready for reader download
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="text-xs text-slate-500 hover:text-rose-700 flex items-center gap-1 cursor-pointer font-medium"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remove file</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <UploadCloud className="w-8 h-8 text-slate-400 mx-auto" />
+                  <div>
+                    <label
+                      htmlFor="manuscript-file-input"
+                      className="text-xs font-semibold text-rose-700 hover:text-rose-800 cursor-pointer underline underline-offset-2"
+                    >
+                      Click to browse manuscript PDF
+                    </label>
+                    <span className="text-xs text-slate-500"> or drag and drop file here</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-mono">PDF documents up to 50MB</p>
+                </div>
+              )}
+            </div>
+
+            {/* Direct URL input fallback */}
+            <div className="pt-2">
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-600 mb-1">
+                Or Direct PDF Document URL (Optional fallback)
+              </label>
+              <input
+                type="url"
+                value={documentUrl}
+                onChange={(e) => {
+                  setDocumentUrl(e.target.value);
+                  if (e.target.value && uploadedFileName) setUploadedFileName(null);
+                }}
+                placeholder="https://example.org/papers/manuscript.pdf or Zenodo link"
+                className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-mono text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 5. Main Content Area */}
         <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold">

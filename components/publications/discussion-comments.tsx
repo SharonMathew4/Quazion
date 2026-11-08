@@ -69,7 +69,31 @@ export function DiscussionComments({ publicationId }: DiscussionCommentsProps) {
           .order("created_at", { ascending: true });
 
         if (!error && data) {
-          const mapped: PublicationComment[] = data.map((c: any) => {
+          interface RawDbComment {
+            id: string;
+            publication_id: string;
+            parent_id?: string;
+            content: string;
+            created_at: string;
+            updated_at?: string;
+            author?: {
+              id?: string;
+              username?: string;
+              display_name?: string;
+              avatar_url?: string;
+              role?: PublicationComment["author"]["role"];
+              affiliation?: string;
+            } | Array<{
+              id?: string;
+              username?: string;
+              display_name?: string;
+              avatar_url?: string;
+              role?: PublicationComment["author"]["role"];
+              affiliation?: string;
+            }> | null;
+          }
+
+          const mapped: PublicationComment[] = (data as unknown as RawDbComment[]).map((c) => {
             const author = Array.isArray(c.author) ? c.author[0] : c.author;
             return {
               id: c.id,
@@ -137,8 +161,8 @@ export function DiscussionComments({ publicationId }: DiscussionCommentsProps) {
         setComments((prev) => [...prev, addedComment]);
         setNewComment("");
       }
-    } catch (err) {
-      console.error("Failed to post comment:", err);
+    } catch {
+      // Keep errors server-side; do not expose internal exceptions to client console
     } finally {
       setSubmitting(false);
     }
@@ -157,8 +181,8 @@ export function DiscussionComments({ publicationId }: DiscussionCommentsProps) {
       if (!error) {
         setComments((prev) => prev.filter((c) => c.id !== id));
       }
-    } catch (err) {
-      console.error("Failed to delete comment:", err);
+    } catch {
+      // Keep errors server-side; do not expose internal exceptions to client console
     } finally {
       setDeletingId(null);
     }

@@ -25,6 +25,15 @@ export function PublicationCard({ publication }: PublicationCardProps) {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex flex-wrap items-center gap-2">
             <CategoryBadge category={publication.category} />
+            {publication.sourceName === "arXiv.org" || publication.isExternal ? (
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-800 bg-rose-50 px-2 py-0.5 rounded-sm border border-rose-200">
+                arXiv.org
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-800 bg-blue-50 px-2 py-0.5 rounded-sm border border-blue-200">
+                Quazion Original
+              </span>
+            )}
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
               {publication.publicationType}
             </span>

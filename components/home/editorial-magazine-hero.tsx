@@ -90,6 +90,15 @@ export function EditorialMagazineHero({
                 <span className="px-2 py-0.5 rounded-sm bg-rose-700 text-white font-sans text-[10px] font-bold tracking-wider uppercase shadow-xs">
                   Cover Story
                 </span>
+                {leadPublication.sourceName === "arXiv.org" || leadPublication.isExternal ? (
+                  <span className="px-2 py-0.5 rounded-sm bg-slate-900/90 text-white font-mono text-[10px] font-bold tracking-wider uppercase shadow-xs">
+                    arXiv.org
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-sm bg-blue-700 text-white font-sans text-[10px] font-bold tracking-wider uppercase shadow-xs">
+                    Quazion Original
+                  </span>
+                )}
                 <CategoryBadge category={leadPublication.category} clickable={false} />
                 <span className="px-2 py-0.5 rounded-sm bg-slate-900 text-white font-sans text-[10px] uppercase font-bold tracking-wider">
                   {leadPublication.publicationType}

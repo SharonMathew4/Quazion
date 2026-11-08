@@ -2,9 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
-import { Calendar, Clock, RefreshCw, ArrowLeft, CheckCircle2, History, ShieldCheck, Download, Share2, FileCode } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Calendar, Clock, RefreshCw, ArrowLeft, CheckCircle2, History, ShieldCheck } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 interface PublicationHeaderProps {
@@ -53,6 +51,22 @@ export function PublicationHeader({ publication }: PublicationHeaderProps) {
             {publication.publicationType}
           </span>
           <CategoryBadge category={publication.category} clickable={false} />
+
+          {publication.sourceName === "arXiv.org" || publication.isExternal ? (
+            <a
+              href={publication.sourceUrl || "https://arxiv.org"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-rose-800 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-sm hover:bg-rose-100 transition-colors"
+            >
+              <span>Source: arXiv.org</span>
+              {publication.externalId && <span>({publication.externalId})</span>}
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-sm">
+              <span>Quazion Community Original</span>
+            </span>
+          )}
           
           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-sm">
             <ShieldCheck className="w-3 h-3 text-emerald-600" />

@@ -22,10 +22,8 @@ export async function GET(request: Request) {
 
   // Handle user cancellation or denial
   if (error || !code) {
-    const errorMsg = errorDesc || error || "ORCID authorization was cancelled.";
-    return NextResponse.redirect(
-      `${origin}/auth/login?error=${encodeURIComponent(errorMsg)}`
-    );
+    console.error("[SERVER_ORCID] Authorization error from provider:", errorDesc || error);
+    return NextResponse.redirect(`${origin}/auth/login?error=orcid_cancelled`);
   }
 
   // Validate state and decode payload
@@ -51,10 +49,8 @@ export async function GET(request: Request) {
   try {
     orcidData = await exchangeOrcidCodeForToken({ code, redirectUri });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to verify ORCID token.";
-    return NextResponse.redirect(
-      `${origin}/auth/login?error=${encodeURIComponent(message)}`
-    );
+    console.error("[SERVER_ORCID] Token exchange failure:", err);
+    return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
   }
 
   const { orcid, name, scope } = orcidData;
@@ -98,9 +94,8 @@ export async function GET(request: Request) {
       .eq("id", user.id);
 
     if (updateError) {
-      return NextResponse.redirect(
-        `${origin}${next}?tab=about&error=${encodeURIComponent(updateError.message)}`
-      );
+      console.error("[SERVER_ORCID] Profile update error:", updateError.message);
+      return NextResponse.redirect(`${origin}${next}?tab=about&error=link_failed`);
     }
 
     return NextResponse.redirect(`${origin}${next}?tab=about&success=orcid_linked`);
@@ -130,6 +125,25 @@ export async function GET(request: Request) {
           redirectTo: `${origin}${next}`,
         },
       });
+
+      if (!linkError && linkData?.properties?.hashed_token) {
+        // Direct server-side OTP exchange: sets session cookies directly into the response
+        // and eliminates exposing any tokens in the browser search/address bar!
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash: linkData.properties.hashed_token,
+          type: "email",
+        });
+
+        if (!verifyError) {
+          // Zero tokens in the URL: clean, direct redirect to destination
+          return NextResponse.redirect(`${origin}${next}`);
+        }
+
+        // Secondary server-safe fallback: route via /auth/callback using token_hash query param
+        return NextResponse.redirect(
+          `${origin}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=email&next=${encodeURIComponent(next)}`
+        );
+      }
 
       if (!linkError && linkData?.properties?.action_link) {
         return NextResponse.redirect(linkData.properties.action_link);

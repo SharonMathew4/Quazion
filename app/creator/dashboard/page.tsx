@@ -43,6 +43,7 @@ import {
   ExperienceEntry,
   SocialLinks,
 } from "@/types";
+import { getSanitizedErrorMessage } from "@/lib/security-errors";
 
 /* ─────────────── Type Definitions ─────────────── */
 
@@ -549,16 +550,16 @@ function CreatorDashboardContent() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (searchParams.get("success") === "orcid_linked") {
-      setSuccessMessage("ORCID iD successfully verified and linked via OAuth 2.0!");
-    } else if (searchParams.get("error") === "orcid_already_linked") {
-      setErrorMessage("This ORCID iD is already linked to another researcher profile.");
-    }
-  }, [searchParams]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+    searchParams.get("error") === "orcid_already_linked"
+      ? "This ORCID iD is already linked to another researcher profile."
+      : null
+  );
+  const [successMessage, setSuccessMessage] = useState<string | null>(() =>
+    searchParams.get("success") === "orcid_linked"
+      ? "ORCID iD successfully verified and linked via OAuth 2.0!"
+      : null
+  );
 
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -640,8 +641,8 @@ function CreatorDashboardContent() {
               },
               { onConflict: "id" }
             );
-          } catch (e) {
-            console.warn("Could not upsert profile to DB, using in-memory state:", e);
+          } catch {
+            // Silently fall back to in-memory profile without leaking to client
           }
         }
 
@@ -660,7 +661,7 @@ function CreatorDashboardContent() {
           .order("created_at", { ascending: false });
 
         if (pubError) {
-          setErrorMessage(pubError.message);
+          setErrorMessage("Unable to load your publications at this time.");
         } else if (pubData) {
           interface RawDashboardItem extends Omit<CreatorPublication, "category"> {
             category?: CreatorPublication["category"] | CreatorPublication["category"][];
@@ -690,8 +691,9 @@ function CreatorDashboardContent() {
           setSavedPubIds(savedData.map((s) => s.publication_id));
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to load dashboard.";
-        setErrorMessage(msg);
+        setErrorMessage(
+          getSanitizedErrorMessage(err, "Failed to load creator dashboard data.")
+        );
       } finally {
         setLoading(false);
       }
@@ -713,7 +715,9 @@ function CreatorDashboardContent() {
         .eq("id", userId);
 
       if (error) {
-        setErrorMessage(`Failed to save ${field}: ${error.message}`);
+        setErrorMessage(
+          getSanitizedErrorMessage(error, `Failed to update ${field}. Please verify input and try again.`)
+        );
       } else {
         setProfile((prev) => prev ? { ...prev, [field]: value } as UserProfile : prev);
         setSuccessMessage("Profile updated!");
@@ -737,12 +741,12 @@ function CreatorDashboardContent() {
     try {
       const { error } = await supabase.from("publications").delete().eq("id", id);
       if (error) {
-        alert(`Failed to delete: ${error.message}`);
+        alert("Failed to delete manuscript. Please try again.");
       } else {
         setPublications((prev) => prev.filter((p) => p.id !== id));
       }
-    } catch (err) {
-      console.error("Delete error:", err);
+    } catch {
+      alert("An unexpected error occurred while deleting the publication.");
     }
   };
 

@@ -8,6 +8,7 @@ import { CheckCircle2, AlertTriangle, MessageSquare, ShieldCheck, Send, Loader2 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { getSanitizedErrorMessage } from "@/lib/security-errors";
 
 interface PeerReviewSectionProps {
   publicationId: string;
@@ -77,7 +78,32 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
           .order("created_at", { ascending: false });
 
         if (!error && data) {
-          const mapped: PeerReview[] = data.map((r: any) => {
+          interface RawDbReview {
+            id: string;
+            publication_id: string;
+            verdict: string;
+            summary: string;
+            competing_interests?: string;
+            created_at: string;
+            updated_at: string;
+            reviewer?: {
+              id?: string;
+              username?: string;
+              display_name?: string;
+              avatar_url?: string;
+              role?: PeerReview["reviewer"]["role"];
+              affiliation?: string;
+            } | Array<{
+              id?: string;
+              username?: string;
+              display_name?: string;
+              avatar_url?: string;
+              role?: PeerReview["reviewer"]["role"];
+              affiliation?: string;
+            }> | null;
+          }
+
+          const mapped: PeerReview[] = (data as unknown as RawDbReview[]).map((r) => {
             const rev = Array.isArray(r.reviewer) ? r.reviewer[0] : r.reviewer;
             return {
               id: r.id,
@@ -152,7 +178,9 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
         .single();
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(
+          getSanitizedErrorMessage(error, "Unable to submit peer review report. Please try again.")
+        );
       } else if (data) {
         const newReview: PeerReview = {
           id: data.id,
@@ -172,8 +200,10 @@ export function PeerReviewSection({ publicationId, authorId }: PeerReviewSection
         setSummary("");
         setCompetingInterests("");
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || "Failed to submit review.");
+    } catch (err: unknown) {
+      setErrorMessage(
+        getSanitizedErrorMessage(err, "Unable to submit peer review report. Please try again.")
+      );
     } finally {
       setSubmitting(false);
     }
