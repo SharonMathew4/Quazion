@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/publications/category-badge";
 import { QuickReadModal } from "@/components/publications/quick-read-modal";
 import { formatShortDate } from "@/lib/utils";
+import { showToast } from "@/components/ui/toast";
 
 interface SocialScienceFeedProps {
   initialPublications: Publication[];
@@ -81,12 +82,16 @@ export function SocialScienceFeed({
 
   // Toggle Bookmark
   const handleBookmarkToggle = (pubId: string) => {
-    setBookmarks((prev) => ({ ...prev, [pubId]: !prev[pubId] }));
+    const nextState = !bookmarks[pubId];
+    setBookmarks((prev) => ({ ...prev, [pubId]: nextState }));
+    showToast(nextState ? "Saved manuscript to your reading list." : "Removed from library.", "info");
   };
 
   // Toggle Follow
   const handleFollowToggle = (authorId: string) => {
-    setFollowing((prev) => ({ ...prev, [authorId]: !prev[authorId] }));
+    const nextState = !following[authorId];
+    setFollowing((prev) => ({ ...prev, [authorId]: nextState }));
+    showToast(nextState ? "Following researcher updates." : "Unfollowed researcher.", "info");
   };
 
   // Toggle Comments
@@ -113,6 +118,7 @@ export function SocialScienceFeed({
     }));
 
     setNewCommentText((prev) => ({ ...prev, [pubId]: "" }));
+    showToast("Observation contributed to discussion.", "success");
   };
 
   // Share DOI / Link
@@ -120,6 +126,7 @@ export function SocialScienceFeed({
     const url = `${window.location.origin}/publications/${pub.slug}`;
     navigator.clipboard.writeText(url);
     setCopiedId(pub.id);
+    showToast("Manuscript handle copied to clipboard.", "info");
     setTimeout(() => setCopiedId(null), 2500);
   };
 
