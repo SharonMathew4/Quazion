@@ -1,6 +1,6 @@
 import React from "react";
 import { Publication } from "@/types";
-import { BookMarked, Sparkles } from "lucide-react";
+import { BookMarked, FileText } from "lucide-react";
 import { Tag } from "./tag";
 import { MathRenderer } from "./math-renderer";
 
@@ -24,20 +24,20 @@ $$R_s = \\frac{2GM}{c^2}$$
 
 Where $G$ represents the Newtonian gravitational constant, $M$ denotes the central gravitational mass, and $c$ designates the vacuum speed of light.
 
-## 3. Observational Predictions
+## 3. Observational Predictions & Boundary Conditions
 
 When integrating gravitational wave waveforms with orbital frequency $\\omega$, the quadrupole strain radiation is given by:
 
 $$h_+(t) = \\frac{4G}{c^4 r} \\left(\\frac{d^2 Q_{ij}}{dt^2}\\right)$$
 
-Observations in high-cadence gravitational wave detectors provide an unprecedented laboratory for testing strong-field general relativity against quantum corrections.`;
+High-cadence observations provide an unprecedented laboratory for testing strong-field general relativity against quantum corrections and post-Newtonian expansions.`;
 
 /**
  * PublicationContent Component
- * Journal-grade scientific manuscript content renderer supporting:
- * - Dynamic manuscript content with inline ($...$) and block ($$...$$) LaTeX formulas
- * - KaTeX mathematical proofs and theorems
- * - Dynamic bibliographic references from database
+ * Science.org-grade scientific manuscript content renderer supporting:
+ * - Structured abstract callout
+ * - Dynamic manuscript content with inline and display LaTeX KaTeX formulas
+ * - Indexed bibliographic references from peer review databases
  */
 export function PublicationContent({ publication }: PublicationContentProps) {
   const contentToRender =
@@ -48,24 +48,26 @@ export function PublicationContent({ publication }: PublicationContentProps) {
   const hasDynamicReferences = Boolean(publication.references && publication.references.length > 0);
 
   return (
-    <article className="space-y-10 text-slate-200 leading-relaxed font-sans text-base sm:text-lg">
+    <article className="space-y-10 text-slate-800 leading-relaxed font-serif text-base sm:text-lg">
       {/* 1. Abstract Callout Box */}
-      <section className="bg-slate-900/80 border-l-4 border-sky-400 p-6 sm:p-8 rounded-r-2xl shadow-xl space-y-3">
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-sky-400 font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
+      <section className="bg-slate-50 border-l-4 border-rose-700 p-6 sm:p-8 rounded-r-md space-y-3 border-y border-r border-slate-200 shadow-2xs font-sans">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-rose-800">
+          <FileText className="w-4 h-4 text-rose-700" />
           <span>Abstract</span>
         </div>
-        <p className="text-base sm:text-lg text-slate-200 leading-relaxed italic font-serif">
+        <p className="text-base sm:text-lg text-slate-800 leading-relaxed italic font-serif">
           &ldquo;{publication.abstract}&rdquo;
         </p>
 
         {publication.keywords && publication.keywords.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800 text-xs font-mono text-slate-400">
-            <span className="text-slate-500">Keywords:</span>
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-200 text-xs font-sans text-slate-600">
+            <span className="font-semibold text-slate-500 uppercase tracking-wider text-[11px]">
+              Keywords:
+            </span>
             {publication.keywords.map((kw) => (
               <span
                 key={kw}
-                className="bg-slate-950 text-sky-300 px-2.5 py-0.5 rounded border border-slate-800"
+                className="bg-white text-slate-800 px-2 py-0.5 rounded-sm border border-slate-200 font-medium"
               >
                 {kw}
               </span>
@@ -77,11 +79,13 @@ export function PublicationContent({ publication }: PublicationContentProps) {
       {/* 2. Main Article Body with KaTeX Scientific Markdown */}
       <MathRenderer content={contentToRender} />
 
-      {/* Tags Row */}
+      {/* Keywords / Tags Row */}
       {publication.tags && publication.tags.length > 0 && (
-        <div className="pt-6 border-t border-slate-800">
+        <div className="pt-6 border-t border-slate-200 font-sans">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500 font-mono">Subject Tags:</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Subject Classifications:
+            </span>
             {publication.tags.map((tag) => (
               <Tag key={tag} label={tag} />
             ))}
@@ -89,31 +93,36 @@ export function PublicationContent({ publication }: PublicationContentProps) {
         </div>
       )}
 
-      {/* References Bibliography Section */}
-      <section className="bg-[#080d14] border border-slate-800/80 rounded-2xl p-6 sm:p-8 space-y-4 font-sans">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-200 uppercase font-mono tracking-wider">
-          <BookMarked className="w-4 h-4 text-sky-400" />
-          <span>References &amp; Bibliography</span>
+      {/* 3. References Bibliography Section */}
+      <section className="bg-white border border-slate-200 rounded-md p-6 sm:p-8 space-y-4 font-sans shadow-2xs">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-2">
+          <BookMarked className="w-4 h-4 text-rose-700" />
+          <span>References &amp; Bibliographic Citations</span>
         </div>
 
         {hasDynamicReferences ? (
-          <ol className="list-decimal list-inside text-xs sm:text-sm text-slate-400 space-y-3 leading-relaxed font-mono">
+          <ol className="list-decimal list-inside text-xs sm:text-sm text-slate-600 space-y-3 leading-relaxed font-sans">
             {publication.references!.map((ref, idx) => (
-              <li key={ref.id || idx}>
-                <span className="text-slate-300 font-medium">{ref.authors}</span>{" "}
+              <li key={ref.id || idx} className="pl-1">
+                <span className="text-slate-900 font-bold">{ref.authors}</span>{" "}
                 {ref.year && <span>({ref.year}). </span>}
                 &ldquo;{ref.title}&rdquo;
-                {ref.source && <span className="text-slate-400"> — {ref.source}</span>}
+                {ref.source && <span className="text-slate-600"> — {ref.source}</span>}
                 {ref.doi && (
-                  <span className="text-sky-400 ml-1">
+                  <a
+                    href={`https://doi.org/${ref.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-rose-700 hover:underline ml-1 font-mono text-xs"
+                  >
                     [DOI: {ref.doi}]
-                  </span>
+                  </a>
                 )}
               </li>
             ))}
           </ol>
         ) : (
-          <p className="text-xs text-slate-500 font-mono italic">
+          <p className="text-xs text-slate-500 font-sans italic">
             No formal bibliographic citations listed for this document.
           </p>
         )}

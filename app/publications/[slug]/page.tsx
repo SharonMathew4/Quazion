@@ -169,8 +169,8 @@ export default async function PublicationDetailPage({ params }: Props) {
           <PublicationContent publication={pub} />
 
           {/* Bottom Community Engagement Bar */}
-          <section className="pt-8 border-t border-slate-800/80">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-4">
+          <section className="pt-8 border-t border-slate-200">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4 font-sans">
               Article Reader Interaction &amp; Telemetry
             </h3>
             <PublicationStats
@@ -198,8 +198,8 @@ export default async function PublicationDetailPage({ params }: Props) {
           {/* Related Manuscripts Section */}
           {related.length > 0 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400">
-                <BookOpen className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-2">
+                <BookOpen className="w-4 h-4 text-rose-700" />
                 <span>Related Manuscripts</span>
               </div>
 
