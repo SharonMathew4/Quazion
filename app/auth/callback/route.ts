@@ -8,6 +8,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const token_hash = searchParams.get("token_hash");
+  const type = (searchParams.get("type") as "email" | "magiclink" | "signup" | "recovery") || "email";
   const errorDescription = searchParams.get("error_description");
   const rawNext = searchParams.get("next") || "/creator/dashboard";
   
@@ -15,8 +17,21 @@ export async function GET(request: Request) {
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/creator/dashboard";
 
   if (errorDescription) {
-    console.error("Supabase OAuth callback error:", errorDescription);
-    return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(errorDescription)}`);
+    console.error("[SERVER_AUTH] Supabase OAuth callback error:", errorDescription);
+    return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
+  }
+
+  // Handle server-side token_hash verification (Magic Link / Email OTP)
+  if (token_hash) {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
+
+    if (!error && data?.user) {
+      return NextResponse.redirect(`${origin}${next}`);
+    } else if (error) {
+      console.error("[SERVER_AUTH] VerifyOtp failure:", error.message);
+      return NextResponse.redirect(`${origin}/auth/login?error=session_expired`);
+    }
   }
 
   if (code) {
@@ -77,8 +92,8 @@ export async function GET(request: Request) {
 
       return NextResponse.redirect(`${origin}${next}`);
     } else if (error) {
-      console.error("Exchange code error:", error.message);
-      return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(error.message)}`);
+      console.error("[SERVER_AUTH] Exchange code error:", error.message);
+      return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
     }
   }
 

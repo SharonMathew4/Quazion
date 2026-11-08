@@ -63,9 +63,26 @@ export async function POST(request: Request) {
               redirectTo: `${origin}${next}`,
             },
           });
-          actionLink = linkData?.properties?.action_link || null;
+          
+          if (linkData?.properties?.hashed_token) {
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+              token_hash: linkData.properties.hashed_token,
+              type: "email",
+            });
+            if (!verifyError) {
+              actionLink = null;
+            } else {
+              actionLink = linkData?.properties?.action_link || null;
+            }
+          } else {
+            actionLink = linkData?.properties?.action_link || null;
+          }
         } else {
-          return NextResponse.json({ error: createError.message }, { status: 400 });
+          console.error("[SERVER_AUTH] User creation failed:", createError.message);
+          return NextResponse.json(
+            { error: "Unable to register institutional credentials. Please verify your details." },
+            { status: 400 }
+          );
         }
       } else if (newUser?.user) {
         userId = newUser.user.id;
@@ -78,7 +95,20 @@ export async function POST(request: Request) {
             redirectTo: `${origin}${next}`,
           },
         });
-        actionLink = linkData?.properties?.action_link || null;
+
+        if (linkData?.properties?.hashed_token) {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: linkData.properties.hashed_token,
+            type: "email",
+          });
+          if (!verifyError) {
+            actionLink = null;
+          } else {
+            actionLink = linkData?.properties?.action_link || null;
+          }
+        } else {
+          actionLink = linkData?.properties?.action_link || null;
+        }
       }
     }
 
@@ -108,7 +138,10 @@ export async function POST(request: Request) {
       redirectUrl: actionLink || `${origin}${next}`,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to complete ORCID setup.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[SERVER_AUTH] Failed to complete ORCID setup:", err);
+    return NextResponse.json(
+      { error: "An unexpected error occurred during setup. Please try again." },
+      { status: 500 }
+    );
   }
 }
