@@ -8,8 +8,12 @@ import { PublicationContent } from "@/components/publications/publication-conten
 import { PublicationStats } from "@/components/publications/publication-stats";
 import { AuthorSummary } from "@/components/publications/author-summary";
 import { RelatedPublicationCard } from "@/components/publications/related-publication-card";
+import { PeerReviewSection } from "@/components/publications/peer-review-section";
+import { DiscussionComments } from "@/components/publications/discussion-comments";
 import { BookOpen } from "lucide-react";
 import { Publication, Reference } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -34,6 +38,9 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
         likes_count,
         downloads_count,
         reading_time_minutes,
+        version,
+        changelog_notes,
+        endorsements_count,
         created_at,
         published_at,
         category:categories(id, name, slug, description),
@@ -44,6 +51,12 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
       .maybeSingle();
 
     if (!error && p) {
+      try {
+        await supabase.rpc("record_publication_view", { p_pub_id: p.id });
+      } catch {
+        // Safe fallback
+      }
+
       interface RawRef {
         id: string;
         title: string;
@@ -99,6 +112,9 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
         likes: p.likes_count || 0,
         downloads: p.downloads_count || 0,
         readingTimeMinutes: p.reading_time_minutes || 5,
+        version: p.version || 1,
+        changelogNotes: p.changelog_notes || undefined,
+        endorsementsCount: p.endorsements_count || 0,
         references: refs,
         createdAt: p.created_at,
         publishedAt: p.published_at,
@@ -166,6 +182,12 @@ export default async function PublicationDetailPage({ params }: Props) {
               showDemoNotice={false}
             />
           </section>
+
+          {/* Post-Publication Peer Review Section */}
+          <PeerReviewSection publicationId={pub.id} authorId={pub.author.id} />
+
+          {/* Open Scientific Discussion & Questions */}
+          <DiscussionComments publicationId={pub.id} />
         </main>
 
         {/* Sidebar Pane (4 Cols) */}
