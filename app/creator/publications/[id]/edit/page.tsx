@@ -20,8 +20,9 @@ import {
   CheckCircle2,
   FileCode
 } from "lucide-react";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSanitizedErrorMessage } from "@/lib/security-errors";
+import { EmptyState } from "@/components/ui/empty-state";
+import { reportClientError } from "@/lib/client-logger";
 
 const PUBLICATION_TYPES: PublicationType[] = [
   "Research Paper",
@@ -45,7 +46,6 @@ export default function EditPublicationPage() {
 
   // Loading & Auth State
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentStatus, setCurrentStatus] = useState<string>("DRAFT");
   const [currentVersion, setCurrentVersion] = useState<number>(1);
@@ -79,7 +79,6 @@ export default function EditPublicationPage() {
           router.push(`/auth/login?next=/creator/publications/${pubId}/edit`);
           return;
         }
-        setCurrentUser(user);
 
         // 1. Fetch categories
         const { data: catData } = await supabase
@@ -165,6 +164,7 @@ export default function EditPublicationPage() {
           setReferences([{ title: "", authors: "", year: "", source: "" }]);
         }
       } catch (err: unknown) {
+        reportClientError("EditPublication_LoadData", err, { pubId });
         setErrorMessage(
           getSanitizedErrorMessage(
             err,
@@ -286,6 +286,7 @@ export default function EditPublicationPage() {
         router.refresh();
       }, 1200);
     } catch (err: unknown) {
+      reportClientError("EditPublication_SaveUpdates", err, { pubId });
       setErrorMessage(
         getSanitizedErrorMessage(
           err,
@@ -309,6 +310,23 @@ export default function EditPublicationPage() {
           <Loader2 className="w-5 h-5 animate-spin text-rose-700" />
           <span>Loading manuscript editor...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (!title && errorMessage) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center bg-slate-50 p-4">
+        <EmptyState
+          icon={AlertCircle}
+          badge="Access Notice"
+          title="Manuscript Inaccessible"
+          description={errorMessage}
+          primaryAction={{
+            label: "Return to Creator Dashboard",
+            href: "/creator/dashboard",
+          }}
+        />
       </div>
     );
   }
