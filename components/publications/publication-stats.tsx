@@ -32,7 +32,7 @@ export function PublicationStats({
       <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
         <div className="flex items-center gap-2">
           <LikeButton publicationId={publicationId} initialLikes={likes} />
-          <DownloadButton initialDownloads={downloads} title={title} />
+          <DownloadButton publicationId={publicationId} initialDownloads={downloads} title={title} />
         </div>
 
         <div className="flex items-center gap-3 text-slate-400">
