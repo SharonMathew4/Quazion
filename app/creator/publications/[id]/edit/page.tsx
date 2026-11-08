@@ -291,9 +291,9 @@ export default function EditPublicationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <div className="cosmic-card p-8 rounded-2xl flex items-center gap-3 text-slate-400 font-mono text-sm">
-          <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+      <div className="min-h-[70vh] flex items-center justify-center bg-slate-50">
+        <div className="academic-card p-8 rounded bg-white border border-slate-200 shadow-2xs flex items-center gap-3 text-slate-700 font-mono text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-rose-700" />
           <span>Loading manuscript editor...</span>
         </div>
       </div>
@@ -301,44 +301,44 @@ export default function EditPublicationPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 font-sans">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
           <Link
             href="/creator/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-400 transition-colors font-mono mb-2"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-rose-700 transition-colors font-mono mb-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Dashboard</span>
+            <span>Back to Researcher Studio</span>
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               Edit Manuscript
             </h1>
             <Badge variant={currentStatus === "PUBLISHED" ? "success" : "warning"}>
               {currentStatus}
             </Badge>
-            <span className="text-xs font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+            <span className="text-xs font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
               v{currentVersion}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 font-sans">
             Update manuscript content, mathematical theorems, references, and changelog notes.
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setIsPreviewOpen(true)}
-            className="flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-1.5 cursor-pointer shadow-2xs"
           >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Preview</span>
+            <Eye className="w-3.5 h-3.5 text-slate-600" />
+            <span>Manuscript Preview</span>
           </Button>
 
           {currentStatus === "DRAFT" ? (
@@ -349,7 +349,7 @@ export default function EditPublicationPage() {
                 size="sm"
                 onClick={() => saveUpdates("DRAFT")}
                 disabled={isSubmitting}
-                className="flex items-center gap-1.5 cursor-pointer"
+                className="flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 <span>Save Draft</span>
@@ -360,7 +360,7 @@ export default function EditPublicationPage() {
                 size="sm"
                 onClick={() => saveUpdates("PUBLISHED")}
                 disabled={isSubmitting}
-                className="flex items-center gap-1.5 cursor-pointer font-semibold"
+                className="flex items-center gap-1.5 cursor-pointer font-semibold shadow-2xs"
               >
                 {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 <span>Publish</span>
@@ -373,7 +373,7 @@ export default function EditPublicationPage() {
               size="sm"
               onClick={() => saveUpdates("PUBLISHED")}
               disabled={isSubmitting}
-              className="flex items-center gap-1.5 cursor-pointer font-semibold"
+              className="flex items-center gap-1.5 cursor-pointer font-semibold shadow-2xs"
             >
               {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               <span>Save Revision (v{currentVersion + 1})</span>
@@ -384,56 +384,56 @@ export default function EditPublicationPage() {
 
       {/* Alerts */}
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start gap-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">{errorMessage}</span>
+        <div className="p-4 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+          <span className="leading-relaxed font-sans">{errorMessage}</span>
         </div>
       )}
       {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-start gap-2.5">
-          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">{successMessage}</span>
+        <div className="p-4 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
+          <span className="leading-relaxed font-sans">{successMessage}</span>
         </div>
       )}
 
       {/* Edit Form */}
       <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
         {/* Title & Slug */}
-        <div className="space-y-4">
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 space-y-4 shadow-2xs">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-              Manuscript Title <span className="text-rose-400">*</span>
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold mb-1.5">
+              Manuscript Title <span className="text-rose-700">*</span>
             </label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-lg font-medium"
+              className="w-full bg-white border border-slate-300 rounded px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-serif text-xl sm:text-2xl font-bold"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1">
-              URL Slug
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-1">
+              Permanent Identifier / URL Slug
             </label>
-            <div className="flex items-center gap-1 text-xs font-mono text-slate-400 bg-slate-950 px-3 py-2 rounded-lg border border-slate-800">
-              <span className="text-slate-600">quazion.org/publications/</span>
-              <span className="text-sky-400">{slug}</span>
+            <div className="flex items-center gap-1 text-xs font-mono text-slate-700 bg-slate-50 px-3 py-2 rounded border border-slate-200">
+              <span className="text-slate-400">quazion.org/publications/</span>
+              <span className="text-slate-900 font-semibold">{slug}</span>
             </div>
           </div>
         </div>
 
         {/* Category & Type */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-              Scientific Discipline <span className="text-rose-400">*</span>
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold mb-1.5">
+              Scientific Discipline <span className="text-rose-700">*</span>
             </label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500 cursor-pointer"
+              className="w-full bg-white border border-slate-300 rounded px-3.5 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-slate-500 cursor-pointer font-sans"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -444,13 +444,13 @@ export default function EditPublicationPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-              Publication Type <span className="text-rose-400">*</span>
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold mb-1.5">
+              Publication Classification <span className="text-rose-700">*</span>
             </label>
             <select
               value={publicationType}
               onChange={(e) => setPublicationType(e.target.value as PublicationType)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500 cursor-pointer"
+              className="w-full bg-white border border-slate-300 rounded px-3.5 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-slate-500 cursor-pointer font-sans"
             >
               {PUBLICATION_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -462,103 +462,106 @@ export default function EditPublicationPage() {
         </div>
 
         {/* Abstract */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300">
-              Abstract <span className="text-rose-400">*</span>
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold">
+              Structured Abstract <span className="text-rose-700">*</span>
             </label>
-            <span className="text-[11px] text-slate-500">Concise summary</span>
+            <span className="text-[11px] text-slate-500 font-mono">150–300 words recommended</span>
           </div>
           <textarea
             required
-            rows={4}
+            rows={5}
             value={abstract}
             onChange={(e) => setAbstract(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-xl p-3.5 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:border-sky-500 leading-relaxed"
+            className="w-full bg-white border border-slate-300 rounded p-3.5 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-500 leading-relaxed font-serif"
           />
         </div>
 
         {/* Content with KaTeX Notice */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300">
-              Scientific Manuscript Content <span className="text-rose-400">*</span>
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold">
+              Scientific Manuscript Content <span className="text-rose-700">*</span>
             </label>
-            <span className="text-[11px] text-sky-400 font-mono flex items-center gap-1">
-              <FileCode className="w-3.5 h-3.5" />
-              <span>Supports Markdown &amp; LaTeX ($...$ and $$...$$)</span>
+            <span className="text-[11px] text-slate-500 font-mono flex items-center gap-1">
+              <FileCode className="w-3.5 h-3.5 text-rose-700" />
+              <span>Supports Markdown &amp; KaTeX ($...$ and $$...$$)</span>
             </span>
           </div>
           <textarea
             required
-            rows={14}
+            rows={16}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-xl p-4 text-slate-100 text-sm font-mono placeholder-slate-500 focus:outline-none focus:border-sky-500 leading-relaxed"
+            className="w-full bg-slate-50/50 border border-slate-300 rounded p-4 text-slate-900 text-xs font-mono placeholder:text-slate-400 focus:outline-none focus:border-slate-500 leading-relaxed"
           />
         </div>
 
         {/* Changelog Notes (for revisions) */}
         {currentStatus === "PUBLISHED" && (
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
-            <label className="block text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold">
+          <div className="academic-card p-5 rounded bg-amber-50/50 border border-amber-200 space-y-1.5 shadow-2xs">
+            <label className="block text-xs font-mono uppercase tracking-wider text-amber-900 font-bold">
               Revision Changelog Notes
             </label>
             <input
               type="text"
               value={changelogNotes}
               onChange={(e) => setChangelogNotes(e.target.value)}
-              placeholder="e.g. Corrected metric tensor coefficient in Equation 4; added 2026 citations"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+              placeholder="e.g., Corrected metric tensor coefficient in Equation 4; added 2026 citations"
+              className="w-full bg-white border border-amber-300 rounded px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
           </div>
         )}
 
         {/* Tags & Keywords */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-              Tags (comma separated)
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold mb-1.5">
+              Disciplines &amp; Tags (comma separated)
             </label>
             <input
               type="text"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500"
+              className="w-full bg-white border border-slate-300 rounded px-3.5 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-              Keywords (comma separated)
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-700 font-bold mb-1.5">
+              Indexing Keywords (comma separated)
             </label>
             <input
               type="text"
               value={keywordsInput}
               onChange={(e) => setKeywordsInput(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-sky-500"
+              className="w-full bg-white border border-slate-300 rounded px-3.5 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-500 font-sans"
             />
           </div>
         </div>
 
         {/* References */}
-        <div className="space-y-3 pt-4 border-t border-slate-800">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300">
-              Bibliographic References
-            </label>
+        <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div>
+              <label className="block text-xs font-mono uppercase tracking-wider text-slate-800 font-bold">
+                Bibliographic References
+              </label>
+              <p className="text-[11px] text-slate-500 font-sans">Formal citations referenced in the text</p>
+            </div>
             <button
               type="button"
               onClick={handleAddReference}
-              className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1 font-mono cursor-pointer"
+              className="text-xs text-rose-700 hover:text-rose-800 flex items-center gap-1 font-mono cursor-pointer font-medium"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Reference</span>
+              <span>Add Citation</span>
             </button>
           </div>
 
           {references.map((ref, idx) => (
-            <div key={idx} className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl flex items-start gap-3">
+            <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded flex items-start gap-3">
               <span className="text-xs font-mono text-slate-500 mt-2">[{idx + 1}]</span>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 flex-1">
                 <input
@@ -566,28 +569,29 @@ export default function EditPublicationPage() {
                   placeholder="Article/Book Title"
                   value={ref.title}
                   onChange={(e) => handleReferenceChange(idx, "title", e.target.value)}
-                  className="sm:col-span-2 bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5"
+                  className="sm:col-span-2 bg-white border border-slate-300 text-slate-900 text-xs rounded px-2.5 py-1.5 focus:border-slate-500 font-sans"
                 />
                 <input
                   type="text"
                   placeholder="Authors"
                   value={ref.authors}
                   onChange={(e) => handleReferenceChange(idx, "authors", e.target.value)}
-                  className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5"
+                  className="bg-white border border-slate-300 text-slate-900 text-xs rounded px-2.5 py-1.5 focus:border-slate-500 font-sans"
                 />
                 <input
                   type="text"
                   placeholder="Year / Source"
                   value={ref.source}
                   onChange={(e) => handleReferenceChange(idx, "source", e.target.value)}
-                  className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5"
+                  className="bg-white border border-slate-300 text-slate-900 text-xs rounded px-2.5 py-1.5 focus:border-slate-500 font-sans"
                 />
               </div>
               {references.length > 1 && (
                 <button
                   type="button"
                   onClick={() => handleRemoveReference(idx)}
-                  className="text-slate-500 hover:text-rose-400 p-1.5 cursor-pointer"
+                  className="text-slate-400 hover:text-rose-700 p-1.5 cursor-pointer"
+                  title="Remove reference"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -599,34 +603,37 @@ export default function EditPublicationPage() {
 
       {/* Live Preview Modal */}
       {isPreviewOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="cosmic-card w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="academic-card w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded bg-white p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div className="flex items-center gap-2">
                 <Badge variant="accent">PREVIEW MODE</Badge>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-600 font-mono">
                   {selectedCategoryObj.name} • {publicationType}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPreviewOpen(false)}
-                className="text-xs font-mono text-slate-400 hover:text-white px-2.5 py-1 rounded bg-slate-800 cursor-pointer"
+                className="text-xs font-mono text-slate-600 hover:text-slate-900 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 cursor-pointer border border-slate-200"
               >
                 Close Preview
               </button>
             </div>
 
             <div className="space-y-4">
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
                 {title || "Untitled Manuscript"}
               </h1>
 
-              <div className="bg-slate-900/80 border-l-4 border-sky-500 p-4 rounded-r-lg italic text-slate-300 text-sm">
+              <div className="bg-slate-50 border-l-4 border-rose-700 p-4 rounded-r italic text-slate-800 text-sm font-serif">
+                <strong className="block text-[11px] font-sans font-bold uppercase tracking-wider text-rose-800 not-italic mb-1">
+                  Abstract
+                </strong>
                 {abstract || "No abstract provided."}
               </div>
 
-              <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 leading-relaxed max-h-[50vh] overflow-y-auto">
+              <div className="bg-white p-6 rounded border border-slate-200 leading-relaxed max-h-[50vh] overflow-y-auto">
                 <MathRenderer content={content || "No manuscript content entered yet."} />
               </div>
             </div>
