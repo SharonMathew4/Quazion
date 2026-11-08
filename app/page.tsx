@@ -110,6 +110,8 @@ function mapRawPublication(raw: RawPubItem): Publication {
   };
 }
 
+export const revalidate = 60;
+
 export default async function Home() {
   let categories: Category[] = MOCK_CATEGORIES;
   let allPublications: Publication[] = [...MOCK_PUBLICATIONS];
@@ -118,12 +120,43 @@ export default async function Home() {
   try {
     const supabase = await createServerSupabaseClient();
 
-    // 1. Fetch live categories
-    const { data: dbCategories } = await supabase
-      .from("categories")
-      .select("id, name, slug, description, icon_name")
-      .order("name", { ascending: true });
+    // Fetch live categories, published papers, and contributors concurrently to eliminate TTFB bottleneck
+    const [categoriesRes, publicationsRes, profilesRes] = await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, slug, description, icon_name")
+        .order("name", { ascending: true }),
+      supabase
+        .from("publications")
+        .select(`
+          id,
+          title,
+          slug,
+          abstract,
+          publication_type,
+          status,
+          cover_image,
+          tags,
+          keywords,
+          views_count,
+          likes_count,
+          downloads_count,
+          reading_time_minutes,
+          created_at,
+          published_at,
+          category:categories(id, name, slug, description, icon_name),
+          author:profiles(id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at)
+        `)
+        .eq("status", "PUBLISHED")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("profiles")
+        .select("id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at")
+        .limit(6),
+    ]);
 
+    const dbCategories = categoriesRes.data;
     if (dbCategories && dbCategories.length > 0) {
       categories = dbCategories.map((c) => {
         const mockMatch = MOCK_CATEGORIES.find((mc) => mc.slug === c.slug);
@@ -138,45 +171,14 @@ export default async function Home() {
       });
     }
 
-    // 2. Fetch live published papers from Supabase
-    const { data: liveData } = await supabase
-      .from("publications")
-      .select(`
-        id,
-        title,
-        slug,
-        abstract,
-        content,
-        publication_type,
-        status,
-        cover_image,
-        tags,
-        keywords,
-        views_count,
-        likes_count,
-        downloads_count,
-        reading_time_minutes,
-        created_at,
-        published_at,
-        category:categories(id, name, slug, description, icon_name),
-        author:profiles(id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at)
-      `)
-      .eq("status", "PUBLISHED")
-      .order("created_at", { ascending: false })
-      .limit(20);
-
+    const liveData = publicationsRes.data;
     if (liveData && liveData.length > 0) {
       allPublications = (liveData as unknown as RawPubItem[]).map(mapRawPublication);
     } else {
       allPublications = [];
     }
 
-    // 3. Fetch live contributors if available
-    const { data: liveProfiles } = await supabase
-      .from("profiles")
-      .select("id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at")
-      .limit(6);
-
+    const liveProfiles = profilesRes.data;
     if (liveProfiles && liveProfiles.length > 0) {
       contributors = liveProfiles.map((p) => ({
         id: p.id,
