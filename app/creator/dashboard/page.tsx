@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   FileText,
@@ -542,14 +542,23 @@ function EducationSection({
    MAIN DASHBOARD PAGE — LinkedIn-Style Researcher Profile
    ═══════════════════════════════════════════════════════════════════ */
 
-export default function CreatorDashboard() {
+function CreatorDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("success") === "orcid_linked") {
+      setSuccessMessage("ORCID iD successfully verified and linked via OAuth 2.0!");
+    } else if (searchParams.get("error") === "orcid_already_linked") {
+      setErrorMessage("This ORCID iD is already linked to another researcher profile.");
+    }
+  }, [searchParams]);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -900,11 +909,24 @@ export default function CreatorDashboard() {
                     Website
                   </a>
                 )}
-                {profile.orcid && (
-                  <span className="flex items-center gap-1 font-mono text-[11px]">
+                {profile.orcid ? (
+                  <a
+                    href={`https://orcid.org/${profile.orcid}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 font-mono text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors"
+                  >
                     <Award className="w-3.5 h-3.5 text-emerald-400" />
-                    ORCID: {profile.orcid}
-                  </span>
+                    <span>ORCID: {profile.orcid}</span>
+                  </a>
+                ) : (
+                  <Link
+                    href="/auth/orcid?mode=link&next=/creator/dashboard"
+                    className="flex items-center gap-1 font-mono text-[11px] text-slate-400 hover:text-emerald-400 transition-colors bg-slate-900/60 px-2 py-0.5 rounded border border-slate-800 hover:border-emerald-500/40"
+                  >
+                    <Award className="w-3 h-3 text-[#A6CE39]" />
+                    <span>Connect ORCID</span>
+                  </Link>
                 )}
                 <span className="flex items-center gap-1 font-mono text-[11px] text-slate-500">
                   <Calendar className="w-3 h-3" />
@@ -1075,6 +1097,11 @@ export default function CreatorDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      <Link href={`/creator/publications/${pub.id}/edit`}>
+                        <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
+                          <Pencil className="w-3.5 h-3.5" /> Edit
+                        </Button>
+                      </Link>
                       {pub.status === "PUBLISHED" ? (
                         <Link href={`/publications/${pub.slug}`}>
                           <Button variant="outline" size="sm" className="flex items-center gap-1.5">
@@ -1219,7 +1246,6 @@ export default function CreatorDashboard() {
                   { key: "location", label: "Location", icon: MapPin, value: profile.location || "" },
                   { key: "bio", label: "Short Bio", icon: FileText, value: profile.bio || "" },
                   { key: "website", label: "Website", icon: Globe, value: profile.website || "" },
-                  { key: "orcid", label: "ORCID", icon: Award, value: profile.orcid || "" },
                 ] as const).map((field) => (
                   <div key={field.key} className="space-y-1">
                     <label className="text-[11px] font-mono text-slate-500 flex items-center gap-1">
@@ -1249,6 +1275,58 @@ export default function CreatorDashboard() {
                     )}
                   </div>
                 ))}
+
+                {/* ORCID Academic Verification Widget */}
+                <div className="pt-3 border-t border-slate-800/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 font-semibold">
+                      <div className="w-4 h-4 rounded bg-[#A6CE39] text-slate-950 font-bold text-[9px] flex items-center justify-center">
+                        iD
+                      </div>
+                      <span>ORCID Identity</span>
+                    </label>
+                    {profile.orcid ? (
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                        OAuth Verified
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-amber-400 bg-amber-950/40 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                        Unlinked
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-2">
+                    {profile.orcid ? (
+                      <div>
+                        <div className="font-mono text-slate-200 text-xs">
+                          {profile.orcid}
+                        </div>
+                        <a
+                          href={`https://orcid.org/${profile.orcid}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-sky-400 hover:underline flex items-center gap-1 mt-0.5"
+                        >
+                          <span>View on orcid.org</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        Connect your authenticated ORCID iD to claim publication credits and verify your researcher identity.
+                      </p>
+                    )}
+
+                    <Link
+                      href="/auth/orcid?mode=link&next=/creator/dashboard"
+                      className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-lg text-xs font-mono font-medium transition-colors bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-500/30"
+                    >
+                      <Award className="w-3.5 h-3.5" />
+                      <span>{profile.orcid ? "Re-authorize ORCID" : "Link ORCID iD"}</span>
+                    </Link>
+                  </div>
+                </div>
               </div>
 
               {/* Social Links */}
@@ -1332,5 +1410,22 @@ export default function CreatorDashboard() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CreatorDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-950">
+          <div className="cosmic-card p-8 rounded-2xl flex items-center gap-3 text-slate-400 font-mono text-sm">
+            <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+            <span>Loading Researcher Studio...</span>
+          </div>
+        </div>
+      }
+    >
+      <CreatorDashboardContent />
+    </Suspense>
   );
 }
