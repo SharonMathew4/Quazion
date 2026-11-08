@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { fetchArxivPublications } from "@/lib/arxiv";
 import { MOCK_CATEGORIES, MOCK_PUBLICATIONS } from "@/lib/mock-data";
 import { ArrowRight, Compass, BookOpen } from "lucide-react";
 import { PublicationCard } from "@/components/publications/publication-card";
@@ -153,7 +154,16 @@ export default async function ExplorePage() {
       });
     }
   } catch (err) {
-    console.warn("Failed to load explore data from Supabase:", err);
+    console.warn("[SERVER] Notice: failed to load explore data from Supabase, using fallback:", err);
+  }
+
+  // If local publications are empty, populate featured additions from arXiv
+  if (publications.length === 0) {
+    try {
+      publications = await fetchArxivPublications({ limit: 6 });
+    } catch {
+      // keep fallback
+    }
   }
 
   return (

@@ -153,14 +153,50 @@ export default function PublicationsPage() {
             };
           });
 
-          setPublications(mapped);
+          // Fetch arXiv preprints to supplement directory
+          let combined = mapped;
+          try {
+            const arxivRes = await fetch("/api/arxiv?limit=20");
+            if (arxivRes.ok) {
+              const { publications: arxivPubs } = await arxivRes.json();
+              if (Array.isArray(arxivPubs) && arxivPubs.length > 0) {
+                combined = [...mapped, ...arxivPubs];
+              }
+            }
+          } catch {
+            // fallback to mapped
+          }
+          setPublications(combined);
         } else {
-          // Fallback to static mock publications if database has no published papers yet
+          // If database has no published papers, fetch directly from arXiv API route
+          try {
+            const arxivRes = await fetch("/api/arxiv?limit=25");
+            if (arxivRes.ok) {
+              const { publications: arxivPubs } = await arxivRes.json();
+              if (Array.isArray(arxivPubs) && arxivPubs.length > 0) {
+                setPublications(arxivPubs);
+                return;
+              }
+            }
+          } catch {
+            // fallback
+          }
           setPublications(MOCK_PUBLICATIONS);
         }
-      } catch (err) {
-        console.warn("Failed to fetch published papers:", err);
-        setPublications(MOCK_PUBLICATIONS);
+      } catch {
+        // Silently fall back to arXiv or mock publications without console leak
+        try {
+          const arxivRes = await fetch("/api/arxiv?limit=25");
+          if (arxivRes.ok) {
+            const { publications: arxivPubs } = await arxivRes.json();
+            if (Array.isArray(arxivPubs) && arxivPubs.length > 0) {
+              setPublications(arxivPubs);
+              return;
+            }
+          }
+        } catch {
+          setPublications(MOCK_PUBLICATIONS);
+        }
       } finally {
         setLoading(false);
       }

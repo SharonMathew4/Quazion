@@ -9,7 +9,6 @@ import {
   Bookmark, 
   Share2, 
   Clock, 
-  Eye, 
   Check, 
   ExternalLink, 
   Filter, 
@@ -22,10 +21,8 @@ import {
   HelpCircle,
   Award,
   FileText,
-  ShieldCheck,
-  CheckCircle2
+  ShieldCheck
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/publications/category-badge";
 import { QuickReadModal } from "@/components/publications/quick-read-modal";
@@ -57,6 +54,7 @@ export function SocialScienceFeed({
   // Feed filtering & sorting state
   const [selectedDomain, setSelectedDomain] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedSource, setSelectedSource] = useState<"all" | "arxiv" | "community">("all");
   const [sortBy, setSortBy] = useState<"trending" | "latest" | "views">("trending");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -148,6 +146,14 @@ export function SocialScienceFeed({
           return false;
         }
 
+        // Source Filter (arXiv vs Community)
+        if (selectedSource === "arxiv" && !pub.isExternal && pub.sourceName !== "arXiv.org") {
+          return false;
+        }
+        if (selectedSource === "community" && (pub.isExternal || pub.sourceName === "arXiv.org")) {
+          return false;
+        }
+
         // Search Filter
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
@@ -175,7 +181,7 @@ export function SocialScienceFeed({
         const scoreB = (b.likes || 0) * 3 + (b.downloads || 0) * 2 + (b.views || 0);
         return scoreB - scoreA;
       });
-  }, [initialPublications, selectedDomain, selectedType, sortBy, searchQuery]);
+  }, [initialPublications, selectedDomain, selectedType, selectedSource, sortBy, searchQuery]);
 
   const totalPollVotes = pollVotes.reduce((acc, curr) => acc + curr, 0);
 
@@ -240,7 +246,49 @@ export function SocialScienceFeed({
           })}
         </div>
 
-        {/* 2. Format & Sort Control Bar */}
+        {/* 2. Source Filter Tabs: All Sources | arXiv Preprints | Community Submissions */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-1.5 p-1 rounded-md bg-slate-100 border border-slate-200">
+            <button
+              onClick={() => setSelectedSource("all")}
+              className={`px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition-all ${
+                selectedSource === "all"
+                  ? "bg-slate-900 text-white font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All Research ({initialPublications.length})
+            </button>
+            <button
+              onClick={() => setSelectedSource("arxiv")}
+              className={`px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5 ${
+                selectedSource === "arxiv"
+                  ? "bg-rose-700 text-white font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${selectedSource === "arxiv" ? "bg-white" : "bg-rose-600"}`} />
+              <span>arXiv Preprints ({initialPublications.filter((p) => p.isExternal || p.sourceName === "arXiv.org").length})</span>
+            </button>
+            <button
+              onClick={() => setSelectedSource("community")}
+              className={`px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5 ${
+                selectedSource === "community"
+                  ? "bg-blue-700 text-white font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${selectedSource === "community" ? "bg-white" : "bg-blue-600"}`} />
+              <span>Community Submissions ({initialPublications.filter((p) => !p.isExternal && p.sourceName !== "arXiv.org").length})</span>
+            </button>
+          </div>
+
+          <div className="text-xs text-slate-500 font-sans hidden sm:block">
+            Showing <span className="font-semibold text-slate-900">{filteredPublications.length}</span> peer-indexed publications
+          </div>
+        </div>
+
+        {/* 3. Format & Sort Control Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-md bg-slate-50 border border-slate-200 mb-8 text-xs font-sans">
           {/* Content Type Selector */}
           <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -409,6 +457,19 @@ export function SocialScienceFeed({
                       {/* Meta Badges */}
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <CategoryBadge category={pub.category} clickable={false} />
+
+                        {pub.sourceName === "arXiv.org" || pub.isExternal ? (
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-800 bg-rose-50 px-2 py-0.5 rounded-sm border border-rose-200 flex items-center gap-1">
+                            <ExternalLink className="w-2.5 h-2.5 text-rose-700" />
+                            <span>arXiv.org</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-800 bg-blue-50 px-2 py-0.5 rounded-sm border border-blue-200 flex items-center gap-1">
+                            <Award className="w-2.5 h-2.5 text-blue-700" />
+                            <span>Quazion Original</span>
+                          </span>
+                        )}
+
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
                           {pub.publicationType}
                         </span>
@@ -543,8 +604,20 @@ export function SocialScienceFeed({
                         </button>
                       </div>
 
-                      {/* Right: Quick Read & Full Manuscript Link */}
+                      {/* Right: Quick Read, PDF & Full Manuscript Link */}
                       <div className="flex items-center gap-2">
+                        {pub.documentUrl && (
+                          <a
+                            href={pub.documentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs h-7 px-2.5 rounded border border-slate-200 bg-white text-slate-700 hover:text-rose-700 hover:border-slate-300 flex items-center gap-1 font-mono transition-colors"
+                            title="Direct PDF Download / Viewer"
+                          >
+                            <FileText className="w-3 h-3 text-rose-600" />
+                            <span>PDF</span>
+                          </a>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
