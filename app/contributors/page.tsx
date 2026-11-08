@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users, ArrowRight, BookOpen, ShieldCheck } from "lucide-react";
+import { Users, ArrowRight } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Profile } from "@/types";
 import { Button } from "@/components/ui/button";
