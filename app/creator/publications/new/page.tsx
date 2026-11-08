@@ -8,6 +8,7 @@ import { MOCK_CATEGORIES } from "@/lib/mock-data";
 import { PublicationType, Category } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MathRenderer } from "@/components/publications/math-renderer";
 import { 
   ArrowLeft, 
   Save, 
@@ -585,8 +586,8 @@ export default function NewPublicationPage() {
                 {abstract || "No abstract provided."}
               </div>
 
-              <div className="whitespace-pre-wrap font-mono text-xs sm:text-sm text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800 leading-relaxed">
-                {content || "No manuscript content entered yet."}
+              <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 leading-relaxed max-h-[50vh] overflow-y-auto">
+                <MathRenderer content={content || "No manuscript content entered yet."} />
               </div>
             </div>
           </div>
