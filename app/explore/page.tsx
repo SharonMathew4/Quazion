@@ -157,19 +157,19 @@ export default async function ExplorePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 font-sans">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400 mb-2">
-          <Compass className="w-4 h-4" />
-          <span>Scientific Disciplines</span>
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-rose-800 font-bold mb-2">
+          <Compass className="w-4 h-4 text-rose-700" />
+          <span>Academic Disciplinary Directory</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
-          Explore Research Categories
+        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+          Explore Research Disciplines
         </h1>
-        <p className="text-slate-400 mt-2 max-w-2xl text-sm sm:text-base">
-          From astrophysics and cosmological simulations to mathematical physics and quantum systems. 
-          Select a discipline to dive into peer-moderated papers and essays.
+        <p className="text-slate-600 mt-2 max-w-2xl text-sm sm:text-base font-sans leading-relaxed">
+          From astrophysics and cosmological simulations to mathematical physics and quantum computation. 
+          Select a discipline to inspect peer-reviewed manuscripts and scholarly dispatches.
         </p>
       </div>
 
@@ -178,47 +178,47 @@ export default async function ExplorePage() {
         {categories.map((category) => (
           <div
             key={category.id}
-            className="cosmic-card p-6 rounded-xl flex flex-col justify-between"
+            className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs hover:border-slate-400 transition-all flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
-                <h2 className="text-xl font-bold text-slate-100">
+                <h2 className="font-serif text-xl font-bold text-slate-900">
                   {category.name}
                 </h2>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 text-sky-400 border border-slate-800">
-                  {category.publicationCount ?? 0} publications
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                  {category.publicationCount ?? 0} papers
                 </span>
               </div>
-              <p className="text-sm text-slate-400 leading-relaxed mb-6">
+              <p className="text-xs text-slate-600 leading-relaxed mb-6 font-sans">
                 {category.description}
               </p>
             </div>
 
             <Link
               href={`/publications?category=${category.slug}`}
-              className="inline-flex items-center gap-2 text-sm font-medium text-sky-400 hover:text-sky-300 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 transition-colors uppercase tracking-wider font-mono pt-3 border-t border-slate-100"
             >
-              <span>Browse {category.name} publications</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Browse {category.name}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         ))}
       </div>
 
       {/* Recent additions across domains */}
-      <div className="pt-8 border-t border-slate-800">
+      <div className="pt-8 border-t border-slate-200">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-sky-400" />
-            <h2 className="text-xl font-bold text-slate-100">
+            <BookOpen className="w-4 h-4 text-rose-700" />
+            <h2 className="font-serif text-xl font-bold text-slate-900">
               Featured Across Disciplines
             </h2>
           </div>
           <Link
             href="/publications"
-            className="text-sm text-sky-400 hover:text-sky-300 flex items-center gap-1"
+            className="text-xs font-mono font-medium text-rose-700 hover:text-rose-800 flex items-center gap-1 uppercase tracking-wider"
           >
-            <span>All publications</span>
+            <span>Complete Archive</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -230,9 +230,9 @@ export default async function ExplorePage() {
             ))}
           </div>
         ) : (
-          <div className="cosmic-card rounded-2xl p-8 text-center border border-dashed border-slate-800">
-            <BookOpen className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-            <p className="text-xs text-slate-400">
+          <div className="academic-card rounded p-8 text-center border border-dashed border-slate-200 bg-white shadow-2xs">
+            <BookOpen className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-xs text-slate-500 font-sans">
               No publications have been uploaded across disciplines yet.
             </p>
           </div>

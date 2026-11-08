@@ -16,67 +16,67 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 font-sans">
       
       {/* 1. Header & Identity */}
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-sky-500/30 bg-sky-950/40 text-sky-300 text-xs font-mono">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Product Identity &amp; Mission</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-rose-200 bg-rose-50 text-rose-800 text-xs font-mono font-medium">
+          <Sparkles className="w-3.5 h-3.5 text-rose-700" />
+          <span>Institutional Mission &amp; Editorial Charter</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-100 tracking-tight">
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
           About QUAZION
         </h1>
-        <p className="text-lg text-slate-300 italic font-medium">
+        <p className="font-serif text-lg text-slate-700 italic font-medium">
           &ldquo;Exploring Knowledge Beyond Boundaries&rdquo;
         </p>
-        <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          QUAZION is an open scientific knowledge repository and digital publishing medium. 
-          Our core objective is to dismantle paywalls and bureaucratic barriers to scientific dissemination, 
-          empowering researchers, educators, and independent thinkers to publish and access knowledge freely.
+        <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed font-sans">
+          QUAZION is a peer-moderated open science archive and academic publishing medium. 
+          Our core objective is to dismantle commercial paywalls and bureaucratic friction in scientific dissemination, 
+          empowering university faculties, independent researchers, and scholarly institutions to publish and read peer-reviewed knowledge freely under Creative Commons.
         </p>
       </div>
 
       {/* 2. Core Pillars */}
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-100 border-b border-slate-800 pb-3 flex items-center gap-2">
-          <Globe className="w-5 h-5 text-sky-400" />
-          <span>Core Philosophies</span>
+        <h2 className="font-serif text-2xl font-bold text-slate-900 border-b border-slate-200 pb-3 flex items-center gap-2">
+          <Globe className="w-5 h-5 text-rose-700" />
+          <span>Scholarly Principles</span>
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="cosmic-card p-5 rounded-xl space-y-2">
-            <h3 className="font-semibold text-slate-100 text-base">
+          <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
+            <h3 className="font-serif font-bold text-slate-900 text-base">
               1. Universal Open Access
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Every publication, observational note, and educational article hosted on QUAZION is free to read, reference, and download. No subscription fees, paywalls, or mandatory visitor accounts.
+            <p className="text-xs text-slate-600 leading-relaxed font-sans">
+              Every manuscript, observational log, and pedagogical paper on QUAZION is free to read, cite, and download as standard PDF under the CC BY 4.0 license. Zero subscription paywalls, zero author-processing charges (APCs).
             </p>
           </div>
 
-          <div className="cosmic-card p-5 rounded-xl space-y-2">
-            <h3 className="font-semibold text-slate-100 text-base">
-              2. Scientific Authenticity
+          <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
+            <h3 className="font-serif font-bold text-slate-900 text-base">
+              2. Academic Authenticity &amp; ORCID
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              We provide clear distinction between theoretical research papers, observational logs, reviews, and community educational essays, keeping presentation rigorous and trustworthy.
+            <p className="text-xs text-slate-600 leading-relaxed font-sans">
+              We enforce verified researcher identities via official ORCID OAuth 2.0 integration, guaranteeing transparent author attribution, institutional affiliations, and permanent bibliographic records.
             </p>
           </div>
 
-          <div className="cosmic-card p-5 rounded-xl space-y-2">
-            <h3 className="font-semibold text-slate-100 text-base">
-              3. Contributor Ownership
+          <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
+            <h3 className="font-serif font-bold text-slate-900 text-base">
+              3. Contributor Intellectual Ownership
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Authors maintain full copyright and recognition for their work, with permanent timestamps, public profiles, and transparent engagement metrics.
+            <p className="text-xs text-slate-600 leading-relaxed font-sans">
+              Authors retain complete intellectual copyright over their manuscripts, supported by digital object identifiers (DOIs), versioned changelogs, and immutable cryptographic timestamps.
             </p>
           </div>
 
-          <div className="cosmic-card p-5 rounded-xl space-y-2">
-            <h3 className="font-semibold text-slate-100 text-base">
-              4. Zero Commercialization of Science
+          <div className="academic-card p-6 rounded bg-white border border-slate-200 shadow-2xs space-y-2">
+            <h3 className="font-serif font-bold text-slate-900 text-base">
+              4. Non-Commercial Academic Integrity
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              QUAZION is not a social media feed or ad-driven platform. The architecture is engineered around long-form readability, mathematical formulas, and scientific discovery.
+            <p className="text-xs text-slate-600 leading-relaxed font-sans">
+              QUAZION rejects sensational algorithmic feeds and third-party advertising. The platform adheres strictly to COPE (Committee on Publication Ethics) principles and scholarly typography standards.
             </p>
           </div>
         </div>
@@ -84,44 +84,44 @@ export default function AboutPage() {
 
       {/* 3. Publication Distinction & Moderation */}
       <section id="moderation" className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-100 border-b border-slate-800 pb-3 flex items-center gap-2">
-          <Scale className="w-5 h-5 text-sky-400" />
-          <span>Publishing &amp; Moderation Model</span>
+        <h2 className="font-serif text-2xl font-bold text-slate-900 border-b border-slate-200 pb-3 flex items-center gap-2">
+          <Scale className="w-5 h-5 text-rose-700" />
+          <span>Publishing &amp; Moderation Standards</span>
         </h2>
 
-        <div className="p-5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-4 text-sm text-slate-300 leading-relaxed">
-          <div className="flex items-center gap-2 text-emerald-400 font-semibold font-mono text-xs uppercase">
-            <ShieldCheck className="w-4 h-4" />
-            <span>Important Scientific Notice</span>
+        <div className="p-6 rounded bg-slate-50 border border-slate-200 space-y-4 text-sm text-slate-800 leading-relaxed">
+          <div className="flex items-center gap-2 text-emerald-800 font-semibold font-mono text-xs uppercase tracking-wider">
+            <ShieldCheck className="w-4 h-4 text-emerald-700" />
+            <span>Ethical Publication Compliance</span>
           </div>
-          <p>
+          <p className="text-xs font-sans text-slate-700 leading-relaxed">
             QUAZION distinguishes clearly between community open publishing and formal institutional peer review. Hosting a manuscript on QUAZION means the work has fulfilled our platform formatting and community standards.
           </p>
-          <p>
-            Publications are categorized strictly by intent:
+          <p className="text-xs font-sans font-semibold text-slate-900">
+            Manuscript categories include:
           </p>
-          <ul className="list-disc list-inside space-y-1 text-xs text-slate-400 font-mono">
-            <li><strong>Research Paper:</strong> Original theoretical derivations, mathematical models, or empirical findings.</li>
-            <li><strong>Observation Report:</strong> Telescopic, astronomical, or experimental laboratory data logs.</li>
-            <li><strong>Review Article:</strong> Comprehensive literature surveys summarizing current paradigms.</li>
-            <li><strong>Educational Article &amp; Tutorial:</strong> Accessible pedagogical breakdowns explaining core concepts.</li>
-            <li><strong>Scientific Note &amp; Commentary:</strong> Concise insights, hypotheses, or critical commentary.</li>
+          <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-600 font-sans">
+            <li><strong className="text-slate-900 font-semibold font-mono">Research Paper:</strong> Original theoretical derivations, mathematical models, or empirical findings.</li>
+            <li><strong className="text-slate-900 font-semibold font-mono">Observation Report:</strong> Telescopic, astronomical, or experimental laboratory data logs.</li>
+            <li><strong className="text-slate-900 font-semibold font-mono">Review Article:</strong> Comprehensive literature surveys summarizing current paradigms.</li>
+            <li><strong className="text-slate-900 font-semibold font-mono">Educational Article &amp; Tutorial:</strong> Accessible pedagogical breakdowns explaining core concepts.</li>
+            <li><strong className="text-slate-900 font-semibold font-mono">Scientific Note &amp; Commentary:</strong> Concise insights, hypotheses, or critical commentary.</li>
           </ul>
         </div>
       </section>
 
       {/* 4. Call to Action */}
-      <div className="cosmic-card rounded-2xl p-8 text-center space-y-4 border-slate-700/60">
-        <h3 className="text-xl font-bold text-slate-100">
-          Ready to share your scientific insights?
+      <div className="academic-card rounded bg-white p-8 text-center space-y-4 border border-slate-200 shadow-2xs">
+        <h3 className="font-serif text-xl font-bold text-slate-900">
+          Ready to submit your scientific manuscript?
         </h3>
-        <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
-          Sign in to the Creator Studio to begin authoring and publishing your research today.
+        <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto font-sans">
+          Sign in via institutional credentials or ORCID iD to begin authoring and submitting your research to the archive.
         </p>
         <div className="pt-2">
-          <Link href="/auth/login">
-            <Button variant="primary" size="md" className="gap-2">
-              <span>Open Creator Studio</span>
+          <Link href="/creator/publications/new">
+            <Button variant="primary" size="md" className="gap-2 font-semibold">
+              <span>Submit Manuscript</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

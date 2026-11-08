@@ -187,33 +187,33 @@ export default function PublicationsPage() {
     });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 font-sans">
       {/* Page Title */}
       <div>
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-400 mb-2">
-          <BookOpen className="w-4 h-4" />
-          <span>Open Archive Catalog</span>
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-rose-800 font-bold mb-2">
+          <BookOpen className="w-4 h-4 text-rose-700" />
+          <span>Journal Archive Catalog</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
-          Scientific Publications
+        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+          Scientific Publications &amp; Manuscripts
         </h1>
-        <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-2xl">
-          Search and filter all open research papers, review articles, observational logs, and scientific notes.
+        <p className="text-slate-600 mt-2 text-sm sm:text-base max-w-2xl font-sans leading-relaxed">
+          Index of peer-moderated open access research papers, review articles, observational logs, and theoretical treatises across all scientific disciplines.
         </p>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 rounded p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
         
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Category:</span>
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-mono font-medium">
+            <Filter className="w-3.5 h-3.5 text-slate-400" />
+            <span>Discipline:</span>
           </div>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500 cursor-pointer"
+            className="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded px-3 py-1.5 focus:outline-none focus:border-slate-500 cursor-pointer font-sans"
           >
             <option value="all">All Disciplines</option>
             {categories.map((cat) => (
@@ -223,13 +223,13 @@ export default function PublicationsPage() {
             ))}
           </select>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono ml-2">
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-mono font-medium ml-2">
             <span>Type:</span>
           </div>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500 cursor-pointer"
+            className="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded px-3 py-1.5 focus:outline-none focus:border-slate-500 cursor-pointer font-sans"
           >
             <option value="all">All Types</option>
             {PUBLICATION_TYPES.map((type) => (
@@ -243,23 +243,23 @@ export default function PublicationsPage() {
         {/* Sort options */}
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-xs text-slate-400 font-mono">Sort:</span>
+          <span className="text-xs text-slate-600 font-mono font-medium">Sort:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "newest" | "views" | "likes")}
-            className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500 cursor-pointer"
+            className="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded px-3 py-1.5 focus:outline-none focus:border-slate-500 cursor-pointer font-sans"
           >
-            <option value="newest">Newest First</option>
-            <option value="views">Most Viewed</option>
-            <option value="likes">Most Liked</option>
+            <option value="newest">Most Recent</option>
+            <option value="views">Most Read</option>
+            <option value="likes">Most Endorsed</option>
           </select>
         </div>
       </div>
 
       {/* Publications Listing */}
       {loading ? (
-        <div className="py-20 text-center flex items-center justify-center gap-3 text-slate-400 font-mono text-sm">
-          <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+        <div className="py-20 text-center flex items-center justify-center gap-3 text-slate-600 font-mono text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-rose-700" />
           <span>Querying open publication archive...</span>
         </div>
       ) : filteredPublications.length > 0 ? (
@@ -269,13 +269,13 @@ export default function PublicationsPage() {
           ))}
         </div>
       ) : (
-        <div className="cosmic-card rounded-2xl p-12 text-center max-w-lg mx-auto border border-dashed border-slate-800">
-          <BookOpen className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-200 mb-1">
+        <div className="academic-card rounded p-12 text-center max-w-lg mx-auto border border-dashed border-slate-200 bg-white shadow-2xs">
+          <BookOpen className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+          <h3 className="font-serif text-base font-semibold text-slate-900 mb-1">
             No publications found
           </h3>
-          <p className="text-xs text-slate-400">
-            There are currently no publications matching this filter.
+          <p className="text-xs text-slate-500 font-sans">
+            There are currently no manuscripts matching this discipline filter.
           </p>
         </div>
       )}
