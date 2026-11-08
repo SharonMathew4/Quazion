@@ -5,6 +5,8 @@ import { ArrowRight, Compass, BookOpen } from "lucide-react";
 import { PublicationCard } from "@/components/publications/publication-card";
 import { Category, Publication } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Explore Scientific Domains — QUAZION",
   description: "Browse open research, publications, and notes by scientific category.",

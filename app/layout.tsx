@@ -1,24 +1,53 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import "katex/dist/katex.min.css";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
 export const metadata: Metadata = {
-  title: "QUAZION — Exploring Knowledge Beyond Boundaries",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://quazion.org"),
+  title: {
+    default: "QUAZION — Exploring Knowledge Beyond Boundaries",
+    template: "%s | QUAZION",
+  },
   description:
     "QUAZION is an open scientific knowledge archive and publishing platform for researchers, educators, and science enthusiasts.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  openGraph: {
+    title: "QUAZION — Exploring Knowledge Beyond Boundaries",
+    description:
+      "Open scientific knowledge archive, research articles, preprints, and peer-reviewed community inquiry.",
+    url: "https://quazion.org",
+    siteName: "QUAZION",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "QUAZION Open Science Archive",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "QUAZION — Exploring Knowledge Beyond Boundaries",
+    description:
+      "Open scientific knowledge archive, research articles, preprints, and peer-reviewed community inquiry.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className="h-full antialiased dark"
     >
       <body className="min-h-full flex flex-col cosmic-bg text-[#f0f4fc]">
         <Navbar />

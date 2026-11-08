@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Profile } from "@/types";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Contributors Directory — QUAZION",
   description: "Discover researchers, educators, and authors publishing on QUAZION.",

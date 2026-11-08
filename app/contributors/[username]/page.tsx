@@ -7,6 +7,8 @@ import { ArrowLeft, BookOpen, MapPin, Building, Globe, Award, Sparkles } from "l
 import { Badge } from "@/components/ui/badge";
 import { Profile, Publication, Category } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ username: string }>;
 }

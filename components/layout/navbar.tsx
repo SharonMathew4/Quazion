@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { 
-  Search, 
-  Menu, 
-  X, 
-  Compass, 
-  BookOpen, 
-  Users, 
+import Image from "next/image";
+import {
+  Search,
+  Menu,
+  X,
+  Compass,
+  BookOpen,
+  Users,
   Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,22 +28,30 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#06080d]/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        
+
         {/* Brand / Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 border border-slate-700/80 group-hover:border-sky-500/50 transition-colors">
-            {/* Subtle celestial quasar icon */}
-            <span className="absolute w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-            <div className="w-5 h-5 rounded-full border border-sky-400/40 group-hover:rotate-45 transition-transform duration-500" />
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
+          <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900/80 border border-slate-700/60 p-1 group-hover:border-sky-500/60 group-hover:shadow-[0_0_22px_rgba(56,189,248,0.28)] transition-all duration-300">
+            <Image
+              src="/icon.svg"
+              alt="QUAZION Logo"
+              width={36}
+              height={36}
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              priority
+            />
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-lg tracking-wider text-slate-100 flex items-center gap-1.5 font-mono">
+          <div className="hidden sm:flex flex-col">
+            <span className="font-bold text-lg tracking-wider text-slate-100 flex items-center gap-1.5 font-mono group-hover:text-sky-300 transition-colors">
               QUAZION
             </span>
-            <span className="hidden sm:inline-block text-[10px] uppercase tracking-widest text-slate-400 font-medium -mt-1">
+            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium -mt-1">
               Open Science Archive
             </span>
           </div>
+          <span className="sm:hidden font-bold text-base tracking-wider text-slate-100 font-mono group-hover:text-sky-300 transition-colors">
+            QUAZION
+          </span>
         </Link>
 
         {/* Desktop Navigation Links */}

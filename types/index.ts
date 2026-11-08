@@ -116,8 +116,34 @@ export interface Publication {
   views: number;
   likes: number;
   downloads: number;
+  version?: number;
+  changelogNotes?: string;
+  endorsementsCount?: number;
   createdAt: string;
   publishedAt?: string;
   updatedAt?: string;
   readingTimeMinutes?: number;
+}
+
+export type PeerReviewVerdict = "ENDORSED" | "REVISION_REQUESTED" | "COMMENT";
+
+export interface PeerReview {
+  id: string;
+  publicationId: string;
+  reviewer: Profile;
+  verdict: PeerReviewVerdict;
+  summary: string;
+  competingInterests?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicationComment {
+  id: string;
+  publicationId: string;
+  author: Profile;
+  parentId?: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
