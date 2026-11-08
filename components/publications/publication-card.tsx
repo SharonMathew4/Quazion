@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
 import { Tag } from "./tag";
-import { Eye, Heart, Download, Clock, ArrowUpRight } from "lucide-react";
+import { Eye, Heart, Download, Clock, ArrowUpRight, CheckCircle2 } from "lucide-react";
 
 interface PublicationCardProps {
   publication: Publication;
@@ -14,16 +14,29 @@ interface PublicationCardProps {
  * Refactored modular card for scientific repository listings.
  */
 export function PublicationCard({ publication }: PublicationCardProps) {
+  const isEndorsed = (publication.endorsementsCount || 0) > 0;
+
   return (
     <article className="cosmic-card rounded-2xl p-5 md:p-6 flex flex-col justify-between group bg-slate-900/50 border border-slate-800 hover:border-sky-500/40 transition-all">
       <div>
         {/* Header Badges: Category + Publication Type */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <CategoryBadge category={publication.category} />
             <span className="text-xs text-slate-400 font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
               {publication.publicationType}
             </span>
+            {publication.version && publication.version > 1 && (
+              <span className="text-[11px] font-mono text-sky-400 bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-800/40">
+                v{publication.version}
+              </span>
+            )}
+            {isEndorsed && (
+              <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/50 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                Endorsed
+              </span>
+            )}
           </div>
 
           {publication.readingTimeMinutes && (
