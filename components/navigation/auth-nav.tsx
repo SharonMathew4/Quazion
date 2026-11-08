@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, PenSquare } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, User } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export function AuthNav() {
@@ -43,22 +43,30 @@ export function AuthNav() {
 
   if (loading) {
     return (
-      <div className="w-20 h-8 rounded-lg bg-slate-800/40 animate-pulse" />
+      <div className="w-24 h-8 rounded-md bg-slate-100 animate-pulse border border-slate-200" />
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         <Link href="/auth/login">
-          <Button variant="ghost" size="sm" className="text-xs text-slate-300 hover:text-white">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs text-slate-700 hover:text-slate-900 border-slate-300 whitespace-nowrap px-3 py-1.5 cursor-pointer shadow-2xs"
+          >
             Sign In
           </Button>
         </Link>
-        <Link href="/auth/login?mode=signup">
-          <Button variant="primary" size="sm" className="flex items-center gap-1.5 text-xs font-semibold">
-            <PenSquare className="w-3.5 h-3.5 text-slate-950" />
-            <span>Sign Up</span>
+        <Link href="/creator/publications/new">
+          <Button
+            variant="primary"
+            size="sm"
+            className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap px-3.5 py-1.5 cursor-pointer shadow-2xs"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Submit Manuscript</span>
           </Button>
         </Link>
       </div>
@@ -66,18 +74,34 @@ export function AuthNav() {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 shrink-0">
+      <Link href="/creator/publications/new">
+        <Button
+          variant="primary"
+          size="sm"
+          className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap px-3.5 py-1.5 hidden md:inline-flex cursor-pointer shadow-2xs"
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>Submit Manuscript</span>
+        </Button>
+      </Link>
+
       <Link href="/creator/dashboard">
-        <Button variant="secondary" size="sm" className="flex items-center gap-1.5 font-mono text-xs">
-          <LayoutDashboard className="w-3.5 h-3.5 text-sky-400" />
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1.5 text-xs font-medium border-slate-300 text-slate-800 hover:bg-slate-50 whitespace-nowrap px-3 py-1.5 cursor-pointer shadow-2xs"
+        >
+          <LayoutDashboard className="w-3.5 h-3.5 text-slate-600" />
           <span>Dashboard</span>
         </Button>
       </Link>
 
       <button
         onClick={handleLogout}
-        title="Sign Out"
-        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors cursor-pointer"
+        title="Sign Out of Journal Session"
+        className="p-1.5 rounded-md text-slate-500 hover:text-rose-700 hover:bg-slate-100 transition-colors cursor-pointer"
+        aria-label="Sign Out"
       >
         <LogOut className="w-4 h-4" />
       </button>
