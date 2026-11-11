@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/publications/category-badge";
 import { QuickReadModal } from "@/components/publications/quick-read-modal";
+import { InlineMathText } from "@/components/publications/math-renderer";
 import { formatShortDate } from "@/lib/utils";
 import { showToast } from "@/components/ui/toast";
 
@@ -499,7 +500,7 @@ export function SocialScienceFeed({
                       {/* Title */}
                       <h3 className="font-serif text-lg sm:text-xl font-bold text-slate-900 hover:text-rose-700 transition-colors leading-snug">
                         <Link href={`/publications/${pub.slug}`}>
-                          {pub.title}
+                          <InlineMathText text={pub.title} />
                         </Link>
                       </h3>
 
@@ -516,7 +517,7 @@ export function SocialScienceFeed({
 
                       {/* Abstract / Scientific Narrative */}
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans">
-                        {pub.abstract}
+                        <InlineMathText text={pub.abstract} />
                       </p>
 
                       {/* Key Takeaway Callout */}
@@ -524,7 +525,7 @@ export function SocialScienceFeed({
                         <span className="font-bold text-rose-800 uppercase tracking-wider block text-[10px] mb-0.5 not-italic">
                           Core Conclusion
                         </span>
-                        &ldquo;{pub.abstract.slice(0, 180)}...&rdquo;
+                        &ldquo;<InlineMathText text={pub.abstract} maxLength={180} />&rdquo;
                       </div>
 
                       {/* Academic Keyword pills (no #) */}
