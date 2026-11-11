@@ -128,6 +128,39 @@ export interface Publication {
   isExternal?: boolean;
   externalId?: string;
   doi?: string;
+  citationCount?: number;
+  isOpenAccess?: boolean;
+  trendingScore?: number;
+}
+
+export interface ExternalAuthor {
+  name: string;
+  orcid?: string;
+  affiliation?: string;
+}
+
+export interface ExternalPublicationRecord {
+  id: string;
+  source: "openalex" | "arxiv" | "biorxiv";
+  external_id: string;
+  doi?: string | null;
+  title: string;
+  slug: string;
+  abstract: string;
+  category_slug: string;
+  authors: ExternalAuthor[];
+  publication_type: string;
+  published_at: string;
+  cover_image?: string | null;
+  document_url?: string | null;
+  source_url: string;
+  citation_count: number;
+  trending_score: number;
+  is_open_access: boolean;
+  license?: string | null;
+  raw_metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export type PeerReviewVerdict = "ENDORSED" | "REVISION_REQUESTED" | "COMMENT";
