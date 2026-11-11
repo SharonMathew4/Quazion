@@ -56,7 +56,7 @@ export function SocialScienceFeed({
   // Feed filtering & sorting state
   const [selectedDomain, setSelectedDomain] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [selectedSource, setSelectedSource] = useState<"all" | "arxiv" | "community">("all");
+  const [selectedSource, setSelectedSource] = useState<"all" | "openalex" | "arxiv" | "community">("all");
   const [sortBy, setSortBy] = useState<"trending" | "latest" | "views">("trending");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -154,11 +154,14 @@ export function SocialScienceFeed({
           return false;
         }
 
-        // Source Filter (arXiv vs Community)
-        if (selectedSource === "arxiv" && !pub.isExternal && pub.sourceName !== "arXiv.org") {
+        // Source Filter (OpenAlex vs arXiv vs Community)
+        if (selectedSource === "openalex" && (!pub.isExternal || !pub.sourceName?.toLowerCase().includes("openalex"))) {
           return false;
         }
-        if (selectedSource === "community" && (pub.isExternal || pub.sourceName === "arXiv.org")) {
+        if (selectedSource === "arxiv" && (!pub.isExternal || !pub.sourceName?.toLowerCase().includes("arxiv"))) {
+          return false;
+        }
+        if (selectedSource === "community" && pub.isExternal) {
           return false;
         }
 
@@ -256,7 +259,7 @@ export function SocialScienceFeed({
 
         {/* 2. Source Filter Tabs: All Sources | arXiv Preprints | Community Submissions */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-1.5 p-1 rounded-md bg-slate-100 border border-slate-200">
+          <div className="flex items-center gap-1.5 p-1 rounded-md bg-slate-100 border border-slate-200 overflow-x-auto">
             <button
               onClick={() => setSelectedSource("all")}
               className={`px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition-all ${
@@ -268,15 +271,26 @@ export function SocialScienceFeed({
               All Research ({initialPublications.length})
             </button>
             <button
-              onClick={() => setSelectedSource("arxiv")}
+              onClick={() => setSelectedSource("openalex")}
               className={`px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5 ${
-                selectedSource === "arxiv"
+                selectedSource === "openalex"
                   ? "bg-rose-700 text-white font-bold shadow-2xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${selectedSource === "arxiv" ? "bg-white" : "bg-rose-600"}`} />
-              <span>arXiv Preprints ({initialPublications.filter((p) => p.isExternal || p.sourceName === "arXiv.org").length})</span>
+              <span className={`w-1.5 h-1.5 rounded-full ${selectedSource === "openalex" ? "bg-white" : "bg-rose-600"}`} />
+              <span>OpenAlex Feed ({initialPublications.filter((p) => p.isExternal && p.sourceName?.toLowerCase().includes("openalex")).length})</span>
+            </button>
+            <button
+              onClick={() => setSelectedSource("arxiv")}
+              className={`px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5 ${
+                selectedSource === "arxiv"
+                  ? "bg-amber-700 text-white font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${selectedSource === "arxiv" ? "bg-white" : "bg-amber-600"}`} />
+              <span>arXiv Preprints ({initialPublications.filter((p) => p.isExternal && p.sourceName?.toLowerCase().includes("arxiv")).length})</span>
             </button>
             <button
               onClick={() => setSelectedSource("community")}
@@ -287,7 +301,7 @@ export function SocialScienceFeed({
               }`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${selectedSource === "community" ? "bg-white" : "bg-blue-600"}`} />
-              <span>Community Submissions ({initialPublications.filter((p) => !p.isExternal && p.sourceName !== "arXiv.org").length})</span>
+              <span>Community ({initialPublications.filter((p) => !p.isExternal).length})</span>
             </button>
           </div>
 
@@ -466,15 +480,22 @@ export function SocialScienceFeed({
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <CategoryBadge category={pub.category} clickable={false} />
 
-                        {pub.sourceName === "arXiv.org" || pub.isExternal ? (
+                        {pub.isExternal ? (
                           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-800 bg-rose-50 px-2 py-0.5 rounded-sm border border-rose-200 flex items-center gap-1">
                             <ExternalLink className="w-2.5 h-2.5 text-rose-700" />
-                            <span>arXiv.org</span>
+                            <span>{pub.sourceName || "Open Research"}</span>
                           </span>
                         ) : (
                           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-800 bg-blue-50 px-2 py-0.5 rounded-sm border border-blue-200 flex items-center gap-1">
                             <Award className="w-2.5 h-2.5 text-blue-700" />
                             <span>Quazion Original</span>
+                          </span>
+                        )}
+
+                        {pub.citationCount !== undefined && pub.citationCount > 0 && (
+                          <span className="text-[10px] font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-sm border border-amber-200 flex items-center gap-1">
+                            <Award className="w-2.5 h-2.5 text-amber-600" />
+                            <span>{pub.citationCount} {pub.citationCount === 1 ? "Citation" : "Citations"}</span>
                           </span>
                         )}
 
