@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
+import { InlineMathText } from "./math-renderer";
 import { Calendar, Clock, RefreshCw, ArrowLeft, CheckCircle2, History, ShieldCheck } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ export function PublicationHeader({ publication }: PublicationHeaderProps) {
         </Link>
         <span>/</span>
         <span className="text-slate-400 truncate max-w-xs sm:max-w-md">
-          {publication.title}
+          <InlineMathText text={publication.title} />
         </span>
       </nav>
 
@@ -101,7 +102,7 @@ export function PublicationHeader({ publication }: PublicationHeaderProps) {
 
       {/* ──────────────── Main Manuscript Title ──────────────── */}
       <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-[1.18]">
-        {publication.title}
+        <InlineMathText text={publication.title} />
       </h1>
 
       {/* Revision notes if applicable */}
