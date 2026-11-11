@@ -2,6 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { fetchArxivPublicationById } from "@/lib/arxiv";
+import { getExternalPublicationBySlug } from "@/lib/external-publications";
 import { MOCK_PUBLICATIONS } from "@/lib/mock-data";
 import { PublicationHeader } from "@/components/publications/publication-header";
 import { PublicationMeta } from "@/components/publications/publication-meta";
@@ -22,9 +23,16 @@ interface Props {
 }
 
 async function getPublicationBySlug(slug: string): Promise<Publication | null> {
-  // 1. Direct arXiv lookup if slug indicates an external arXiv paper
+  // 1. Direct external lookup if slug indicates an external paper
+  if (slug.startsWith("openalex-") || slug.startsWith("ext-")) {
+    const extPub = await getExternalPublicationBySlug(slug);
+    if (extPub) return extPub;
+  }
+
   if (slug.startsWith("arxiv-")) {
     const arxivId = slug.replace(/^arxiv-/i, "");
+    const extPub = await getExternalPublicationBySlug(slug);
+    if (extPub) return extPub;
     const arxivPub = await fetchArxivPublicationById(arxivId);
     if (arxivPub) return arxivPub;
   }
@@ -143,6 +151,10 @@ async function getPublicationBySlug(slug: string): Promise<Publication | null> {
   // Fallback check: see if the slug is an arXiv ID without prefix
   const arxivFallback = await fetchArxivPublicationById(slug);
   if (arxivFallback) return arxivFallback;
+
+  // Fallback check in external publications cache
+  const generalExtFallback = await getExternalPublicationBySlug(slug);
+  if (generalExtFallback) return generalExtFallback;
 
   // Fallback to static mock publications
   const fallback = MOCK_PUBLICATIONS.find((p) => p.slug === slug);

@@ -4,7 +4,7 @@ import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
 import { Tag } from "./tag";
 import { InlineMathText } from "./math-renderer";
-import { Eye, Heart, Download, Clock, ArrowUpRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Eye, Heart, Download, Clock, ArrowUpRight, CheckCircle2, ShieldCheck, Award } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 interface PublicationCardProps {
@@ -18,6 +18,8 @@ interface PublicationCardProps {
 export function PublicationCard({ publication }: PublicationCardProps) {
   const isEndorsed = (publication.endorsementsCount || 0) > 0;
   const formattedDate = formatDate(publication.publishedAt || publication.createdAt);
+  const isExternal = Boolean(publication.isExternal || publication.sourceName);
+  const sourceLabel = publication.sourceName || (isExternal ? "Open Research" : "Quazion Original");
 
   return (
     <article className="academic-card p-6 flex flex-col justify-between group bg-white border border-slate-200 hover:border-slate-400 hover:shadow-md transition-all rounded-md">
@@ -26,9 +28,9 @@ export function PublicationCard({ publication }: PublicationCardProps) {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex flex-wrap items-center gap-2">
             <CategoryBadge category={publication.category} />
-            {publication.sourceName === "arXiv.org" || publication.isExternal ? (
+            {isExternal ? (
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-800 bg-rose-50 px-2 py-0.5 rounded-sm border border-rose-200">
-                arXiv.org
+                {sourceLabel}
               </span>
             ) : (
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-800 bg-blue-50 px-2 py-0.5 rounded-sm border border-blue-200">
@@ -38,6 +40,12 @@ export function PublicationCard({ publication }: PublicationCardProps) {
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-700 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
               {publication.publicationType}
             </span>
+            {publication.citationCount !== undefined && publication.citationCount > 0 && (
+              <span className="text-[10px] font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-sm border border-amber-200 flex items-center gap-1">
+                <Award className="w-3 h-3 text-amber-600" />
+                <span>{publication.citationCount} {publication.citationCount === 1 ? "Citation" : "Citations"}</span>
+              </span>
+            )}
             {publication.version && publication.version > 1 && (
               <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-sm border border-slate-200">
                 v{publication.version}

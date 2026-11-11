@@ -163,45 +163,45 @@ export default function PublicationsPage() {
           };
         });
 
-        // Fetch arXiv preprints to supplement directory
+        // Fetch syndicated research feed (OpenAlex & arXiv) to supplement directory
         let combined = mapped;
         try {
-          const arxivRes = await fetch("/api/arxiv?limit=20");
-          if (arxivRes.ok) {
-            const { publications: arxivPubs } = await arxivRes.json();
-            if (Array.isArray(arxivPubs) && arxivPubs.length > 0) {
-              combined = [...mapped, ...arxivPubs];
+          const feedRes = await fetch("/api/feed?limit=25");
+          if (feedRes.ok) {
+            const { publications: feedPubs } = await feedRes.json();
+            if (Array.isArray(feedPubs) && feedPubs.length > 0) {
+              combined = [...mapped, ...feedPubs];
             }
           }
-        } catch (arxivErr) {
-          reportClientError("PublicationsCatalog_ArxivFallback", arxivErr);
+        } catch (feedErr) {
+          reportClientError("PublicationsCatalog_FeedFallback", feedErr);
         }
         setPublications(combined);
       } else {
-        // If database has no published papers, fetch directly from arXiv API route
+        // If database has no published papers, fetch directly from syndicated feed route
         try {
-          const arxivRes = await fetch("/api/arxiv?limit=25");
-          if (arxivRes.ok) {
-            const { publications: arxivPubs } = await arxivRes.json();
-            if (Array.isArray(arxivPubs) && arxivPubs.length > 0) {
-              setPublications(arxivPubs);
+          const feedRes = await fetch("/api/feed?limit=25");
+          if (feedRes.ok) {
+            const { publications: feedPubs } = await feedRes.json();
+            if (Array.isArray(feedPubs) && feedPubs.length > 0) {
+              setPublications(feedPubs);
               return;
             }
           }
         } catch (err) {
-          reportClientError("PublicationsCatalog_DirectArxiv", err);
+          reportClientError("PublicationsCatalog_DirectFeed", err);
         }
         setPublications(MOCK_PUBLICATIONS);
       }
     } catch (err) {
       reportClientError("PublicationsCatalog_FatalLoad", err);
       try {
-        const arxivRes = await fetch("/api/arxiv?limit=25");
-        if (arxivRes.ok) {
-          const { publications: arxivPubs } = await arxivRes.json();
-          if (Array.isArray(arxivPubs) && arxivPubs.length > 0) {
-            setPublications(arxivPubs);
-            setCatalogNotice("Displaying external preprints while the community archive is syncing.");
+        const feedRes = await fetch("/api/feed?limit=25");
+        if (feedRes.ok) {
+          const { publications: feedPubs } = await feedRes.json();
+          if (Array.isArray(feedPubs) && feedPubs.length > 0) {
+            setPublications(feedPubs);
+            setCatalogNotice("Displaying syndicated research while the community archive is syncing.");
             return;
           }
         }

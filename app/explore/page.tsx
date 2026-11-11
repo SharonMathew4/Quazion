@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { fetchArxivPublications } from "@/lib/arxiv";
+import { getExternalPublications } from "@/lib/external-publications";
 import { MOCK_CATEGORIES, MOCK_PUBLICATIONS } from "@/lib/mock-data";
 import { ArrowRight, Compass, BookOpen } from "lucide-react";
 import { PublicationCard } from "@/components/publications/publication-card";
@@ -160,10 +160,10 @@ export default async function ExplorePage() {
     });
   }
 
-  // If local publications are empty, populate featured additions from arXiv
+  // If local publications are empty, populate featured additions from syndicated feed
   if (publications.length === 0) {
     try {
-      publications = await fetchArxivPublications({ limit: 6 });
+      publications = await getExternalPublications({ limit: 6 });
     } catch {
       // keep fallback
     }

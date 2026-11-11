@@ -119,14 +119,14 @@ function SearchContent() {
         }));
       }
 
-      // 2. Query arXiv preprints
-      let arxivResults: Publication[] = [];
+      // 2. Query syndicated research feed
+      let syndicatedResults: Publication[] = [];
       try {
-        const res = await fetch(`/api/arxiv?limit=15`);
+        const res = await fetch(`/api/feed?limit=30`);
         if (res.ok) {
           const { publications } = await res.json();
           if (Array.isArray(publications)) {
-            arxivResults = publications.filter((p: Publication) =>
+            syndicatedResults = publications.filter((p: Publication) =>
               p.title.toLowerCase().includes(trimmed) ||
               p.abstract.toLowerCase().includes(trimmed) ||
               p.author.displayName.toLowerCase().includes(trimmed) ||
@@ -134,8 +134,8 @@ function SearchContent() {
             );
           }
         }
-      } catch (arxivErr) {
-        reportClientError("Search_ArxivQuery", arxivErr);
+      } catch (feedErr) {
+        reportClientError("Search_SyndicatedFeedQuery", feedErr);
       }
 
       // 3. Match against fallback dataset for seamless coverage
@@ -148,7 +148,7 @@ function SearchContent() {
       );
 
       // Merge unique by slug/id
-      const combined = [...liveResults, ...arxivResults, ...mockMatches];
+      const combined = [...liveResults, ...syndicatedResults, ...mockMatches];
       const uniqueMap = new Map<string, Publication>();
       for (const item of combined) {
         if (!uniqueMap.has(item.slug || item.id)) {

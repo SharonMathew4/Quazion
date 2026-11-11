@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Globe, Atom, Compass, Binary, Cpu, Layers } from "lucide-react";
+import { ArrowRight, Sparkles, Globe, Atom, Compass, Binary, Cpu, Layers, Dna, HeartPulse, Brain, FlaskConical } from "lucide-react";
 import { Category } from "@/types";
 
 interface CategorySectionProps {
@@ -14,6 +14,10 @@ const iconMap: Record<string, React.ElementType> = {
   Compass,
   Binary,
   Cpu,
+  Dna,
+  HeartPulse,
+  Brain,
+  FlaskConical,
 };
 
 /**
