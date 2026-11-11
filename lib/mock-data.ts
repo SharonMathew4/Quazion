@@ -55,6 +55,38 @@ export const MOCK_CATEGORIES: Category[] = [
     iconName: "Cpu",
     publicationCount: 0,
   },
+  {
+    id: "cat-7",
+    name: "Life Sciences & Genetics",
+    slug: "life-sciences",
+    description: "Cellular biochemistry, CRISPR gene editing, genomics, molecular biology, and evolutionary dynamics.",
+    iconName: "Dna",
+    publicationCount: 0,
+  },
+  {
+    id: "cat-8",
+    name: "Medicine & Neuroscience",
+    slug: "medicine-health",
+    description: "Clinical investigations, neural circuits, cognitive neuroscience, immunology, and oncology.",
+    iconName: "HeartPulse",
+    publicationCount: 0,
+  },
+  {
+    id: "cat-9",
+    name: "Computer Science & AI",
+    slug: "computer-science-ai",
+    description: "Machine intelligence, neural architectures, distributed computing systems, and algorithmic theory.",
+    iconName: "Brain",
+    publicationCount: 0,
+  },
+  {
+    id: "cat-10",
+    name: "Chemistry & Materials",
+    slug: "chemistry",
+    description: "Chemical synthesis, nanostructures, quantum chemistry, catalysis, and advanced materials.",
+    iconName: "FlaskConical",
+    publicationCount: 0,
+  },
 ];
 
 export const MOCK_AUTHORS: Record<string, Profile> = {};
