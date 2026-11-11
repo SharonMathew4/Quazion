@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Publication } from "@/types";
+import { InlineMathText } from "./math-renderer";
 import { ShieldCheck, Check, FileCode, Share2, Copy } from "lucide-react";
 import { showToast } from "@/components/ui/toast";
 
@@ -93,7 +94,7 @@ export function PublicationMeta({ publication }: PublicationMetaProps) {
             How to Cite:
           </span>
           <p className="text-slate-800 text-xs leading-relaxed font-sans bg-slate-50 p-2.5 rounded border border-slate-200">
-            {publication.author.displayName} ({year}). &ldquo;{publication.title}&rdquo;.{" "}
+            {publication.author.displayName} ({year}). &ldquo;<InlineMathText text={publication.title} />&rdquo;.{" "}
             <em className="text-slate-900 font-serif">QUAZION Open Science Archive</em>.{" "}
             <span className="font-mono text-slate-600 text-[11px]">doi:{doi}</span>
           </p>

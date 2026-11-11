@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, Calendar, Eye, Heart, Download, FileText } from "lucide-react";
 import { Publication } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { InlineMathText } from "@/components/publications/math-renderer";
 import { formatDate } from "@/lib/utils";
 
 interface LatestPublicationsProps {
@@ -62,12 +63,12 @@ export function LatestPublications({ publications }: LatestPublicationsProps) {
 
                 <h3 className="font-serif text-lg font-bold text-slate-900 group-hover:text-rose-700 transition-colors">
                   <Link href={`/publications/${pub.slug}`}>
-                    {pub.title}
+                    <InlineMathText text={pub.title} />
                   </Link>
                 </h3>
 
                 <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 leading-relaxed font-sans">
-                  {pub.abstract}
+                  <InlineMathText text={pub.abstract} />
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 pt-1 font-sans">

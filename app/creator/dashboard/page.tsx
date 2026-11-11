@@ -45,6 +45,7 @@ import {
 } from "@/types";
 import { getSanitizedErrorMessage } from "@/lib/security-errors";
 import { showToast } from "@/components/ui/toast";
+import { InlineMathText } from "@/components/publications/math-renderer";
 import { reportClientError } from "@/lib/client-logger";
 
 /* ─────────────── Type Definitions ─────────────── */
@@ -1092,7 +1093,9 @@ function CreatorDashboardContent() {
                         <Badge variant={pub.status === "PUBLISHED" ? "success" : "warning"}>{pub.status}</Badge>
                         <span className="text-[11px] text-slate-500 font-mono">{pub.category?.name || "General"} • {pub.publication_type}</span>
                       </div>
-                      <h3 className="text-sm font-semibold text-slate-900 truncate font-serif">{pub.title}</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 truncate font-serif">
+                        <InlineMathText text={pub.title} />
+                      </h3>
                       <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
                         <span>{formatDate(pub.created_at)}</span>
                         {pub.status === "PUBLISHED" && (

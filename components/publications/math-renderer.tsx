@@ -7,6 +7,82 @@ interface MathRendererProps {
   className?: string;
 }
 
+export interface InlineMathTextProps {
+  text: string;
+  maxLength?: number;
+  className?: string;
+  as?: "span" | "div" | "p" | "h1" | "h2" | "h3" | "h4";
+}
+
+/**
+ * Safely truncates text without splitting an active LaTeX math delimiter ($...$ or $$...$$).
+ * If cut lands inside an active math expression, it cleanly ends before the formula
+ * (or closes it if near the end) and preserves syntax integrity.
+ */
+export function truncateMathText(text: string, maxLength: number): string {
+  if (!text || text.length <= maxLength) return text;
+
+  // Find all math ranges: [start, end]
+  const mathRanges: Array<{ start: number; end: number }> = [];
+  const mathRegex = /\$\$[\s\S]+?\$\$|\$[^\$\n]+?\$/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = mathRegex.exec(text)) !== null) {
+    mathRanges.push({
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+
+  // Check if maxLength falls inside any math range
+  let targetCut = maxLength;
+  for (const range of mathRanges) {
+    if (targetCut > range.start && targetCut < range.end) {
+      // If we are close to the end of the formula (within 15 chars), keep it intact
+      if (range.end - targetCut <= 15) {
+        targetCut = range.end;
+      } else {
+        // Otherwise, cut cleanly before the math block starts
+        targetCut = range.start;
+      }
+      break;
+    }
+  }
+
+  // If cut point lands in the middle of a regular word outside of math, trim back to space
+  if (targetCut === maxLength && targetCut < text.length) {
+    const lastSpace = text.lastIndexOf(" ", targetCut);
+    if (lastSpace > maxLength * 0.8) {
+      targetCut = lastSpace;
+    }
+  }
+
+  const truncated = text.slice(0, targetCut).trim().replace(/[,;:\-\s]+$/, "");
+  return `${truncated}...`;
+}
+
+/**
+ * Lightweight inline math and text formatter for titles, abstracts, cards, and excerpts.
+ * Renders LaTeX formulas ($...$ and $$...$$) alongside markdown bold/italics/code,
+ * with optional math-safe truncation.
+ */
+export function InlineMathText({
+  text,
+  maxLength,
+  className = "",
+  as: Component = "span",
+}: InlineMathTextProps) {
+  if (!text) return null;
+
+  const processedText = maxLength ? truncateMathText(text, maxLength) : text;
+
+  return (
+    <Component className={className}>
+      {renderInlineFormatting(processedText)}
+    </Component>
+  );
+}
+
 /**
  * High-performance scientific markdown and LaTeX formula renderer for QUAZION.
  * Supports inline math ($...$), display block math ($$...$$), headings, tables,
@@ -159,17 +235,29 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
 }
 
 /**
- * KaTeX formula compiler with safe HTML output fallback.
+ * KaTeX formula compiler with graceful plain-text fallback.
  */
+function cleanMathFallback(tex: string): string {
+  return tex
+    .replace(/\\[a-zA-Z]+/g, " ")
+    .replace(/[{}]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function renderKaTeX(tex: string, displayMode: boolean): string {
   try {
-    return katex.renderToString(tex, {
+    const html = katex.renderToString(tex, {
       displayMode,
       throwOnError: false,
       strict: false,
     });
+    if (html.includes("katex-error")) {
+      return `<span class="inline-math-clean font-serif italic">${escapeHtml(cleanMathFallback(tex))}</span>`;
+    }
+    return html;
   } catch {
-    return `<span class="katex-error text-rose-700 font-mono">${escapeHtml(tex)}</span>`;
+    return `<span class="inline-math-clean font-serif italic">${escapeHtml(cleanMathFallback(tex))}</span>`;
   }
 }
 
@@ -361,31 +449,33 @@ function parseTextBlocks(text: string, result: ContentBlock[]): void {
 }
 
 /**
- * Handles inline math ($...$), bold (**...**), italics (*...*), and code (`...`).
+ * Handles inline math ($...$ or $$...$$), bold (**...**), italics (*...*), and code (`...`).
  */
-function renderInlineFormatting(text: string): React.ReactNode {
+export function renderInlineFormatting(text: string): React.ReactNode {
   if (!text) return null;
 
-  // Split by inline math: $formula$
-  const inlineMathRegex = /\$([^\$\n]+?)\$/g;
+  // Split by display math ($$...$$) or inline math ($...$)
+  const mathRegex = /\$\$([\s\S]+?)\$\$|\$([^\$\n]+?)\$/g;
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let keyCounter = 0;
 
-  while ((match = inlineMathRegex.exec(text)) !== null) {
+  while ((match = mathRegex.exec(text)) !== null) {
     const textBefore = text.slice(lastIndex, match.index);
     if (textBefore) {
       elements.push(renderBasicInline(textBefore, keyCounter++));
     }
 
-    const mathContent = match[1];
+    const isDisplay = Boolean(match[1]);
+    const mathContent = match[1] || match[2];
+
     elements.push(
       <span
         key={keyCounter++}
-        className="inline-math px-0.5 text-slate-900 font-mono"
+        className={isDisplay ? "block my-2 text-center" : "inline-math px-0.5 text-slate-900"}
         dangerouslySetInnerHTML={{
-          __html: renderKaTeX(mathContent, false),
+          __html: renderKaTeX(mathContent, isDisplay),
         }}
       />
     );

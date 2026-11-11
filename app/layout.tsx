@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";

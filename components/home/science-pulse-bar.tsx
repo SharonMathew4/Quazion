@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ShieldCheck, BookOpen, Scale } from "lucide-react";
 import { Publication } from "@/types";
+import { InlineMathText } from "@/components/publications/math-renderer";
 
 interface SciencePulseBarProps {
   publications?: Publication[];
@@ -68,7 +69,9 @@ export function SciencePulseBar({ publications = [] }: SciencePulseBarProps) {
               <span className="text-[11px] font-mono text-slate-400 font-normal shrink-0">
                 [{activeItem.tag}]
               </span>
-              <span className="truncate">{activeItem.title}</span>
+              <span className="truncate">
+                <InlineMathText text={activeItem.title} />
+              </span>
               <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-rose-700 transition-colors shrink-0" />
             </Link>
           </div>

@@ -2,7 +2,7 @@ import React from "react";
 import { Publication } from "@/types";
 import { BookMarked, FileText, Download, ExternalLink } from "lucide-react";
 import { Tag } from "./tag";
-import { MathRenderer } from "./math-renderer";
+import { MathRenderer, InlineMathText } from "./math-renderer";
 
 interface PublicationContentProps {
   publication: Publication;
@@ -56,7 +56,7 @@ export function PublicationContent({ publication }: PublicationContentProps) {
           <span>Abstract</span>
         </div>
         <p className="text-base sm:text-lg text-slate-800 leading-relaxed italic font-serif">
-          &ldquo;{publication.abstract}&rdquo;
+          &ldquo;<InlineMathText text={publication.abstract} />&rdquo;
         </p>
 
         {publication.keywords && publication.keywords.length > 0 && (
@@ -153,7 +153,7 @@ export function PublicationContent({ publication }: PublicationContentProps) {
               <li key={ref.id || idx} className="pl-1">
                 <span className="text-slate-900 font-bold">{ref.authors}</span>{" "}
                 {ref.year && <span>({ref.year}). </span>}
-                &ldquo;{ref.title}&rdquo;
+                &ldquo;<InlineMathText text={ref.title} />&rdquo;
                 {ref.source && <span className="text-slate-600"> — {ref.source}</span>}
                 {ref.doi && (
                   <a

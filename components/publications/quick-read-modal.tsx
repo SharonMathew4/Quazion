@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "./category-badge";
+import { InlineMathText } from "./math-renderer";
 import { formatDate } from "@/lib/utils";
 
 interface QuickReadModalProps {
@@ -103,7 +104,7 @@ export function QuickReadModal({
           {/* Title */}
           <div>
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
-              {publication.title}
+              <InlineMathText text={publication.title} />
             </h2>
 
             {/* Author Byline */}
@@ -134,7 +135,7 @@ export function QuickReadModal({
               Principal Scientific Finding
             </span>
             <p className="italic text-slate-700">
-              &ldquo;{publication.abstract.slice(0, 260)}...&rdquo;
+              &ldquo;<InlineMathText text={publication.abstract} maxLength={260} />&rdquo;
             </p>
           </div>
 
@@ -145,7 +146,7 @@ export function QuickReadModal({
               <span>Full Abstract</span>
             </h3>
             <p className="text-sm text-slate-600 leading-relaxed font-sans">
-              {publication.abstract}
+              <InlineMathText text={publication.abstract} />
             </p>
           </div>
 
@@ -176,7 +177,8 @@ export function QuickReadModal({
               <ul className="space-y-1 text-xs text-slate-600">
                 {publication.references.slice(0, 3).map((ref) => (
                   <li key={ref.id} className="truncate">
-                    • <strong className="text-slate-800">{ref.authors}</strong> ({ref.year || "n.d."}): {ref.title}
+                    • <strong className="text-slate-800">{ref.authors}</strong> ({ref.year || "n.d."}):{" "}
+                    <InlineMathText text={ref.title} />
                   </li>
                 ))}
               </ul>
