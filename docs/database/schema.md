@@ -27,7 +27,14 @@ Normalized bibliographic citation list for each paper.
 ### 5. `publication_likes`, `publication_views`, `publication_downloads`
 Interaction tables that prevent duplicate metrics and record engagement.
 
+### 6. `external_publications`
+High-throughput cached syndicated research from **OpenAlex** (250M+ catalog) and **arXiv**.
+- Stores normalized external manuscripts with `external_id`, `source` ('openalex' | 'arxiv'), `doi`, `title`, `abstract`, `authors` (JSONB), `citation_count`, `trending_score`, and Open Access direct PDF URLs.
+- Decouples external data syndication from community manuscripts to preserve zero-trust RLS isolation.
+- Indexed by `category_slug`, `trending_score DESC`, `published_at DESC`, and a GIN full-text index on title and abstract for sub-30ms read latencies.
+
 ## Row Level Security (RLS) Rules
-- **Public Readers**: Can only execute `SELECT` queries on publications where `status = 'PUBLISHED'`.
+- **Public Readers**: Can execute `SELECT` on publications where `status = 'PUBLISHED'` and read all `external_publications`.
 - **Creators**: Can `INSERT`, `UPDATE`, and `DELETE` their own publications while in `DRAFT` or `SUBMITTED` states. Cannot modify other users' publications.
+- **Service Role**: Exclusive write access to `external_publications` for background sync workers.
 - **Admins**: Can moderate, update status, and manage all records.
