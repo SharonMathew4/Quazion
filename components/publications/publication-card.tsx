@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
 import { Tag } from "./tag";
+import { InlineMathText } from "./math-renderer";
 import { Eye, Heart, Download, Clock, ArrowUpRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -70,14 +71,16 @@ export function PublicationCard({ publication }: PublicationCardProps) {
             href={`/publications/${publication.slug}`}
             className="flex items-start gap-1"
           >
-            <span>{publication.title}</span>
+            <span>
+              <InlineMathText text={publication.title} />
+            </span>
             <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1 text-rose-700" />
           </Link>
         </h3>
 
         {/* Abstract Snippet */}
         <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed mb-4 font-sans">
-          {publication.abstract}
+          <InlineMathText text={publication.abstract} />
         </p>
 
         {/* Academic Keywords (No social hashtags) */}
