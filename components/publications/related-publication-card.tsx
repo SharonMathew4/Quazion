@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Publication } from "@/types";
 import { CategoryBadge } from "./category-badge";
+import { InlineMathText } from "./math-renderer";
 import { ArrowUpRight, Clock } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -31,13 +32,15 @@ export function RelatedPublicationCard({ publication }: RelatedPublicationCardPr
 
         <h3 className="font-serif font-bold text-sm text-slate-900 group-hover:text-rose-700 transition-colors line-clamp-2 leading-snug">
           <Link href={`/publications/${publication.slug}`} className="flex items-start gap-1">
-            <span>{publication.title}</span>
+            <span>
+              <InlineMathText text={publication.title} />
+            </span>
             <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5 text-rose-700" />
           </Link>
         </h3>
 
         <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed font-sans">
-          {publication.abstract}
+          <InlineMathText text={publication.abstract} />
         </p>
       </div>
 
