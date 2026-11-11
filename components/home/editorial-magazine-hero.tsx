@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/publications/category-badge";
 import { QuickReadModal } from "@/components/publications/quick-read-modal";
+import { InlineMathText } from "@/components/publications/math-renderer";
 import { formatDate } from "@/lib/utils";
 
 interface EditorialMagazineHeroProps {
@@ -135,17 +136,18 @@ export function EditorialMagazineHero({
               <div className="space-y-3">
                 <h3 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug group-hover:text-rose-700 transition-colors">
                   <Link href={`/publications/${leadPublication.slug}`}>
-                    {leadPublication.title}
+                    <InlineMathText text={leadPublication.title} />
                   </Link>
                 </h3>
 
                 <p className="text-sm text-slate-600 leading-relaxed font-sans line-clamp-3">
-                  {leadPublication.abstract}
+                  <InlineMathText text={leadPublication.abstract} />
                 </p>
 
                 {/* Key scientific takeaway highlight */}
                 <div className="p-3.5 rounded-sm bg-rose-50/70 border-l-3 border-rose-700 text-xs text-slate-800 italic leading-relaxed">
-                  <strong>Abstract Finding:</strong> {leadPublication.abstract.slice(0, 180)}...
+                  <strong>Abstract Finding:</strong>{" "}
+                  <InlineMathText text={leadPublication.abstract} maxLength={180} />
                 </div>
               </div>
 
@@ -223,12 +225,12 @@ export function EditorialMagazineHero({
 
                       <h4 className="font-serif font-bold text-base text-slate-900 group-hover:text-rose-700 transition-colors line-clamp-2 leading-snug">
                         <Link href={`/publications/${pub.slug}`}>
-                          {pub.title}
+                          <InlineMathText text={pub.title} />
                         </Link>
                       </h4>
 
                       <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed font-sans">
-                        {pub.abstract}
+                        <InlineMathText text={pub.abstract} />
                       </p>
                     </div>
 
