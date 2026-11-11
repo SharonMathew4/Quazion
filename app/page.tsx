@@ -5,7 +5,7 @@ import { EditorialMagazineHero } from "@/components/home/editorial-magazine-hero
 import { SocialScienceFeed } from "@/components/home/social-science-feed";
 import { ContributionCta } from "@/components/home/contribution-cta";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { fetchArxivPublications } from "@/lib/arxiv";
+import { getExternalPublications } from "@/lib/external-publications";
 import { Category, Publication, Profile } from "@/types";
 import {
   MOCK_CATEGORIES,
@@ -125,8 +125,8 @@ export default async function Home() {
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Fetch live categories, published community papers, contributors, and arXiv research in parallel
-    const [categoriesRes, publicationsRes, profilesRes, arxivPubs] = await Promise.all([
+    // Fetch live categories, published community papers, contributors, and syndicated external research in parallel
+    const [categoriesRes, publicationsRes, profilesRes, externalPubs] = await Promise.all([
       supabase
         .from("categories")
         .select("id, name, slug, description, icon_name")
@@ -160,7 +160,7 @@ export default async function Home() {
         .from("profiles")
         .select("id, username, display_name, avatar_url, bio, affiliation, orcid, role, created_at")
         .limit(6),
-      fetchArxivPublications({ limit: 18 }).catch(() => [] as Publication[]),
+      getExternalPublications({ limit: 25 }).catch(() => [] as Publication[]),
     ]);
 
     const liveData = publicationsRes.data;
@@ -168,8 +168,8 @@ export default async function Home() {
       ? (liveData as unknown as RawPubItem[]).map(mapRawPublication)
       : [];
 
-    // Combine community and arXiv publications, sorting fresh publications first
-    const merged = [...userPublications, ...(arxivPubs || [])];
+    // Combine community and syndicated publications, sorting fresh publications first
+    const merged = [...userPublications, ...(externalPubs || [])];
     allPublications = merged.sort((a, b) => {
       const timeA = new Date(a.publishedAt || a.createdAt).getTime();
       const timeB = new Date(b.publishedAt || b.createdAt).getTime();
@@ -215,11 +215,11 @@ export default async function Home() {
       contributors = [];
     }
   } catch (err) {
-    logServerWarn("HomePage_DataLoad", "Falling back to direct arXiv feed on homepage", {
+    logServerWarn("HomePage_DataLoad", "Falling back to external syndicated feed on homepage", {
       error: err instanceof Error ? err.message : String(err),
     });
     try {
-      allPublications = await fetchArxivPublications({ limit: 18 });
+      allPublications = await getExternalPublications({ limit: 25 });
     } catch {
       allPublications = [];
     }
